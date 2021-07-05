@@ -1,0 +1,52 @@
+---
+  routes: 
+    - 
+      group: "ipblock-server"
+      minversion: "v1.0"
+      maxversion: "v1.0"
+      list: 
+        - 
+          handler: "GetHealthCheck"
+          method: "get"
+          uri: "/healthcheck/_check"
+          precheck: false
+        - 
+          handler: "GetVersion"
+          method: "get"
+          uri: "/:apiver/version"
+          precheck: false
+        - 
+          handler: "PostLogin"
+          method: "post"
+          uri: "/:apiver/auth/login"
+          precheck: false
+        -
+          handler: "PostRegisterItem" # item 등록
+          method: "post"
+          uri: "/:apiver/item/register"
+          precheck: true
+        -
+          handler: "DeleteUnregisterItem" # 등록된 item 삭제 요청
+          method: "delete"
+          uri: "/:apiver/item/unregister"
+          precheck: true
+        -
+          handler: "GetItemList"  # 등록된 item 리스트 요청
+          method: "get"
+          uri: "/:apiver/item/list"
+          precheck: true
+        -
+          handler: "PostPurchaseItem" # item 구매
+          method: "post"
+          uri: "/:apiver/item/purchase"
+          precheck: true
+        - handler: "GetHistoryTransferItem"   # Item transfer History 조회
+          method: "get"
+          uri: "/:apiver/history/transfer/item"
+          precheck: true
+        - handler: "GetHistoryTransferMe"   # 나의 transfer History 조회
+          method: "get"
+          uri: "/:apiver/history/transfer/me"
+          precheck: true
+
+

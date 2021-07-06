@@ -26,7 +26,7 @@ func PostRegisterItem(c echo.Context) error {
 
 	resp := new(context.IpBlockBaseResponse)
 	// token 생성
-	txHash, err := token.GetToken().CreateERC721(params.WalletAddr, params.Thumbnail)
+	txHash, err := token.GetToken().Tokens[token.Token_nft].Nft_CreateERC721(params.WalletAddr, params.Thumbnail)
 	if err != nil {
 		resp.Return = constant.Result_TokenERC721CreateError
 		resp.Message = constant.ResultCodeText(constant.Result_TokenERC721CreateError)
@@ -67,7 +67,7 @@ func DeleteUnregisterItem(c echo.Context) error {
 		resp.Message = constant.ResultCodeText(constant.Result_DBError)
 	} else {
 		// token burn 시도
-		txHash, err := token.GetToken().Burn(item.TokenId)
+		txHash, err := token.GetToken().Tokens[token.Token_nft].Nft_Burn(item.TokenId)
 		if err != nil {
 			resp.Return = constant.Result_TokenERC721BurnError
 			resp.Message = constant.ResultCodeText(constant.Result_TokenERC721BurnError)
@@ -136,8 +136,9 @@ func PostPurchaseItem(c echo.Context) error {
 		resp.Return = constant.Result_DBError
 		resp.Message = constant.ResultCodeText(constant.Result_DBError)
 	}
+
 	// 인증 토큰에서 지갑주소 추출해서 item_id와 owner_wallet_address 추출
-	txHash, err := token.GetToken().TransferERC721(item.OwnerWalletAddr, params.WalletAddress, item.TokenId)
+	txHash, err := token.GetToken().Tokens[token.Token_nft].Nft_TransferERC721(item.OwnerWalletAddr, params.WalletAddress, item.TokenId)
 	if err != nil {
 		resp.Return = constant.Result_TokenERC721TransferError
 		resp.Message = constant.ResultCodeText(constant.Result_TokenERC721TransferError)

@@ -15,10 +15,10 @@ type IpblockServer struct {
 }
 
 type TokenInfo struct {
-	MainnetHost      string `yaml:"mainnet_host"`
-	ServerWalletAddr string `yaml:"server_wallet_address"`
-	ServerPrivateKey string `yaml:"server_private_key"`
-	NFTTokenAddr     string `yaml:"nft_token_address"`
+	MainnetHost      string   `yaml:"mainnet_host"`
+	ServerWalletAddr string   `yaml:"server_wallet_address"`
+	ServerPrivateKey string   `yaml:"server_private_key"`
+	TokenAddrs       []string `yaml:"token_address"`
 }
 
 type ApiAuth struct {

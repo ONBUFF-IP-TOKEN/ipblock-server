@@ -3,7 +3,7 @@ module github.com/ONBUFF-IP-TOKEN/ipblock-server
 go 1.16
 
 require (
-	github.com/ONBUFF-IP-TOKEN/baseEthereum v1.0.3
+	github.com/ONBUFF-IP-TOKEN/baseEthereum v1.0.4
 	github.com/ONBUFF-IP-TOKEN/baseapp v1.0.4
 	github.com/ONBUFF-IP-TOKEN/basedb v1.0.4
 	github.com/ONBUFF-IP-TOKEN/basenet v1.0.2

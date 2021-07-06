@@ -16,7 +16,8 @@ const (
 	Result_RequireValidItemId     = 12007
 	Result_RequireValidPageOffset = 12008
 	Result_RequireValidPageSize   = 12009
-	Result_RequireDescription     = 120010
+	Result_RequireDescription     = 12010
+	Result_InvalidWalletAddress   = 12011
 
 	Result_DBError        = 13000
 	Result_DBNotExistItem = 13001
@@ -48,6 +49,7 @@ var resultCodeText = map[int]string{
 	Result_RequireValidPageOffset: "Valid page offset is required",
 	Result_RequireValidPageSize:   "Valid page size is required",
 	Result_RequireDescription:     "Description is required",
+	Result_InvalidWalletAddress:   "Invalid Wallet Address",
 
 	Result_DBError:        "Internal DB error",
 	Result_DBNotExistItem: "Not exist item",
@@ -71,6 +73,29 @@ func ResultCodeText(code int) string {
 
 func MakeResponse(code int) *base.BaseResponse {
 	resp := new(base.BaseResponse)
+	resp.Return = code
+	resp.Message = resultCodeText[code]
+	return resp
+}
+
+type OnbuffBaseResponse struct {
+	Return  int         `json:"return"`
+	Message string      `json:"message"`
+	Value   interface{} `json:"value,omitempty"`
+}
+
+func (o *OnbuffBaseResponse) Success() {
+	o.Return = Result_Success
+	o.Message = resultCodeText[Result_Success]
+}
+
+func (o *OnbuffBaseResponse) SetResult(ret int) {
+	o.Return = ret
+	o.Message = resultCodeText[ret]
+}
+
+func MakeOnbuffBaseResponse(code int) *OnbuffBaseResponse {
+	resp := new(OnbuffBaseResponse)
 	resp.Return = code
 	resp.Message = resultCodeText[code]
 	return resp

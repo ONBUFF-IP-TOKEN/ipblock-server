@@ -29,9 +29,9 @@ func PreCheck(c echo.Context) base.PreCheckResponse {
 		}
 	}
 
-	log.Debug(c.Request().Header["Authorization"])
 	// auth token 검증
-	if conf.Auth.AuthEnable && !auth.GetIAuth().IsValidAuthToken(c.Request().Header["Authorization"][0][7:]) {
+	walletAddr, isValid := auth.GetIAuth().IsValidAuthToken(c.Request().Header["Authorization"][0][7:])
+	if conf.Auth.AuthEnable && !isValid {
 		// auth token 오류 리턴
 		res := constant.MakeResponse(constant.Result_Auth_InvalidJwt)
 
@@ -40,6 +40,7 @@ func PreCheck(c echo.Context) base.PreCheckResponse {
 			Response:  res,
 		}
 	}
+	base.GetContext(c).(*context.IPBlockServerContext).SetWalletAddr(*walletAddr)
 
 	return base.PreCheckResponse{
 		IsSucceed: true,

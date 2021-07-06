@@ -20,21 +20,19 @@ func PostRegisterItem(c echo.Context) error {
 		return base.BaseJSONInternalServerError(c, err)
 	}
 
-	if err := params.CheckValidate(); err != nil {
+	if err := params.CheckValidate(ctx); err != nil {
 		return c.JSON(http.StatusOK, err)
 	}
 
-	resp := new(context.IpBlockBaseResponse)
+	resp := new(constant.OnbuffBaseResponse)
 	// token 생성
 	txHash, err := token.GetToken().Tokens[token.Token_nft].Nft_CreateERC721(params.WalletAddr, params.Thumbnail)
 	if err != nil {
-		resp.Return = constant.Result_TokenERC721CreateError
-		resp.Message = constant.ResultCodeText(constant.Result_TokenERC721CreateError)
+		resp.SetResult(constant.Result_TokenERC721CreateError)
 	} else {
 		params.CreateHash = txHash
 		if itemId, err := model.GetDB().InsertItem(params); err != nil {
-			resp.Return = constant.Result_DBError
-			resp.Message = constant.ResultCodeText(constant.Result_DBError)
+			resp.SetResult(constant.Result_DBError)
 		} else {
 			resp.Success()
 			resp.Value = context.RegisterItemResponse{
@@ -55,22 +53,20 @@ func DeleteUnregisterItem(c echo.Context) error {
 		return base.BaseJSONInternalServerError(c, err)
 	}
 
-	if err := params.CheckValidate(); err != nil {
+	if err := params.CheckValidate(ctx); err != nil {
 		return c.JSON(http.StatusOK, err)
 	}
 
-	resp := new(context.IpBlockBaseResponse)
+	resp := new(constant.OnbuffBaseResponse)
 	// token id 추출
 	item, err := model.GetDB().GetItem(params.ItemId)
 	if err != nil {
-		resp.Return = constant.Result_DBError
-		resp.Message = constant.ResultCodeText(constant.Result_DBError)
+		resp.SetResult(constant.Result_DBError)
 	} else {
 		// token burn 시도
 		txHash, err := token.GetToken().Tokens[token.Token_nft].Nft_Burn(item.TokenId)
 		if err != nil {
-			resp.Return = constant.Result_TokenERC721BurnError
-			resp.Message = constant.ResultCodeText(constant.Result_TokenERC721BurnError)
+			resp.SetResult(constant.Result_TokenERC721BurnError)
 		} else {
 			// db 삭제 없이 리턴하고 후에 콜백 성공하면 삭제한다.
 			resp.Success()
@@ -96,11 +92,10 @@ func GetItemList(c echo.Context) error {
 		return c.JSON(http.StatusOK, err)
 	}
 
-	resp := new(context.IpBlockBaseResponse)
+	resp := new(constant.OnbuffBaseResponse)
 	items, totalCount, err := model.GetDB().GetItemList(params)
 	if err != nil {
-		resp.Return = constant.Result_DBError
-		resp.Message = constant.ResultCodeText(constant.Result_DBError)
+		resp.SetResult(constant.Result_DBError)
 	} else {
 		resp.Success()
 		pageInfo := context.PageInfoResponse{
@@ -126,22 +121,20 @@ func PostPurchaseItem(c echo.Context) error {
 		return base.BaseJSONInternalServerError(c, err)
 	}
 
-	if err := params.CheckValidate(); err != nil {
+	if err := params.CheckValidate(ctx); err != nil {
 		return c.JSON(http.StatusOK, err)
 	}
 
-	resp := new(context.IpBlockBaseResponse)
+	resp := new(constant.OnbuffBaseResponse)
 	item, err := model.GetDB().GetItem(params.ItemId)
 	if err != nil {
-		resp.Return = constant.Result_DBError
-		resp.Message = constant.ResultCodeText(constant.Result_DBError)
+		resp.SetResult(constant.Result_DBError)
 	}
 
 	// 인증 토큰에서 지갑주소 추출해서 item_id와 owner_wallet_address 추출
-	txHash, err := token.GetToken().Tokens[token.Token_nft].Nft_TransferERC721(item.OwnerWalletAddr, params.WalletAddress, item.TokenId)
+	txHash, err := token.GetToken().Tokens[token.Token_nft].Nft_TransferERC721(item.OwnerWalletAddr, params.WalletAddr, item.TokenId)
 	if err != nil {
-		resp.Return = constant.Result_TokenERC721TransferError
-		resp.Message = constant.ResultCodeText(constant.Result_TokenERC721TransferError)
+		resp.SetResult(constant.Result_TokenERC721TransferError)
 	} else {
 		resp.Success()
 		resp.Value = context.PostPurchaseItemResponse{

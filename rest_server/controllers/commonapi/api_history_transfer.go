@@ -22,12 +22,11 @@ func GetHistoryTransferItem(c echo.Context) error {
 		return c.JSON(http.StatusOK, err)
 	}
 
-	resp := new(context.IpBlockBaseResponse)
+	resp := new(constant.OnbuffBaseResponse)
 	historys, totalCount, err := model.GetDB().GetHistoryTransferItem(params)
 
 	if err != nil {
-		resp.Return = constant.Result_DBError
-		resp.Message = constant.ResultCodeText(constant.Result_DBError)
+		resp.SetResult(constant.Result_DBError)
 	} else {
 		resp.Success()
 		pageInfo := context.PageInfoResponse{
@@ -51,16 +50,15 @@ func GetHistoryTransferMe(c echo.Context) error {
 		log.Error(err)
 		return base.BaseJSONInternalServerError(c, err)
 	}
-	if err := params.CheckValidate(); err != nil {
+	if err := params.CheckValidate(ctx); err != nil {
 		return c.JSON(http.StatusOK, err)
 	}
 
-	resp := new(context.IpBlockBaseResponse)
+	resp := new(constant.OnbuffBaseResponse)
 	historys, totalCount, err := model.GetDB().GetHistoryTransferMe(params)
 
 	if err != nil {
-		resp.Return = constant.Result_DBError
-		resp.Message = constant.ResultCodeText(constant.Result_DBError)
+		resp.SetResult(constant.Result_DBError)
 	} else {
 		resp.Success()
 		pageInfo := context.PageInfoResponse{

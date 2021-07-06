@@ -24,7 +24,7 @@ func PostLogin(c echo.Context) error {
 		return c.JSON(http.StatusOK, err)
 	}
 
-	resp := new(context.IpBlockBaseResponse)
+	resp := new(constant.OnbuffBaseResponse)
 	// 1. verify sign check
 	if !token.GetToken().VerifySign(params.WalletAuth.WalletAddr, params.WalletAuth.Message, params.WalletAuth.Sign) {
 		// invalid sign info

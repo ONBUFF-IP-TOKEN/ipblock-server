@@ -135,30 +135,30 @@ func (o *IAuth) DecryptJwt(jwtStr string) (string, int64, error) {
 }
 
 // auto token 유효한지 검증
-func (o *IAuth) IsValidAuthToken(authToken string) bool {
+func (o *IAuth) IsValidAuthToken(authToken string) (*string, bool) {
 	// todo 기능 구현
 	walletAddr, expireDate, err := o.DecryptJwt(authToken)
 	if err != nil || len(walletAddr) == 0 {
-		return false
+		return nil, false
 	}
 	//log.Debug("auth check wallet address:", walletAddr)
 	//log.Debug("auth check expiredate:", expireDate)
 	if time.Now().Unix() > expireDate {
 		log.Info("out of auth token exipre date :", walletAddr)
-		return false
+		return nil, false
 	}
 
 	authInfo, err := model.GetDB().GetAuthInfo(walletAddr)
 	if err != nil {
-		return false
+		return nil, false
 	}
 	if authInfo.AuthToken != authToken ||
 		authInfo.WalletAuth.WalletAddr != walletAddr ||
 		authInfo.ExpireDate != expireDate {
-		return false
+		return nil, false
 	}
 
-	return true
+	return &walletAddr, true
 }
 
 func (o *IAuth) AesEncrypt(plaintext []byte) string {

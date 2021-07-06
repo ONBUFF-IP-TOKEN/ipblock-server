@@ -52,7 +52,7 @@ func (o *DB) GetTotalHistoryTransferItemSize(ItemId int64) (int64, error) {
 }
 
 func (o *DB) GetHistoryTransferMe(req *context.GetHistoryTransferMe) ([]context.ItemTransferHistory, int64, error) {
-	sqlQuery := fmt.Sprintf("SELECT * FROM ipblock.items_history_transfer WHERE from_addr='%v' OR to_addr='%v' ORDER BY idx DESC LIMIT %v,%v", req.WalletAddress, req.WalletAddress, req.PageSize*req.PageOffset, req.PageSize)
+	sqlQuery := fmt.Sprintf("SELECT * FROM ipblock.items_history_transfer WHERE from_addr='%v' OR to_addr='%v' ORDER BY idx DESC LIMIT %v,%v", req.WalletAddr, req.WalletAddr, req.PageSize*req.PageOffset, req.PageSize)
 	rows, err := o.Mysql.Query(sqlQuery)
 	if err != nil {
 		log.Error(err)
@@ -70,7 +70,7 @@ func (o *DB) GetHistoryTransferMe(req *context.GetHistoryTransferMe) ([]context.
 		historys = append(historys, history)
 	}
 
-	totalCount, err := o.GetTotalHistoryTransferMeSize(req.WalletAddress)
+	totalCount, err := o.GetTotalHistoryTransferMeSize(req.WalletAddr)
 
 	return historys, totalCount, err
 }

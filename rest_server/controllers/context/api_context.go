@@ -207,8 +207,9 @@ type GetItemListResponse struct {
 
 // item 구매 (purchase)
 type PostPurchaseItem struct {
-	WalletAddr string `json:"wallet_address" validate:"required"`
-	ItemId     int64  `json:"item_id" validate:"required"`
+	WalletAddr     string `json:"wallet_address" validate:"required"`
+	ItemId         int64  `json:"item_id" validate:"required"`
+	PurchaseTxHash string `json:"purchase_tx_hash" validate:"required"`
 }
 
 func NewPostPurchaseItem() *PostPurchaseItem {
@@ -224,6 +225,9 @@ func (o *PostPurchaseItem) CheckValidate(ctx *IPBlockServerContext) *constant.On
 	}
 	if o.ItemId < 0 {
 		return constant.MakeOnbuffBaseResponse(constant.Result_RequireValidItemId)
+	}
+	if len(o.PurchaseTxHash) == 0 {
+		return constant.MakeOnbuffBaseResponse(constant.Result_RequiredPurchaseTxHash)
 	}
 	return nil
 }

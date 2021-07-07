@@ -126,21 +126,16 @@ func PostPurchaseItem(c echo.Context) error {
 	}
 
 	resp := new(constant.OnbuffBaseResponse)
-	item, err := model.GetDB().GetItem(params.ItemId)
+	//item, err := model.GetDB().GetItem(params.ItemId)
+	itemInfo, err := model.GetDB().GetItem(params.ItemId)
 	if err != nil {
 		resp.SetResult(constant.Result_DBError)
 	}
-
-	// 인증 토큰에서 지갑주소 추출해서 item_id와 owner_wallet_address 추출
-	txHash, err := token.GetToken().Tokens[token.Token_nft].Nft_TransferERC721(item.OwnerWalletAddr, params.WalletAddr, item.TokenId)
-	if err != nil {
-		resp.SetResult(constant.Result_TokenERC721TransferError)
-	} else {
-		resp.Success()
-		resp.Value = context.PostPurchaseItemResponse{
-			ItemId: params.ItemId,
-			TxHash: txHash,
-		}
+	// 구매 tx hash 검사
+	token.GetToken().Tokens[token.Token_onit].CheckTransferReceipt(params, itemInfo)
+	resp.Success()
+	resp.Value = context.PostPurchaseItemResponse{
+		ItemId: params.ItemId,
 	}
 
 	return c.JSON(http.StatusOK, resp)

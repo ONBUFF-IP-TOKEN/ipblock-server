@@ -18,6 +18,7 @@ const (
 	Result_RequireValidPageSize   = 12009
 	Result_RequireDescription     = 12010
 	Result_InvalidWalletAddress   = 12011
+	Result_RequiredPurchaseTxHash = 12012
 
 	Result_DBError        = 13000
 	Result_DBNotExistItem = 13001
@@ -45,11 +46,11 @@ var resultCodeText = map[int]string{
 	Result_RequireValidExpireDate: "Valid expire date is required",
 	Result_RequireCreator:         "Creator is required",
 	Result_RequireValidItemId:     "Valid item id is required",
-
 	Result_RequireValidPageOffset: "Valid page offset is required",
 	Result_RequireValidPageSize:   "Valid page size is required",
 	Result_RequireDescription:     "Description is required",
 	Result_InvalidWalletAddress:   "Invalid Wallet Address",
+	Result_RequiredPurchaseTxHash: "Require purchase tx hash info",
 
 	Result_DBError:        "Internal DB error",
 	Result_DBNotExistItem: "Not exist item",

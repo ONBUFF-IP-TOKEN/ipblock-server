@@ -34,8 +34,8 @@ github.com/Azure/go-autorest/tracing v0.5.0/go.mod h1:r/s2XiOKccPW3HrqB+W0TQzfbt
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
 github.com/BurntSushi/xgb v0.0.0-20160522181843-27f122750802/go.mod h1:IVnqGOEym/WlBOVXweHU+Q+/VP0lqqI8lqeDx9IjBqo=
 github.com/DATA-DOG/go-sqlmock v1.3.3/go.mod h1:f/Ixk793poVmq4qj/V1dPUg2JEAKC73Q5eFN3EC/SaM=
-github.com/ONBUFF-IP-TOKEN/baseEthereum v1.0.4 h1:hvv79NVXQDHydfirTYq/9O05F7W4SGNvbFNSD2gSNWg=
-github.com/ONBUFF-IP-TOKEN/baseEthereum v1.0.4/go.mod h1:t4isFIXN0v7Kk+4gBZeql6Lq8S0PePRc8hdZaGXX1XA=
+github.com/ONBUFF-IP-TOKEN/baseEthereum v1.0.5 h1:cfnUX+JN6sqXWf2tMVSWuioCcXoEAtnGxJfGdLYlm6c=
+github.com/ONBUFF-IP-TOKEN/baseEthereum v1.0.5/go.mod h1:t4isFIXN0v7Kk+4gBZeql6Lq8S0PePRc8hdZaGXX1XA=
 github.com/ONBUFF-IP-TOKEN/baseapp v1.0.4 h1:UuoFti0w31+PlJmoX9Aqu0ITUZA4ygRdEgi4JaRp9gw=
 github.com/ONBUFF-IP-TOKEN/baseapp v1.0.4/go.mod h1:ljBhQrS+jf17h0WGGHs0h6cuq6t6KPfl3ouzWXRMBMo=
 github.com/ONBUFF-IP-TOKEN/basedb v1.0.4 h1:fP7DjVR4hgOliNF1XGjkWhCR61RTDiHBIQyRy326F+g=
@@ -368,6 +368,8 @@ github.com/sergi/go-diff v1.0.0/go.mod h1:0CfEIISq7TuYL3j771MWULgwwjU+GofnZX9QAm
 github.com/shirou/gopsutil v3.21.3+incompatible/go.mod h1:5b4v6he4MtMOwMlS0TUMTu2PcXUg8+E1lC7eC3UO/RA=
 github.com/shirou/gopsutil v3.21.4-0.20210419000835-c7a38de76ee5+incompatible h1:Bn1aCHHRnjv4Bl16T8rcaFjYSrGrIZvpiGO6P3Q4GpU=
 github.com/shirou/gopsutil v3.21.4-0.20210419000835-c7a38de76ee5+incompatible/go.mod h1:5b4v6he4MtMOwMlS0TUMTu2PcXUg8+E1lC7eC3UO/RA=
+github.com/shopspring/decimal v1.2.0 h1:abSATXmQEYyShuxI4/vyW3tV1MrKAJzCZ/0zLUXYbsQ=
+github.com/shopspring/decimal v1.2.0/go.mod h1:DKyhrW/HYNuLGql+MJL6WCR6knT2jwCFRcu2hWCYk4o=
 github.com/shurcooL/sanitized_anchor_name v1.0.0/go.mod h1:1NzhyTcUVG4SuEtjjoZeVRXNmyL/1OwPU0+IJeTBvfc=
 github.com/sirupsen/logrus v1.2.0/go.mod h1:LxeOpSwHxABJmUn/MG1IvRgCAasNZTLOkJPxbbu5VWo=
 github.com/sirupsen/logrus v1.8.1 h1:dJKuHgqk1NNQlqoA6BTlM1Wf9DOH3NBjQyu0h9+AZZE=

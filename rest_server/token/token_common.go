@@ -92,19 +92,20 @@ func (o *Token) CallBackCmdProc(cmd *basenet.CommandData) {
 		transInfo := cmd.Data.(ethcontroller.CallBack_Transfer)
 		if transInfo.FromAddr == gNullAddress && transInfo.ToAddr != gNullAddress {
 			// 최초 생성 처리
-			model.GetDB().UpdateTokenID(transInfo.TxHash, transInfo.TokenID)
-			model.GetDB().InsertHistory(transInfo.TxHash, transInfo.FromAddr, transInfo.ToAddr, transInfo.TokenID, token_state_mint)
+			if err := model.GetDB().UpdateTokenID(transInfo.TxHash, transInfo.TokenID); err == nil {
+				model.GetDB().InsertHistory(transInfo.TxHash, transInfo.FromAddr, transInfo.ToAddr, transInfo.TokenID, token_state_mint)
+			}
 		} else if transInfo.FromAddr != gNullAddress && transInfo.ToAddr != gNullAddress {
 			// 코인 전송 처리
-			model.GetDB().UpdateTransfer(transInfo.TxHash, transInfo.FromAddr, transInfo.ToAddr, transInfo.TokenID)
-			model.GetDB().InsertHistory(transInfo.TxHash, transInfo.FromAddr, transInfo.ToAddr, transInfo.TokenID, token_state_transfer)
+			if err := model.GetDB().UpdateTransfer(transInfo.TxHash, transInfo.FromAddr, transInfo.ToAddr, transInfo.TokenID); err == nil {
+				model.GetDB().InsertHistory(transInfo.TxHash, transInfo.FromAddr, transInfo.ToAddr, transInfo.TokenID, token_state_transfer)
+			}
 		} else if transInfo.FromAddr != gNullAddress && transInfo.ToAddr == gNullAddress {
 			// 코인 삭체 처리 : 히스토리에 먼저 남기고 item 테이블 삭제 한다.
 			insertId, err := model.GetDB().InsertHistory(transInfo.TxHash, transInfo.FromAddr, transInfo.ToAddr, transInfo.TokenID, token_state_burn)
 			if err == nil && insertId != 0 {
 				model.GetDB().DeleteItemByTokenId(transInfo.TokenID)
 			}
-
 		}
 	}
 }

@@ -28,6 +28,9 @@ func (o *IToken) Init() error {
 	}
 
 	for idx, token := range o.Tokens {
+		// callback channel 생성
+		token.CreateChannel()
+
 		token.Init(idx, o.conf)
 
 		// mainnet connect
@@ -57,9 +60,6 @@ func (o *IToken) Init() error {
 		} else {
 			log.Info("LoadContractInfo ", tokenTypes[idx], " ", name, " ", symbol)
 		}
-
-		// callback channel 생성
-		token.CreateChannel()
 	}
 
 	return nil

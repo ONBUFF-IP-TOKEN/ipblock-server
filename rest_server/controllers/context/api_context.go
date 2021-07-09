@@ -38,6 +38,7 @@ type ItemInfo struct {
 	Owner           string  `json:"owner" validate:"required"`
 	TokenId         int64   `json:"token_id"`
 	CreateHash      string  `json:"create_hash"`
+	Content         string  `json:"content,omitempty"`
 }
 
 // item history

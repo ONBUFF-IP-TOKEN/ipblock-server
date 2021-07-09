@@ -17,7 +17,7 @@ func GetVersion(c echo.Context, maxVersion string) error {
 
 	resp.Value = map[string]interface{}{"version": maxVersion,
 		"revision": base.AppVersion}
-	resp.OK()
+	resp.Success()
 
 	return c.JSON(http.StatusOK, resp)
 }

@@ -5,9 +5,9 @@ import (
 
 	"github.com/ONBUFF-IP-TOKEN/baseapp/base"
 	"github.com/ONBUFF-IP-TOKEN/baseutil/log"
-	"github.com/ONBUFF-IP-TOKEN/ipblock-server/rest_server/constant"
 	"github.com/ONBUFF-IP-TOKEN/ipblock-server/rest_server/controllers/auth"
 	"github.com/ONBUFF-IP-TOKEN/ipblock-server/rest_server/controllers/context"
+	"github.com/ONBUFF-IP-TOKEN/ipblock-server/rest_server/controllers/resultcode"
 	"github.com/ONBUFF-IP-TOKEN/ipblock-server/rest_server/model"
 	"github.com/ONBUFF-IP-TOKEN/ipblock-server/rest_server/token"
 	"github.com/labstack/echo"
@@ -24,11 +24,11 @@ func PostLogin(c echo.Context) error {
 		return c.JSON(http.StatusOK, err)
 	}
 
-	resp := new(constant.OnbuffBaseResponse)
+	resp := new(base.BaseResponse)
 	// 1. verify sign check
 	if !token.GetToken().VerifySign(params.WalletAuth.WalletAddr, params.WalletAuth.Message, params.WalletAuth.Sign) {
 		// invalid sign info
-		resp.SetResult(constant.Result_Auth_InvalidLoginInfo)
+		resp.SetReturn(resultcode.Result_Auth_InvalidLoginInfo)
 		return c.JSON(http.StatusOK, resp)
 	}
 
@@ -44,7 +44,7 @@ func PostLogin(c echo.Context) error {
 		// 3. create auth token
 		authToken, expireDate, err := auth.GetIAuth().EncryptJwt(params.WalletAuth.WalletAddr)
 		if err != nil {
-			resp.SetResult(constant.Result_Auth_DontEncryptJwt)
+			resp.SetReturn(resultcode.Result_Auth_DontEncryptJwt)
 		} else {
 			resp.Success()
 			resp.Value = context.LoginResponse{

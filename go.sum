@@ -36,8 +36,9 @@ github.com/BurntSushi/xgb v0.0.0-20160522181843-27f122750802/go.mod h1:IVnqGOEym
 github.com/DATA-DOG/go-sqlmock v1.3.3/go.mod h1:f/Ixk793poVmq4qj/V1dPUg2JEAKC73Q5eFN3EC/SaM=
 github.com/ONBUFF-IP-TOKEN/baseEthereum v1.0.5 h1:cfnUX+JN6sqXWf2tMVSWuioCcXoEAtnGxJfGdLYlm6c=
 github.com/ONBUFF-IP-TOKEN/baseEthereum v1.0.5/go.mod h1:t4isFIXN0v7Kk+4gBZeql6Lq8S0PePRc8hdZaGXX1XA=
-github.com/ONBUFF-IP-TOKEN/baseapp v1.0.4 h1:UuoFti0w31+PlJmoX9Aqu0ITUZA4ygRdEgi4JaRp9gw=
 github.com/ONBUFF-IP-TOKEN/baseapp v1.0.4/go.mod h1:ljBhQrS+jf17h0WGGHs0h6cuq6t6KPfl3ouzWXRMBMo=
+github.com/ONBUFF-IP-TOKEN/baseapp v1.0.9 h1:oHhoj2OZ4C+kwM/BHQlNQdpHah7lz8pKwKeuyc3Uh6w=
+github.com/ONBUFF-IP-TOKEN/baseapp v1.0.9/go.mod h1:ljBhQrS+jf17h0WGGHs0h6cuq6t6KPfl3ouzWXRMBMo=
 github.com/ONBUFF-IP-TOKEN/basedb v1.0.4 h1:fP7DjVR4hgOliNF1XGjkWhCR61RTDiHBIQyRy326F+g=
 github.com/ONBUFF-IP-TOKEN/basedb v1.0.4/go.mod h1:m4FIn+aAgmpbo/2OmoTlFkpwlRKYB6QVFfAzSs0T4IA=
 github.com/ONBUFF-IP-TOKEN/basenet v1.0.2 h1:/nO+L7DzME+5qFI0Hdl//kW1flFCPAOuGZ3ihL5VNoU=

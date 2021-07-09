@@ -5,10 +5,10 @@ import (
 	baseconf "github.com/ONBUFF-IP-TOKEN/baseapp/config"
 	"github.com/ONBUFF-IP-TOKEN/baseutil/log"
 	"github.com/ONBUFF-IP-TOKEN/ipblock-server/rest_server/config"
-	"github.com/ONBUFF-IP-TOKEN/ipblock-server/rest_server/constant"
 	"github.com/ONBUFF-IP-TOKEN/ipblock-server/rest_server/controllers/auth"
 	"github.com/ONBUFF-IP-TOKEN/ipblock-server/rest_server/controllers/commonapi"
 	"github.com/ONBUFF-IP-TOKEN/ipblock-server/rest_server/controllers/context"
+	"github.com/ONBUFF-IP-TOKEN/ipblock-server/rest_server/controllers/resultcode"
 	"github.com/labstack/echo"
 )
 
@@ -33,7 +33,7 @@ func PreCheck(c echo.Context) base.PreCheckResponse {
 	walletAddr, isValid := auth.GetIAuth().IsValidAuthToken(c.Request().Header["Authorization"][0][7:])
 	if conf.Auth.AuthEnable && !isValid {
 		// auth token 오류 리턴
-		res := constant.MakeResponse(constant.Result_Auth_InvalidJwt)
+		res := base.MakeBaseResponse(resultcode.Result_Auth_InvalidJwt)
 
 		return base.PreCheckResponse{
 			IsSucceed: false,

@@ -5,8 +5,8 @@ import (
 
 	"github.com/ONBUFF-IP-TOKEN/baseapp/base"
 	"github.com/ONBUFF-IP-TOKEN/baseutil/log"
-	"github.com/ONBUFF-IP-TOKEN/ipblock-server/rest_server/constant"
 	"github.com/ONBUFF-IP-TOKEN/ipblock-server/rest_server/controllers/context"
+	"github.com/ONBUFF-IP-TOKEN/ipblock-server/rest_server/controllers/resultcode"
 	"github.com/ONBUFF-IP-TOKEN/ipblock-server/rest_server/model"
 	"github.com/labstack/echo"
 )
@@ -22,11 +22,11 @@ func GetHistoryTransferItem(c echo.Context) error {
 		return c.JSON(http.StatusOK, err)
 	}
 
-	resp := new(constant.OnbuffBaseResponse)
+	resp := new(base.BaseResponse)
 	historys, totalCount, err := model.GetDB().GetHistoryTransferItem(params)
 
 	if err != nil {
-		resp.SetResult(constant.Result_DBError)
+		resp.SetReturn(resultcode.Result_DBError)
 	} else {
 		resp.Success()
 		pageInfo := context.PageInfoResponse{
@@ -54,11 +54,11 @@ func GetHistoryTransferMe(c echo.Context) error {
 		return c.JSON(http.StatusOK, err)
 	}
 
-	resp := new(constant.OnbuffBaseResponse)
+	resp := new(base.BaseResponse)
 	historys, totalCount, err := model.GetDB().GetHistoryTransferMe(params)
 
 	if err != nil {
-		resp.SetResult(constant.Result_DBError)
+		resp.SetReturn(resultcode.Result_DBError)
 	} else {
 		resp.Success()
 		pageInfo := context.PageInfoResponse{

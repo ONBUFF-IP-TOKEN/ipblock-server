@@ -1,7 +1,8 @@
 package context
 
 import (
-	"github.com/ONBUFF-IP-TOKEN/ipblock-server/rest_server/constant"
+	"github.com/ONBUFF-IP-TOKEN/baseapp/base"
+	"github.com/ONBUFF-IP-TOKEN/ipblock-server/rest_server/controllers/resultcode"
 )
 
 const (
@@ -71,18 +72,18 @@ func NewLoginParam() *LoginParam {
 	return new(LoginParam)
 }
 
-func (o *LoginParam) CheckValidate() *constant.OnbuffBaseResponse {
+func (o *LoginParam) CheckValidate() *base.BaseResponse {
 	if len(o.WalletType) == 0 && (Wallet_type_metamask != o.WalletType) {
-		return constant.MakeOnbuffBaseResponse(constant.Result_Auth_InvalidWalletType)
+		return base.MakeBaseResponse(resultcode.Result_Auth_InvalidWalletType)
 	}
 	if len(o.WalletAuth.WalletAddr) == 0 {
-		return constant.MakeOnbuffBaseResponse(constant.Result_RequireWalletAddress)
+		return base.MakeBaseResponse(resultcode.Result_RequireWalletAddress)
 	}
 	if len(o.WalletAuth.Message) == 0 {
-		return constant.MakeOnbuffBaseResponse(constant.Result_Auth_RequireMessage)
+		return base.MakeBaseResponse(resultcode.Result_Auth_RequireMessage)
 	}
 	if len(o.WalletAuth.Sign) == 0 {
-		return constant.MakeOnbuffBaseResponse(constant.Result_Auth_RequireSign)
+		return base.MakeBaseResponse(resultcode.Result_Auth_RequireSign)
 	}
 	return nil
 }
@@ -111,33 +112,33 @@ func NewRegisterItem() *RegisterItem {
 	return new(RegisterItem)
 }
 
-func (o *RegisterItem) CheckValidate(ctx *IPBlockServerContext) *constant.OnbuffBaseResponse {
+func (o *RegisterItem) CheckValidate(ctx *IPBlockServerContext) *base.BaseResponse {
 	if len(o.WalletAddr) == 0 {
-		return constant.MakeOnbuffBaseResponse(constant.Result_RequireWalletAddress)
+		return base.MakeBaseResponse(resultcode.Result_RequireWalletAddress)
 	}
 	if o.WalletAddr != ctx.WalletAddr() {
-		return constant.MakeOnbuffBaseResponse(constant.Result_InvalidWalletAddress)
+		return base.MakeBaseResponse(resultcode.Result_InvalidWalletAddress)
 	}
 	if len(o.Title) == 0 {
-		return constant.MakeOnbuffBaseResponse(constant.Result_RequireTitle)
+		return base.MakeBaseResponse(resultcode.Result_RequireTitle)
 	}
 	if len(o.TokenType) == 0 {
-		return constant.MakeOnbuffBaseResponse(constant.Result_RequireTokenType)
+		return base.MakeBaseResponse(resultcode.Result_RequireTokenType)
 	}
 	if len(o.Thumbnail) == 0 {
-		return constant.MakeOnbuffBaseResponse(constant.Result_RequireThumbnailUrl)
+		return base.MakeBaseResponse(resultcode.Result_RequireThumbnailUrl)
 	}
 	if o.TokenPrice <= 0 {
-		return constant.MakeOnbuffBaseResponse(constant.Result_RequireValidTokenPrice)
+		return base.MakeBaseResponse(resultcode.Result_RequireValidTokenPrice)
 	}
 	if o.ExpireDate <= 0 {
-		return constant.MakeOnbuffBaseResponse(constant.Result_RequireValidExpireDate)
+		return base.MakeBaseResponse(resultcode.Result_RequireValidExpireDate)
 	}
 	if len(o.Creator) == 0 {
-		return constant.MakeOnbuffBaseResponse(constant.Result_RequireCreator)
+		return base.MakeBaseResponse(resultcode.Result_RequireCreator)
 	}
 	if len(o.Description) == 0 {
-		return constant.MakeOnbuffBaseResponse(constant.Result_RequireDescription)
+		return base.MakeBaseResponse(resultcode.Result_RequireDescription)
 	}
 	return nil
 }
@@ -159,15 +160,15 @@ func NewUnregisterItem() *UnregisterItem {
 	return new(UnregisterItem)
 }
 
-func (o *UnregisterItem) CheckValidate(ctx *IPBlockServerContext) *constant.OnbuffBaseResponse {
+func (o *UnregisterItem) CheckValidate(ctx *IPBlockServerContext) *base.BaseResponse {
 	if len(o.WalletAddr) == 0 {
-		return constant.MakeOnbuffBaseResponse(constant.Result_RequireWalletAddress)
+		return base.MakeBaseResponse(resultcode.Result_RequireWalletAddress)
 	}
 	if o.WalletAddr != ctx.WalletAddr() {
-		return constant.MakeOnbuffBaseResponse(constant.Result_InvalidWalletAddress)
+		return base.MakeBaseResponse(resultcode.Result_InvalidWalletAddress)
 	}
 	if o.ItemId <= 0 {
-		return constant.MakeOnbuffBaseResponse(constant.Result_RequireValidItemId)
+		return base.MakeBaseResponse(resultcode.Result_RequireValidItemId)
 	}
 	return nil
 }
@@ -188,12 +189,12 @@ func NewGetItemList() *GetItemList {
 	return new(GetItemList)
 }
 
-func (o *GetItemList) CheckValidate() *constant.OnbuffBaseResponse {
+func (o *GetItemList) CheckValidate() *base.BaseResponse {
 	if o.PageOffset < 0 {
-		return constant.MakeOnbuffBaseResponse(constant.Result_RequireValidPageOffset)
+		return base.MakeBaseResponse(resultcode.Result_RequireValidPageOffset)
 	}
 	if o.PageSize <= 0 {
-		return constant.MakeOnbuffBaseResponse(constant.Result_RequireValidPageSize)
+		return base.MakeBaseResponse(resultcode.Result_RequireValidPageSize)
 	}
 	return nil
 }
@@ -216,25 +217,25 @@ func NewPostPurchaseItem() *PostPurchaseItem {
 	return new(PostPurchaseItem)
 }
 
-func (o *PostPurchaseItem) CheckValidate(ctx *IPBlockServerContext) *constant.OnbuffBaseResponse {
+func (o *PostPurchaseItem) CheckValidate(ctx *IPBlockServerContext) *base.BaseResponse {
 	if len(o.WalletAddr) == 0 {
-		return constant.MakeOnbuffBaseResponse(constant.Result_RequireWalletAddress)
+		return base.MakeBaseResponse(resultcode.Result_RequireWalletAddress)
 	}
 	if o.WalletAddr != ctx.WalletAddr() {
-		return constant.MakeOnbuffBaseResponse(constant.Result_InvalidWalletAddress)
+		return base.MakeBaseResponse(resultcode.Result_InvalidWalletAddress)
 	}
 	if o.ItemId < 0 {
-		return constant.MakeOnbuffBaseResponse(constant.Result_RequireValidItemId)
+		return base.MakeBaseResponse(resultcode.Result_RequireValidItemId)
 	}
 	if len(o.PurchaseTxHash) == 0 {
-		return constant.MakeOnbuffBaseResponse(constant.Result_RequiredPurchaseTxHash)
+		return base.MakeBaseResponse(resultcode.Result_RequiredPurchaseTxHash)
 	}
 	return nil
 }
 
 type PostPurchaseItemResponse struct {
 	ItemId int64  `json:"item_id"`
-	TxHash string `json:"tx_hash"`
+	TxHash string `json:"tx_hash,omitempty"`
 }
 
 /////////////////////////
@@ -249,15 +250,15 @@ func NewGetHistoryTransferItem() *GetHistoryTransferItem {
 	return new(GetHistoryTransferItem)
 }
 
-func (o *GetHistoryTransferItem) CheckValidate() *constant.OnbuffBaseResponse {
+func (o *GetHistoryTransferItem) CheckValidate() *base.BaseResponse {
 	if o.PageOffset < 0 {
-		return constant.MakeOnbuffBaseResponse(constant.Result_RequireValidPageOffset)
+		return base.MakeBaseResponse(resultcode.Result_RequireValidPageOffset)
 	}
 	if o.PageSize <= 0 {
-		return constant.MakeOnbuffBaseResponse(constant.Result_RequireValidPageSize)
+		return base.MakeBaseResponse(resultcode.Result_RequireValidPageSize)
 	}
 	if o.ItemId <= 0 {
-		return constant.MakeOnbuffBaseResponse(constant.Result_RequireWalletAddress)
+		return base.MakeBaseResponse(resultcode.Result_RequireWalletAddress)
 	}
 	return nil
 }
@@ -279,18 +280,18 @@ func NewGetHistoryTransferMe() *GetHistoryTransferMe {
 	return new(GetHistoryTransferMe)
 }
 
-func (o *GetHistoryTransferMe) CheckValidate(ctx *IPBlockServerContext) *constant.OnbuffBaseResponse {
+func (o *GetHistoryTransferMe) CheckValidate(ctx *IPBlockServerContext) *base.BaseResponse {
 	if o.WalletAddr != ctx.WalletAddr() {
-		return constant.MakeOnbuffBaseResponse(constant.Result_InvalidWalletAddress)
+		return base.MakeBaseResponse(resultcode.Result_InvalidWalletAddress)
 	}
 	if o.PageOffset < 0 {
-		return constant.MakeOnbuffBaseResponse(constant.Result_RequireValidPageOffset)
+		return base.MakeBaseResponse(resultcode.Result_RequireValidPageOffset)
 	}
 	if o.PageSize <= 0 {
-		return constant.MakeOnbuffBaseResponse(constant.Result_RequireValidPageSize)
+		return base.MakeBaseResponse(resultcode.Result_RequireValidPageSize)
 	}
 	if len(o.WalletAddr) == 0 {
-		return constant.MakeOnbuffBaseResponse(constant.Result_RequireWalletAddress)
+		return base.MakeBaseResponse(resultcode.Result_RequireWalletAddress)
 	}
 
 	return nil

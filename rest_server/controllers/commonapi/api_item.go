@@ -5,8 +5,8 @@ import (
 
 	"github.com/ONBUFF-IP-TOKEN/baseapp/base"
 	"github.com/ONBUFF-IP-TOKEN/baseutil/log"
-	"github.com/ONBUFF-IP-TOKEN/ipblock-server/rest_server/constant"
 	"github.com/ONBUFF-IP-TOKEN/ipblock-server/rest_server/controllers/context"
+	"github.com/ONBUFF-IP-TOKEN/ipblock-server/rest_server/controllers/resultcode"
 	"github.com/ONBUFF-IP-TOKEN/ipblock-server/rest_server/model"
 	"github.com/ONBUFF-IP-TOKEN/ipblock-server/rest_server/token"
 	"github.com/labstack/echo"
@@ -24,15 +24,15 @@ func PostRegisterItem(c echo.Context) error {
 		return c.JSON(http.StatusOK, err)
 	}
 
-	resp := new(constant.OnbuffBaseResponse)
+	resp := new(base.BaseResponse)
 	// token 생성
 	txHash, err := token.GetToken().Tokens[token.Token_nft].Nft_CreateERC721(params.WalletAddr, params.Thumbnail)
 	if err != nil {
-		resp.SetResult(constant.Result_TokenERC721CreateError)
+		resp.SetReturn(resultcode.Result_TokenERC721CreateError)
 	} else {
 		params.CreateHash = txHash
 		if itemId, err := model.GetDB().InsertItem(params); err != nil {
-			resp.SetResult(constant.Result_DBError)
+			resp.SetReturn(resultcode.Result_DBError)
 		} else {
 			resp.Success()
 			resp.Value = context.RegisterItemResponse{
@@ -57,16 +57,16 @@ func DeleteUnregisterItem(c echo.Context) error {
 		return c.JSON(http.StatusOK, err)
 	}
 
-	resp := new(constant.OnbuffBaseResponse)
+	resp := new(base.BaseResponse)
 	// token id 추출
 	item, err := model.GetDB().GetItem(params.ItemId)
 	if err != nil {
-		resp.SetResult(constant.Result_DBError)
+		resp.SetReturn(resultcode.Result_DBError)
 	} else {
 		// token burn 시도
 		txHash, err := token.GetToken().Tokens[token.Token_nft].Nft_Burn(item.TokenId)
 		if err != nil {
-			resp.SetResult(constant.Result_TokenERC721BurnError)
+			resp.SetReturn(resultcode.Result_TokenERC721BurnError)
 		} else {
 			// db 삭제 없이 리턴하고 후에 콜백 성공하면 삭제한다.
 			resp.Success()
@@ -92,10 +92,10 @@ func GetItemList(c echo.Context) error {
 		return c.JSON(http.StatusOK, err)
 	}
 
-	resp := new(constant.OnbuffBaseResponse)
+	resp := new(base.BaseResponse)
 	items, totalCount, err := model.GetDB().GetItemList(params)
 	if err != nil {
-		resp.SetResult(constant.Result_DBError)
+		resp.SetReturn(resultcode.Result_DBError)
 	} else {
 		resp.Success()
 		pageInfo := context.PageInfoResponse{
@@ -125,11 +125,11 @@ func PostPurchaseItem(c echo.Context) error {
 		return c.JSON(http.StatusOK, err)
 	}
 
-	resp := new(constant.OnbuffBaseResponse)
+	resp := new(base.BaseResponse)
 	//item, err := model.GetDB().GetItem(params.ItemId)
 	itemInfo, err := model.GetDB().GetItem(params.ItemId)
 	if err != nil {
-		resp.SetResult(constant.Result_DBError)
+		resp.SetReturn(resultcode.Result_DBError)
 	}
 	// 구매 tx hash 검사
 	token.GetToken().Tokens[token.Token_onit].CheckTransferReceipt(params, itemInfo)

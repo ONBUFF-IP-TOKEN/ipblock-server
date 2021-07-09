@@ -29,7 +29,7 @@ type ServerApp struct {
 
 func (o *ServerApp) Init(configFile string) (err error) {
 	o.conf = config.GetInstance(configFile)
-	base.AppendResultCodeText(&resultcode.IPBlockServerResultCodeMap)
+	base.AppendReturnCodeText(&resultcode.ResultCodeText)
 	context.AppendRequestParameter()
 
 	if err := o.NewDB(o.conf); err != nil {

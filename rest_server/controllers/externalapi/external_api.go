@@ -30,17 +30,32 @@ func PreCheck(c echo.Context) base.PreCheckResponse {
 	}
 
 	// auth token 검증
-	walletAddr, isValid := auth.GetIAuth().IsValidAuthToken(c.Request().Header["Authorization"][0][7:])
-	if conf.Auth.AuthEnable && !isValid {
-		// auth token 오류 리턴
-		res := base.MakeBaseResponse(resultcode.Result_Auth_InvalidJwt)
 
-		return base.PreCheckResponse{
-			IsSucceed: false,
-			Response:  res,
+	if conf.Auth.AuthEnable {
+		author, ok := c.Request().Header["Authorization"]
+		if !ok {
+			// auth token 오류 리턴
+			res := base.MakeBaseResponse(resultcode.Result_Auth_InvalidJwt)
+
+			return base.PreCheckResponse{
+				IsSucceed: false,
+				Response:  res,
+			}
 		}
+		walletAddr, isValid := auth.GetIAuth().IsValidAuthToken(author[0][7:])
+		if !isValid {
+			// auth token 오류 리턴
+			res := base.MakeBaseResponse(resultcode.Result_Auth_InvalidJwt)
+
+			return base.PreCheckResponse{
+				IsSucceed: false,
+				Response:  res,
+			}
+		}
+		base.GetContext(c).(*context.IPBlockServerContext).SetWalletAddr(*walletAddr)
+	} else {
+		base.GetContext(c).(*context.IPBlockServerContext).SetWalletAddr(conf.Token.ServerWalletAddr)
 	}
-	base.GetContext(c).(*context.IPBlockServerContext).SetWalletAddr(*walletAddr)
 
 	return base.PreCheckResponse{
 		IsSucceed: true,

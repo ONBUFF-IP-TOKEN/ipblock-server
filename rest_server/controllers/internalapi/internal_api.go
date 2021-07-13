@@ -1,6 +1,8 @@
 package internalapi
 
 import (
+	"net/http"
+
 	"github.com/ONBUFF-IP-TOKEN/baseapp/base"
 	baseconf "github.com/ONBUFF-IP-TOKEN/baseapp/config"
 	"github.com/ONBUFF-IP-TOKEN/baseutil/log"
@@ -68,7 +70,18 @@ func (o *InternalAPI) GetVersion(c echo.Context) error {
 
 func (o *InternalAPI) PostRegisterProduct(c echo.Context) error {
 	ctx := base.GetContext(c).(*context.IPBlockServerContext)
-	return commonapi.PostRegisterProduct(ctx)
+
+	params := context.NewProductInfo()
+	if err := ctx.EchoContext.Bind(params); err != nil {
+		log.Error(err)
+		return base.BaseJSONInternalServerError(c, err)
+	}
+
+	if err := params.CheckValidate(); err != nil {
+		return c.JSON(http.StatusOK, err)
+	}
+
+	return commonapi.PostRegisterProduct(params, ctx)
 }
 
 func (o *InternalAPI) DeleteUnregisterProduct(c echo.Context) error {

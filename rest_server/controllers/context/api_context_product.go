@@ -5,6 +5,13 @@ import (
 	"github.com/ONBUFF-IP-TOKEN/ipblock-server/rest_server/controllers/resultcode"
 )
 
+const (
+	Product_state_registering = 0
+	Product_state_ready       = 1
+	Product_state_saleing     = 2
+	Product_state_soldout     = 3
+)
+
 type ProductInfo struct {
 	Id                int64   `json:"product_id"`
 	Title             string  `json:"product_title"`

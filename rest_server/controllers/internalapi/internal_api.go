@@ -67,7 +67,8 @@ func (o *InternalAPI) GetVersion(c echo.Context) error {
 }
 
 func (o *InternalAPI) PostRegisterProduct(c echo.Context) error {
-	return commonapi.GetVersion(c, o.BaseController.MaxVersion)
+	ctx := base.GetContext(c).(*context.IPBlockServerContext)
+	return commonapi.PostRegisterProduct(ctx)
 }
 
 func (o *InternalAPI) DeleteUnregisterProduct(c echo.Context) error {

@@ -16,6 +16,14 @@ const (
 	Result_InvalidWalletAddress   = 12011
 	Result_RequiredPurchaseTxHash = 12012
 
+	Result_Product_RequiredTitle        = 12500
+	Result_Product_RequiredThumbnailUrl = 12501
+	Result_Product_RequiredProductType  = 12502
+	Result_Product_RequiredTokenType    = 12503
+	Result_Product_RequiredCreator      = 12504
+	Result_Product_RequiredDesc         = 12505
+	Result_Product_RequireQuantityTotal = 12506
+
 	Result_DBError        = 13000
 	Result_DBNotExistItem = 13001
 
@@ -47,6 +55,14 @@ var ResultCodeText = map[int]string{
 	Result_RequireDescription:     "Description is required",
 	Result_InvalidWalletAddress:   "Invalid Wallet Address",
 	Result_RequiredPurchaseTxHash: "Require purchase tx hash info",
+
+	Result_Product_RequiredTitle:        "Require product title",
+	Result_Product_RequiredThumbnailUrl: "Require product thumbnail url",
+	Result_Product_RequiredProductType:  "Require product type info",
+	Result_Product_RequiredTokenType:    "Require token type",
+	Result_Product_RequiredCreator:      "Require creator info",
+	Result_Product_RequiredDesc:         "Require description info",
+	Result_Product_RequireQuantityTotal: "Require total quantity",
 
 	Result_DBError:        "Internal DB error",
 	Result_DBNotExistItem: "Not exist item",

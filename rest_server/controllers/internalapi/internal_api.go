@@ -27,23 +27,6 @@ func PreCheck(c echo.Context) base.PreCheckResponse {
 		}
 	}
 
-	// ctx := base.GetContext(c).(*context.LinkViewContext)
-	// cerberus := libcerberus.GetInstance()
-	// resp, err := cerberus.AuthInternal(ctx.ApplicationKey(), ctx.ApplicationSecret())
-	// if err != nil {
-	// 	log.Error(err)
-	// 	return base.PreCheckResponse{
-	// 		IsSucceed: false,
-	// 		Response:  base.ResponseInternalServerError(),
-	// 	}
-	// }
-	// if resp.Result != "000" {
-	// 	return base.PreCheckResponse{
-	// 		IsSucceed: false,
-	// 		Response:  resp,
-	// 	}
-	// }
-
 	return base.PreCheckResponse{
 		IsSucceed: true,
 	}
@@ -80,5 +63,21 @@ func (o *InternalAPI) GetHealthCheck(c echo.Context) error {
 }
 
 func (o *InternalAPI) GetVersion(c echo.Context) error {
+	return commonapi.GetVersion(c, o.BaseController.MaxVersion)
+}
+
+func (o *InternalAPI) PostRegisterProduct(c echo.Context) error {
+	return commonapi.GetVersion(c, o.BaseController.MaxVersion)
+}
+
+func (o *InternalAPI) DeleteUnregisterProduct(c echo.Context) error {
+	return commonapi.GetVersion(c, o.BaseController.MaxVersion)
+}
+
+func (o *InternalAPI) PostUpdateProduct(c echo.Context) error {
+	return commonapi.GetVersion(c, o.BaseController.MaxVersion)
+}
+
+func (o *InternalAPI) GetProductList(c echo.Context) error {
 	return commonapi.GetVersion(c, o.BaseController.MaxVersion)
 }

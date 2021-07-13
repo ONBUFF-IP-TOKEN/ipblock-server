@@ -123,3 +123,15 @@ func (o *ExternalAPI) GetHistoryTransferItem(c echo.Context) error {
 func (o *ExternalAPI) GetHistoryTransferMe(c echo.Context) error {
 	return commonapi.GetHistoryTransferMe(c)
 }
+
+func (o *ExternalAPI) GetProductList(c echo.Context) error {
+	return commonapi.GetVersion(c, o.BaseController.MaxVersion)
+}
+
+func (o *ExternalAPI) PostProductOrder(c echo.Context) error {
+	return commonapi.GetVersion(c, o.BaseController.MaxVersion)
+}
+
+func (o *ExternalAPI) GetMyOrderList(c echo.Context) error {
+	return commonapi.GetVersion(c, o.BaseController.MaxVersion)
+}

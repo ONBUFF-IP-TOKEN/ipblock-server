@@ -3,7 +3,7 @@
     - 
       group: "ipblock-server"
       minversion: "m1.0"
-      maxversion: "m1.0"
+      maxversion: "m1.1"
       list: 
         - 
           handler: "GetHealthCheck"
@@ -15,6 +15,26 @@
           method: "get"
           uri: "/:apiver/version"
           precheck: false
-
+        - # 신규 ipblock api (m1.1)
+          handler: "PostRegisterProduct"    # product 등록
+          method: "post"
+          uri: "/:apiver/product/register"
+          precheck: true
+        - 
+          handler: "DeleteUnregisterProduct" # 등록된 product 삭제 요청
+          method: "delete"
+          uri: "/:apiver/product/unregister"
+          precheck: true
+        - 
+          handler: "PostUpdateProduct" # product 정보 업데이트
+          method: "post"
+          uri: "/:apiver/product/update"
+          precheck: true
+        -
+          handler: "GetProductList" # 등록된 product 리스트 요청
+          method: "get"
+          uri: "/:apiver/product/list"
+          precheck: true
+        
 
         

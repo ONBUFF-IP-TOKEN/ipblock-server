@@ -3,7 +3,7 @@
     - 
       group: "ipblock-server"
       minversion: "v1.0"
-      maxversion: "v1.0"
+      maxversion: "v1.1"
       list: 
         - 
           handler: "GetHealthCheck"
@@ -40,13 +40,31 @@
           method: "post"
           uri: "/:apiver/item/purchase"
           precheck: true
-        - handler: "GetHistoryTransferItem"   # Item transfer History 조회
+        - 
+          handler: "GetHistoryTransferItem"   # Item transfer History 조회
           method: "get"
           uri: "/:apiver/history/transfer/item"
           precheck: true
-        - handler: "GetHistoryTransferMe"   # 나의 transfer History 조회
+        - 
+          handler: "GetHistoryTransferMe"   # 나의 transfer History 조회
           method: "get"
           uri: "/:apiver/history/transfer/me"
           precheck: true
+        - # 신규 ipblock api (v1.1)
+          handler: "GetProductList" # 등록된 product 리스트 요청
+          method: "get"
+          uri: "/:apiver/product/list"
+          precheck: true
+        -
+          handler: "PostProductOrder" # 등록된 product 구매 요청
+          method: "post"
+          uri: "/:apiver/product/order"
+          precheck: true
+        -
+          handler: "GetMyOrderList" # 내 구매 내역
+          method: "get"
+          uri: "/:apiver/product/order/my/list"
+          precheck: true
+
 
 

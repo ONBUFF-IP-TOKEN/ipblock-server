@@ -16,7 +16,7 @@ type IToken struct {
 func NewTokenManager(conf *config.TokenInfo) *IToken {
 	gToken = new(IToken)
 	gToken.conf = conf
-	gToken.tokenCmd = NewTokenCmd(gToken)
+	gToken.tokenCmd = NewTokenCmd(gToken, conf)
 	return gToken
 }
 

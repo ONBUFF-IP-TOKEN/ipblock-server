@@ -8,28 +8,28 @@ const (
 	TokenChannel = "TokenChannel"
 )
 
-var context *Context
+var context *ChanContext
 
 var once sync.Once
 
-func GetInstance() *Context {
+func GetChanInstance() *ChanContext {
 	once.Do(func() {
-		context = &Context{}
+		context = &ChanContext{}
 		context.data = make(map[string]interface{})
 	})
 
 	return context
 }
 
-type Context struct {
+type ChanContext struct {
 	data map[string]interface{}
 }
 
-func (o *Context) Put(key string, value interface{}) {
+func (o *ChanContext) Put(key string, value interface{}) {
 	o.data[key] = value
 }
 
-func (o *Context) Get(key string) (interface{}, bool) {
+func (o *ChanContext) Get(key string) (interface{}, bool) {
 	val, exists := o.data[key]
 	return val, exists
 }

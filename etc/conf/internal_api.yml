@@ -30,6 +30,11 @@
           method: "post"
           uri: "/:apiver/product/update"
           precheck: true
+        - 
+          handler: "PostUpdateProductState" # product state 정보만 업데이트
+          method: "post"
+          uri: "/:apiver/product/update/state"
+          precheck: true
         -
           handler: "GetProductList" # 등록된 product 리스트 요청
           method: "get"

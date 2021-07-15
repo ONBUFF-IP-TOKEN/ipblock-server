@@ -68,6 +68,8 @@ func (o *InternalAPI) GetVersion(c echo.Context) error {
 	return commonapi.GetVersion(c, o.BaseController.MaxVersion)
 }
 
+// product apis(m1.1)
+// product 등록
 func (o *InternalAPI) PostRegisterProduct(c echo.Context) error {
 	ctx := base.GetContext(c).(*context.IPBlockServerContext)
 
@@ -84,14 +86,41 @@ func (o *InternalAPI) PostRegisterProduct(c echo.Context) error {
 	return commonapi.PostRegisterProduct(params, ctx)
 }
 
+// product 삭제
 func (o *InternalAPI) DeleteUnregisterProduct(c echo.Context) error {
-	return commonapi.GetVersion(c, o.BaseController.MaxVersion)
+	ctx := base.GetContext(c).(*context.IPBlockServerContext)
+
+	params := context.NewUnregisterProduct()
+	if err := ctx.EchoContext.Bind(params); err != nil {
+		log.Error(err)
+		return base.BaseJSONInternalServerError(c, err)
+	}
+
+	if err := params.CheckValidate(); err != nil {
+		return c.JSON(http.StatusOK, err)
+	}
+
+	return commonapi.DeleteUnregisterProduct(params, ctx)
 }
 
+// product 업데이트
 func (o *InternalAPI) PostUpdateProduct(c echo.Context) error {
-	return commonapi.GetVersion(c, o.BaseController.MaxVersion)
+	ctx := base.GetContext(c).(*context.IPBlockServerContext)
+
+	params := context.NewProductInfo()
+	if err := ctx.EchoContext.Bind(params); err != nil {
+		log.Error(err)
+		return base.BaseJSONInternalServerError(c, err)
+	}
+
+	if err := params.CheckValidate(); err != nil {
+		return c.JSON(http.StatusOK, err)
+	}
+
+	return commonapi.PostUpdateProduct(params, ctx)
 }
 
+// product state만 업데이트
 func (o *InternalAPI) PostUpdateProductState(c echo.Context) error {
 	ctx := base.GetContext(c).(*context.IPBlockServerContext)
 
@@ -108,6 +137,36 @@ func (o *InternalAPI) PostUpdateProductState(c echo.Context) error {
 	return commonapi.PostUpdateProductState(params, ctx)
 }
 
+// product list 조회
 func (o *InternalAPI) GetProductList(c echo.Context) error {
-	return commonapi.GetVersion(c, o.BaseController.MaxVersion)
+	ctx := base.GetContext(c).(*context.IPBlockServerContext)
+
+	params := context.NewProductList()
+	if err := ctx.EchoContext.Bind(params); err != nil {
+		log.Error(err)
+		return base.BaseJSONInternalServerError(c, err)
+	}
+
+	if err := params.CheckValidate(); err != nil {
+		return c.JSON(http.StatusOK, err)
+	}
+
+	return commonapi.GetProductList(params, ctx)
+}
+
+// nft list 조회
+func (o *InternalAPI) GetNftList(c echo.Context) error {
+	ctx := base.GetContext(c).(*context.IPBlockServerContext)
+
+	params := context.NewNftList()
+	if err := ctx.EchoContext.Bind(params); err != nil {
+		log.Error(err)
+		return base.BaseJSONInternalServerError(c, err)
+	}
+
+	if err := params.CheckValidate(); err != nil {
+		return c.JSON(http.StatusOK, err)
+	}
+
+	return commonapi.GetNftList(params, ctx)
 }

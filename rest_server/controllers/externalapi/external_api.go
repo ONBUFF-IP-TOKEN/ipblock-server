@@ -1,6 +1,8 @@
 package externalapi
 
 import (
+	"net/http"
+
 	"github.com/ONBUFF-IP-TOKEN/baseapp/base"
 	baseconf "github.com/ONBUFF-IP-TOKEN/baseapp/config"
 	"github.com/ONBUFF-IP-TOKEN/baseutil/log"
@@ -124,8 +126,21 @@ func (o *ExternalAPI) GetHistoryTransferMe(c echo.Context) error {
 	return commonapi.GetHistoryTransferMe(c)
 }
 
+// product apis(v1.1)
 func (o *ExternalAPI) GetProductList(c echo.Context) error {
-	return commonapi.GetVersion(c, o.BaseController.MaxVersion)
+	ctx := base.GetContext(c).(*context.IPBlockServerContext)
+
+	params := context.NewProductList()
+	if err := ctx.EchoContext.Bind(params); err != nil {
+		log.Error(err)
+		return base.BaseJSONInternalServerError(c, err)
+	}
+
+	if err := params.CheckValidate(); err != nil {
+		return c.JSON(http.StatusOK, err)
+	}
+
+	return commonapi.GetProductList(params, ctx)
 }
 
 func (o *ExternalAPI) PostProductOrder(c echo.Context) error {

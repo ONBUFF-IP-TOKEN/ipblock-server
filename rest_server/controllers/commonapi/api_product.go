@@ -43,12 +43,60 @@ func PostRegisterProduct(product *context.ProductInfo, ctx *context.IPBlockServe
 	return ctx.EchoContext.JSON(http.StatusOK, resp)
 }
 
+func DeleteUnregisterProduct(product *context.UnregisterProduct, ctx *context.IPBlockServerContext) error {
+	resp := new(base.BaseResponse)
+	resp.Success()
+
+	ret, err := model.GetDB().DeleteProduct(product)
+	if err != nil {
+		resp.SetReturn(resultcode.Result_DBError)
+	}
+	if !ret && err == nil {
+		//삭제할 product이 없는 경우
+		resp.SetReturn(resultcode.Result_DBNotExistItem)
+	}
+
+	return ctx.EchoContext.JSON(http.StatusOK, resp)
+}
+
+func PostUpdateProduct(product *context.ProductInfo, ctx *context.IPBlockServerContext) error {
+	resp := new(base.BaseResponse)
+	resp.Success()
+
+	if _, err := model.GetDB().UpdateProduct(product); err != nil {
+		resp.SetReturn(resultcode.Result_DBError)
+	}
+
+	return ctx.EchoContext.JSON(http.StatusOK, resp)
+}
+
 func PostUpdateProductState(product *context.ProductUpdateState, ctx *context.IPBlockServerContext) error {
 	resp := new(base.BaseResponse)
 	resp.Success()
 
 	if _, err := model.GetDB().UpdateProductState(product); err != nil {
 		resp.SetReturn(resultcode.Result_DBError)
+	}
+
+	return ctx.EchoContext.JSON(http.StatusOK, resp)
+}
+
+func GetProductList(productList *context.ProductList, ctx *context.IPBlockServerContext) error {
+	resp := new(base.BaseResponse)
+	products, totalCount, err := model.GetDB().GetProductList(productList)
+	if err != nil {
+		resp.SetReturn(resultcode.Result_DBError)
+	} else {
+		resp.Success()
+		pageInfo := context.PageInfoResponse{
+			PageOffset: productList.PageOffset,
+			PageSize:   int64(len(products)),
+			TotalSize:  totalCount,
+		}
+		resp.Value = context.ProductListResponse{
+			PageInfo: pageInfo,
+			Products: products,
+		}
 	}
 
 	return ctx.EchoContext.JSON(http.StatusOK, resp)

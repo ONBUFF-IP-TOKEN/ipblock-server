@@ -1,6 +1,7 @@
 package model
 
 import (
+	"database/sql"
 	"errors"
 	"fmt"
 
@@ -45,4 +46,55 @@ func (o *DB) UpdateProductNftTokenID(createHash string, tokenId int64, state int
 	}
 
 	return cnt, nil
+}
+
+func (o *DB) GetNftList(pageInfo *context.NftList) ([]context.NftInfo, int64, error) {
+	var sqlQuery string
+	if pageInfo.ProductId == 0 {
+		sqlQuery = fmt.Sprintf("SELECT * FROM ipblock.product_nft ORDER BY product_id DESC LIMIT %v,%v", pageInfo.PageSize*pageInfo.PageOffset, pageInfo.PageSize)
+	} else {
+		sqlQuery = fmt.Sprintf("SELECT * FROM ipblock.product_nft WHERE product_id=%v ORDER BY product_id DESC LIMIT %v,%v", pageInfo.ProductId, pageInfo.PageSize*pageInfo.PageOffset, pageInfo.PageSize)
+	}
+	rows, err := o.Mysql.Query(sqlQuery)
+
+	if err != nil {
+		log.Error(err)
+		return nil, 0, err
+	}
+
+	defer rows.Close()
+
+	var tokenId, state sql.NullInt64
+	var ownerWalletAddr sql.NullString
+	nfts := make([]context.NftInfo, 0)
+	for rows.Next() {
+		nft := context.NftInfo{}
+		if err := rows.Scan(&nft.ProductId, &nft.CreateTs, &nft.CreateHash, &tokenId, &nft.QuantityIndex, &ownerWalletAddr, &nft.NftUri, &state); err != nil {
+			log.Error(err)
+		}
+		nft.TokenId = tokenId.Int64
+		nft.OwnerWalletAddr = ownerWalletAddr.String
+		nft.State = state.Int64
+		nfts = append(nfts, nft)
+	}
+
+	totalCount, err := o.GetTotalProductSize()
+
+	return nfts, totalCount, err
+}
+
+func (o *DB) GetTotalNftSize() (int64, error) {
+	rows, err := o.Mysql.Query("SELECT COUNT(*) as count FROM ipblock.product_nft")
+	var count int64
+	if err != nil {
+		log.Error(err)
+		return count, err
+	}
+
+	defer rows.Close()
+	for rows.Next() {
+		rows.Scan(&count)
+	}
+
+	return count, nil
 }

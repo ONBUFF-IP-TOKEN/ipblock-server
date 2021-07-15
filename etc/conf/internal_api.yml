@@ -40,6 +40,10 @@
           method: "get"
           uri: "/:apiver/product/list"
           precheck: true
-        
+        -
+          handler: "GetNftList" # 등록된 product nft 리스트 요청
+          method: "get"
+          uri: "/:apiver/nft/list"
+          precheck: true
 
         

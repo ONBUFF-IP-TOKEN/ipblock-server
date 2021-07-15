@@ -39,7 +39,7 @@ func (o *TokenCmd) StartTokenCommand() {
 	context.GetChanInstance().Put(context.TokenChannel, o.command)
 
 	go func() {
-		ticker := time.NewTicker(1 * time.Second)
+		ticker := time.NewTicker(1 * time.Millisecond)
 
 		defer func() {
 			ticker.Stop()
@@ -77,8 +77,8 @@ func (o *TokenCmd) CreateNft(data interface{}, cb chan interface{}) {
 
 	for i := int64(0); i < product.QuantityTotal; i++ {
 		//2-1. nft 생성 요청
-		//conf := o.conf.GetInstance()
-		uri := GetNftUri("https://onbuff.com/onif/ipblock/", product.Id, i+1)
+
+		uri := GetNftUri(o.conf.NftUriDomain, product.Id, i+1)
 
 		if txHash, err := o.itoken.Tokens[Token_nft].Nft_CreateERC721(o.conf.ServerWalletAddr, uri); err != nil {
 			//resp.SetReturn(resultcode.Result_TokenERC721CreateError)

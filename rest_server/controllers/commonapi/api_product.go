@@ -102,9 +102,28 @@ func GetProductList(productList *context.ProductList, ctx *context.IPBlockServer
 	return ctx.EchoContext.JSON(http.StatusOK, resp)
 }
 
+func PostProductOrder(product *context.OrderProduct, ctx *context.IPBlockServerContext) error {
+	resp := new(base.BaseResponse)
+	resp.Success()
+
+	//1. token thread에게 넘긴다.
+	data := &basenet.CommandData{
+		CommandType: token.TokenCmd_OrderProduct,
+		Data:        product,
+		//Callback:    make(chan interface{}),
+	}
+	GetTokenProc(data)
+
+	return ctx.EchoContext.JSON(http.StatusOK, resp)
+}
+
 func GetTokenProc(data *basenet.CommandData) base.BaseResponse {
 	if ch, exist := context.GetChanInstance().Get(context.TokenChannel); exist {
 		ch.(chan *basenet.CommandData) <- data
+	}
+
+	if data.Callback == nil {
+		return base.BaseResponse{}
 	}
 
 	ticker := time.NewTicker(90 * time.Second)

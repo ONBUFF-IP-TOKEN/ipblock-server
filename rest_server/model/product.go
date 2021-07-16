@@ -130,3 +130,29 @@ func (o *DB) GetTotalProductSize() (int64, error) {
 
 	return count, nil
 }
+
+func (o *DB) GetProductInfo(productId int64) (*context.ProductInfo, error) {
+	sqlQuery := fmt.Sprintf("SELECT * FROM ipblock.product product_id=%v", productId)
+	rows, err := o.Mysql.Query(sqlQuery)
+
+	if err != nil {
+		log.Error(err)
+		return nil, err
+	}
+
+	defer rows.Close()
+
+	var creator, thumbnail, content sql.NullString
+	product := &context.ProductInfo{}
+	for rows.Next() {
+		if err := rows.Scan(&product.Id, &product.Title, &thumbnail, &product.Price, &product.ProductType, &product.TokenType,
+			&product.CreateTs, &creator, &product.Desc, &content, &product.QuantityTotal, &product.QuantityRemaining, &product.State); err != nil {
+			log.Error(err)
+		}
+		product.Thumbnail = thumbnail.String
+		product.Creator = creator.String
+		product.Content = content.String
+	}
+
+	return product, nil
+}

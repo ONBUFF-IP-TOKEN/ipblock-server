@@ -73,6 +73,7 @@ func (o *TokenCmd) CommandProc(data *basenet.CommandData) error {
 		case TokenCmd_OrderProduct:
 			o.OrderProduct(data)
 		}
+
 		end := time.Now()
 
 		log.Debug("cmd.kind:", data.CommandType, ",elapsed", end.Sub(start))
@@ -89,12 +90,10 @@ func (o *TokenCmd) CreateNft(data interface{}, cb chan interface{}) {
 		uri := GetNftUri(o.conf.NftUriDomain, product.Id, i+1)
 
 		if txHash, err := o.itoken.Tokens[Token_nft].Nft_CreateERC721(o.conf.ServerWalletAddr, uri); err != nil {
-			//resp.SetReturn(resultcode.Result_TokenERC721CreateError)
 			log.Error("Nft_CreateERC721 error :", err)
 		} else {
 			//2-2. db 저장
 			if _, err := model.GetDB().InsertProductNFT(product, i+1, context.Product_nft_state_pending, txHash, o.conf.ServerWalletAddr, uri); err != nil {
-				//resp.SetReturn(resultcode.Result_DBError)
 				log.Error("InsertProductNFT :", err)
 			}
 		}
@@ -113,7 +112,7 @@ func (o *TokenCmd) OrderProduct(data *basenet.CommandData) {
 	order := data.Data.(*context.OrderProduct)
 	productInfo, err := model.GetDB().GetProductInfo(order.ProductId)
 	if err != nil {
-		log.Error("OrderProduct GetProductInfo error ", err)
+		log.Error("OrderProduct GetProductInfo error ", err, " product_id:")
 		return
 	}
 	token := o.itoken.Tokens[Token_nft]
@@ -124,7 +123,7 @@ func (o *TokenCmd) OrderProduct(data *basenet.CommandData) {
 		tx, isPanding, err := token.eth.GetTransactionByTxHash(order.PurchaseTxHash)
 		if err == nil {
 			if isPanding {
-				log.Debug("is panding : ", isPanding)
+				log.Debug("is panding : ", isPanding, " tx:", order.PurchaseTxHash)
 				time.Sleep(time.Second * 1)
 				errCnt = 0
 				goto POLLING
@@ -135,14 +134,11 @@ func (o *TokenCmd) OrderProduct(data *basenet.CommandData) {
 				log.Info("GetTransactionReceipt PostState:", receipt.PostState)
 				log.Info("GetTransactionReceipt status :", receipt.Status)
 				log.Info("GetTransactionReceipt CumulativeGasUsed:", receipt.CumulativeGasUsed)
-				log.Info("GetTransactionReceipt Bloom :", receipt.Bloom)
-				for _, logInfo := range receipt.Logs {
-					fmt.Printf("GetTransactionReceipt Logs %+v\n", logInfo)
-				}
+				//log.Info("GetTransactionReceipt Bloom :", receipt.Bloom)
 
-				log.Info("topics 0 : ", receipt.Logs[0].Topics[0].Hex())
-				log.Info("topics 1 : ", receipt.Logs[0].Topics[1].Hex())
-				log.Info("topics 2 : ", receipt.Logs[0].Topics[2].Hex())
+				log.Info("GetTransactionReceipt topics 0 : ", receipt.Logs[0].Topics[0].Hex())
+				log.Info("GetTransactionReceipt topics 1 : ", receipt.Logs[0].Topics[1].Hex())
+				log.Info("GetTransactionReceipt topics 2 : ", receipt.Logs[0].Topics[2].Hex())
 
 				log.Info("GetTransactionReceipt TxHash:", receipt.TxHash.Hex())
 				log.Info("GetTransactionReceipt contractAddress :", receipt.ContractAddress.Hex())
@@ -151,9 +147,14 @@ func (o *TokenCmd) OrderProduct(data *basenet.CommandData) {
 				log.Info("GetTransactionReceipt blocknumber :", receipt.BlockNumber)
 				log.Info("GetTransactionReceipt TransactionIndex:", receipt.TransactionIndex)
 
+				for _, logInfo := range receipt.Logs {
+					fmt.Printf("GetTransactionReceipt Logs %+v\n", logInfo)
+				}
+
 				//token contract address check
 				log.Info("token address : ", receipt.Logs[0].Address.Hex())
 				if strings.ToUpper(o.conf.TokenAddrs[Token_onit]) != strings.ToUpper(receipt.Logs[0].Address.Hex()) {
+					model.GetDB().UpdateProductRemain(false, order.ProductId)
 					log.Error("Invalid token address :", receipt.Logs[0].Address.Hex())
 					return
 				}
@@ -162,30 +163,33 @@ func (o *TokenCmd) OrderProduct(data *basenet.CommandData) {
 				fromAddr := strings.Replace(receipt.Logs[0].Topics[1].Hex(), "000000000000000000000000", "", -1)
 				toAddr := strings.Replace(receipt.Logs[0].Topics[2].Hex(), "000000000000000000000000", "", -1)
 				if strings.ToUpper(order.WalletAddr) != strings.ToUpper(fromAddr) {
+					model.GetDB().UpdateProductRemain(false, order.ProductId)
 					log.Error("Invalid from address :", fromAddr)
 					return
 				}
 				if strings.ToUpper(o.conf.ServerWalletAddr) != strings.ToUpper(toAddr) {
+					model.GetDB().UpdateProductRemain(false, order.ProductId)
 					log.Error("Invalid to address :", toAddr)
 					return
 				}
 				// 구입 액수 check
 				value := new(big.Int)
 				value.SetString(hex.EncodeToString(receipt.Logs[0].Data), 16)
-				log.Info("transfer value :", value)
+				//log.Info("transfer value :", value)
 
+				// todo 물건 가격은 소숫점으로 처리 되도록 변환 해줘야함
 				transferEther := ethCtrl.Convert(value.String(), ethCtrl.Wei, ethCtrl.Ether)
 				price := new(big.Rat).SetInt64(int64(productInfo.Price))
 				if transferEther.Cmp(price) != 0 {
+					model.GetDB().UpdateProductRemain(false, order.ProductId)
 					log.Error("Invalid purchase price :", transferEther.String())
 					return
 				}
-
-				// todo 거래 정보가 다 정확하면 nft를 전송하고 nft 테이블에 소유자를 갱신해준다.
 			} else if err.Error() == "not found" {
 				log.Debug("not found retry GetTransactionReceipt : ", order.PurchaseTxHash)
 				time.Sleep(time.Second * 1)
 				if errCnt > 3 {
+					model.GetDB().UpdateProductRemain(false, order.ProductId)
 					log.Error("GetTransactionReceipt max try")
 					return
 				}
@@ -195,6 +199,7 @@ func (o *TokenCmd) OrderProduct(data *basenet.CommandData) {
 		} else {
 			log.Debug("GetTransactionByTxHash error : ", err)
 			if errCnt > 3 {
+				model.GetDB().UpdateProductRemain(false, order.ProductId)
 				log.Error("GetTransactionByTxHash max try : ", order.PurchaseTxHash)
 				return
 			}
@@ -203,9 +208,29 @@ func (o *TokenCmd) OrderProduct(data *basenet.CommandData) {
 		}
 	}()
 
-	// 2. 영수증 확인 후 nft 전송
+	// 2. 영수증 정상 확인 되어 nft 전송
+	// 전송할 nft token id 추출
+	transferNftIndex := productInfo.QuantityTotal - productInfo.QuantityRemaining
+	if nfts, err := model.GetDB().GetNftListByProductId(order.ProductId); err != nil {
+		model.GetDB().UpdateProductRemain(false, order.ProductId)
+		log.Error("GetNftListByProductId error : ", err)
+		return
+	} else {
+		for idx, nft := range nfts {
+			if int64(idx) == transferNftIndex {
+				//nft 전송
+				txHash, err := o.itoken.Tokens[Token_nft].Nft_TransferERC721(nft.OwnerWalletAddr, order.WalletAddr, nft.TokenId)
+				if err != nil {
+					log.Error("Nft_TransferERC721 error : ", err, " token_id:", nft.TokenId)
+					model.GetDB().UpdateProductRemain(false, order.ProductId)
+					return
+				} else {
+					log.Info("Nft_TransferERC721 txhash : ", txHash)
+				}
+			}
+		}
+	}
 
+	//
 	// 3. nft 콜백 스레드에서 db 업데이트 처리
-
-	_ = order
 }

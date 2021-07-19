@@ -25,6 +25,8 @@ const (
 	Result_Product_RequireQuantityTotal = 12506
 	Result_Product_RequireVaildId       = 12507
 	Result_Product_RequireValidState    = 12508
+	Result_Product_NotOnSale            = 12509
+	Result_Product_LackOfQuantity       = 12510
 
 	Result_DBError        = 13000
 	Result_DBNotExistItem = 13001
@@ -67,6 +69,8 @@ var ResultCodeText = map[int]string{
 	Result_Product_RequireQuantityTotal: "Require total quantity",
 	Result_Product_RequireVaildId:       "Require valid product id",
 	Result_Product_RequireValidState:    "Require valid product state",
+	Result_Product_NotOnSale:            "Not on sale",
+	Result_Product_LackOfQuantity:       "Lack of Quantity",
 
 	Result_DBError:        "Internal DB error",
 	Result_DBNotExistItem: "Not exist item",

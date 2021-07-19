@@ -9,7 +9,7 @@ import (
 )
 
 func (o *DB) GetHistoryTransferItem(req *context.GetHistoryTransferItem) ([]context.ItemTransferHistory, int64, error) {
-	sqlQuery := fmt.Sprintf("SELECT * FROM ipblock.items_history_transfer WHERE item_id=%v ORDER BY idx DESC LIMIT %v,%v", req.ItemId, req.PageSize*req.PageOffset, req.PageSize)
+	sqlQuery := fmt.Sprintf("SELECT * FROM  items_history_transfer WHERE item_id=%v ORDER BY idx DESC LIMIT %v,%v", req.ItemId, req.PageSize*req.PageOffset, req.PageSize)
 	rows, err := o.Mysql.Query(sqlQuery)
 
 	if err != nil {
@@ -34,7 +34,7 @@ func (o *DB) GetHistoryTransferItem(req *context.GetHistoryTransferItem) ([]cont
 }
 
 func (o *DB) GetTotalHistoryTransferItemSize(ItemId int64) (int64, error) {
-	sqlQuery := fmt.Sprintf("SELECT COUNT(*) as count FROM ipblock.items_history_transfer WHERE item_id=%v", ItemId)
+	sqlQuery := fmt.Sprintf("SELECT COUNT(*) as count FROM  items_history_transfer WHERE item_id=%v", ItemId)
 	rows, err := o.Mysql.Query(sqlQuery)
 
 	var count int64
@@ -52,7 +52,7 @@ func (o *DB) GetTotalHistoryTransferItemSize(ItemId int64) (int64, error) {
 }
 
 func (o *DB) GetHistoryTransferMe(req *context.GetHistoryTransferMe) ([]context.ItemTransferHistory, int64, error) {
-	sqlQuery := fmt.Sprintf("SELECT * FROM ipblock.items_history_transfer WHERE from_addr='%v' OR to_addr='%v' ORDER BY idx DESC LIMIT %v,%v", req.WalletAddr, req.WalletAddr, req.PageSize*req.PageOffset, req.PageSize)
+	sqlQuery := fmt.Sprintf("SELECT * FROM  items_history_transfer WHERE from_addr='%v' OR to_addr='%v' ORDER BY idx DESC LIMIT %v,%v", req.WalletAddr, req.WalletAddr, req.PageSize*req.PageOffset, req.PageSize)
 	rows, err := o.Mysql.Query(sqlQuery)
 	if err != nil {
 		log.Error(err)
@@ -76,7 +76,7 @@ func (o *DB) GetHistoryTransferMe(req *context.GetHistoryTransferMe) ([]context.
 }
 
 func (o *DB) GetTotalHistoryTransferMeSize(walletAddr string) (int64, error) {
-	sqlQuery := fmt.Sprintf("SELECT COUNT(*) as count FROM ipblock.items_history_transfer WHERE from_addr='%v' OR to_addr='%v'", walletAddr, walletAddr)
+	sqlQuery := fmt.Sprintf("SELECT COUNT(*) as count FROM  items_history_transfer WHERE from_addr='%v' OR to_addr='%v'", walletAddr, walletAddr)
 	rows, err := o.Mysql.Query(sqlQuery)
 
 	var count int64
@@ -100,7 +100,7 @@ func (o *DB) InsertHistory(TxHash, FromAddr, ToAddr string, TokenID int64, State
 		return -1, err
 	}
 
-	sqlQuery := fmt.Sprintf("INSERT INTO ipblock.items_history_transfer(item_id, from_addr, to_addr, token_id, state, hash, timestamp" +
+	sqlQuery := fmt.Sprintf("INSERT INTO  items_history_transfer(item_id, from_addr, to_addr, token_id, state, hash, timestamp" +
 		") VALUES (?,?,?,?,?,?,?)")
 
 	result, err := o.Mysql.PrepareAndExec(sqlQuery, item.ItemId, FromAddr, ToAddr, TokenID, State, TxHash, datetime.GetTS2MilliSec())

@@ -56,7 +56,8 @@ func PreCheck(c echo.Context) base.PreCheckResponse {
 		}
 		base.GetContext(c).(*context.IPBlockServerContext).SetWalletAddr(*walletAddr)
 	} else {
-		base.GetContext(c).(*context.IPBlockServerContext).SetWalletAddr("0x9Ec7EDE9204E17dfa34e1d381ED5f49A0D578e96")
+		//base.GetContext(c).(*context.IPBlockServerContext).SetWalletAddr("0x9Ec7EDE9204E17dfa34e1d381ED5f49A0D578e96")
+		base.GetContext(c).(*context.IPBlockServerContext).SetWalletAddr("0x38f998d033990a315b08afc0f78059fb7d11dc4d")
 	}
 
 	return base.PreCheckResponse{

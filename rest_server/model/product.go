@@ -9,7 +9,7 @@ import (
 )
 
 func (o *DB) InsertProduct(product *context.ProductInfo) (int64, error) {
-	sqlQuery := fmt.Sprintf("INSERT INTO ipblock.product(product_title, product_thumbnail_url, product_price, product_type, token_type," +
+	sqlQuery := fmt.Sprintf("INSERT INTO product(product_title, product_thumbnail_url, product_price, product_type, token_type," +
 		"create_ts, creator, description, content, quantity_total, quantity_remaining, state) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)")
 
 	result, err := o.Mysql.PrepareAndExec(sqlQuery, product.Title, product.Thumbnail, product.Price, product.ProductType, product.TokenType,
@@ -28,7 +28,7 @@ func (o *DB) InsertProduct(product *context.ProductInfo) (int64, error) {
 }
 
 func (o *DB) DeleteProduct(product *context.UnregisterProduct) (bool, error) {
-	sqlQuery := "DELETE FROM ipblock.product WHERE product_id=?"
+	sqlQuery := "DELETE FROM product WHERE product_id=?"
 
 	result, err := o.Mysql.PrepareAndExec(sqlQuery, product.ProductId)
 	if err != nil {
@@ -45,12 +45,7 @@ func (o *DB) DeleteProduct(product *context.UnregisterProduct) (bool, error) {
 }
 
 func (o *DB) UpdateProduct(product *context.ProductInfo) (int64, error) {
-	// sqlQuery := "UPDATE ipblock.product set product_title=?, product_thumbnail_url=?, product_price=?, product_type=?, " +
-	// 	"token_type=?, creator=?, description=?, content=?, quantity_total=?, state=? WHERE product_id=?"
-
-	// result, err := o.Mysql.PrepareAndExec(sqlQuery, product.Title, product.Thumbnail, product.Price, product.ProductType,
-	// 	product.TokenType, product.Creator, product.Desc, product.Content, product.QuantityTotal, product.State, product.Id)
-	sqlQuery := "UPDATE ipblock.product set product_title=?, product_thumbnail_url=?, product_price=?, product_type=?, " +
+	sqlQuery := "UPDATE product set product_title=?, product_thumbnail_url=?, product_price=?, product_type=?, " +
 		"token_type=?, creator=?, description=?, content=?, state=? WHERE product_id=?"
 
 	result, err := o.Mysql.PrepareAndExec(sqlQuery, product.Title, product.Thumbnail, product.Price, product.ProductType,
@@ -69,7 +64,7 @@ func (o *DB) UpdateProduct(product *context.ProductInfo) (int64, error) {
 }
 
 func (o *DB) UpdateProductState(product *context.ProductUpdateState) (int64, error) {
-	sqlQuery := "UPDATE ipblock.product set state=? WHERE product_id=?"
+	sqlQuery := "UPDATE product set state=? WHERE product_id=?"
 
 	result, err := o.Mysql.PrepareAndExec(sqlQuery, product.State, product.ProductId)
 	if err != nil {
@@ -86,7 +81,7 @@ func (o *DB) UpdateProductState(product *context.ProductUpdateState) (int64, err
 }
 
 func (o *DB) GetProductList(pageInfo *context.ProductList) ([]context.ProductInfo, int64, error) {
-	sqlQuery := fmt.Sprintf("SELECT * FROM ipblock.product ORDER BY product_id DESC LIMIT %v,%v", pageInfo.PageSize*pageInfo.PageOffset, pageInfo.PageSize)
+	sqlQuery := fmt.Sprintf("SELECT * FROM product ORDER BY product_id DESC LIMIT %v,%v", pageInfo.PageSize*pageInfo.PageOffset, pageInfo.PageSize)
 	rows, err := o.Mysql.Query(sqlQuery)
 
 	if err != nil {
@@ -115,8 +110,30 @@ func (o *DB) GetProductList(pageInfo *context.ProductList) ([]context.ProductInf
 	return products, totalCount, err
 }
 
+func (o *DB) UpdateProductRemain(increase bool, productId int64) (int64, error) {
+	var sqlQuery string
+	if increase {
+		sqlQuery = "UPDATE product set quantity_remaining=quantity_remaining+1 WHERE product_id=?"
+	} else {
+		sqlQuery = "UPDATE product set quantity_remaining=quantity_remaining-1 WHERE product_id=?"
+	}
+
+	result, err := o.Mysql.PrepareAndExec(sqlQuery, productId)
+	if err != nil {
+		log.Error(err)
+		return 0, err
+	}
+	cnt, err := result.RowsAffected()
+	if err != nil {
+		log.Error(err)
+		return 0, err
+	}
+
+	return cnt, nil
+}
+
 func (o *DB) GetTotalProductSize() (int64, error) {
-	rows, err := o.Mysql.Query("SELECT COUNT(*) as count FROM ipblock.product")
+	rows, err := o.Mysql.Query("SELECT COUNT(*) as count FROM product")
 	var count int64
 	if err != nil {
 		log.Error(err)
@@ -132,7 +149,7 @@ func (o *DB) GetTotalProductSize() (int64, error) {
 }
 
 func (o *DB) GetProductInfo(productId int64) (*context.ProductInfo, error) {
-	sqlQuery := fmt.Sprintf("SELECT * FROM ipblock.product product_id=%v", productId)
+	sqlQuery := fmt.Sprintf("SELECT * FROM product WHERE product_id=%v", productId)
 	rows, err := o.Mysql.Query(sqlQuery)
 
 	if err != nil {

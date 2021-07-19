@@ -102,17 +102,38 @@ func GetProductList(productList *context.ProductList, ctx *context.IPBlockServer
 	return ctx.EchoContext.JSON(http.StatusOK, resp)
 }
 
-func PostProductOrder(product *context.OrderProduct, ctx *context.IPBlockServerContext) error {
+func PostProductOrder(order *context.OrderProduct, ctx *context.IPBlockServerContext) error {
 	resp := new(base.BaseResponse)
-	resp.Success()
 
-	//1. token thread에게 넘긴다.
-	data := &basenet.CommandData{
-		CommandType: token.TokenCmd_OrderProduct,
-		Data:        product,
-		//Callback:    make(chan interface{}),
+	if productInfo, err := model.GetDB().GetProductInfo(order.ProductId); err != nil {
+		log.Error("PostProductOrder::GetProductInfo errr : ", err)
+		resp.SetReturn(resultcode.Result_DBError)
+	} else {
+		//해당 product의 상태가 판매 중인지 확인
+		if productInfo.State == context.Product_state_saleing {
+			//해당 product의 잔여 수량 확인
+			if productInfo.QuantityRemaining > 0 {
+				// 잔여 수량을 1개 줄이고 token thread에게 넘긴다.
+				if _, err := model.GetDB().UpdateProductRemain(false, order.ProductId); err != nil {
+					log.Error("PostProductOrder::UpdateProductRemain errr : ", err)
+					resp.SetReturn(resultcode.Result_DBError)
+				} else {
+					data := &basenet.CommandData{
+						CommandType: token.TokenCmd_OrderProduct,
+						Data:        order,
+						Callback:    nil, //콜백은 필요 없다.
+					}
+					GetTokenProc(data)
+
+					resp.Success()
+				}
+			} else {
+				resp.SetReturn(resultcode.Result_Product_LackOfQuantity)
+			}
+		} else {
+			resp.SetReturn(resultcode.Result_Product_NotOnSale)
+		}
 	}
-	GetTokenProc(data)
 
 	return ctx.EchoContext.JSON(http.StatusOK, resp)
 }

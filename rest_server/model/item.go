@@ -11,7 +11,7 @@ import (
 )
 
 func (o *DB) InsertItem(item *context.RegisterItem) (int64, error) {
-	sqlQuery := fmt.Sprintf("INSERT INTO ipblock.items_base(wallet_address, title, token_type, thumbnail_url, token_price," +
+	sqlQuery := fmt.Sprintf("INSERT INTO  items_base(wallet_address, title, token_type, thumbnail_url, token_price," +
 		"expire_date, register_date, creator, description, owner_wallet_address, owner, create_hash) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)")
 
 	result, err := o.Mysql.PrepareAndExec(sqlQuery, item.WalletAddr, item.Title, item.TokenType, item.Thumbnail, item.TokenPrice,
@@ -30,7 +30,7 @@ func (o *DB) InsertItem(item *context.RegisterItem) (int64, error) {
 }
 
 func (o *DB) DeleteItem(itemId int64) (bool, error) {
-	sqlQuery := "DELETE FROM ipblock.items_base WHERE idx=?"
+	sqlQuery := "DELETE FROM  items_base WHERE idx=?"
 
 	result, err := o.Mysql.PrepareAndExec(sqlQuery, itemId)
 	if err != nil {
@@ -47,7 +47,7 @@ func (o *DB) DeleteItem(itemId int64) (bool, error) {
 }
 
 func (o *DB) DeleteItemByTokenId(TokenId int64) (bool, error) {
-	sqlQuery := "DELETE FROM ipblock.items_base WHERE token_id=?"
+	sqlQuery := "DELETE FROM  items_base WHERE token_id=?"
 
 	result, err := o.Mysql.PrepareAndExec(sqlQuery, TokenId)
 	if err != nil {
@@ -64,7 +64,7 @@ func (o *DB) DeleteItemByTokenId(TokenId int64) (bool, error) {
 }
 
 func (o *DB) GetItem(itemId int64) (*context.ItemInfo, error) {
-	sqlQuery := fmt.Sprintf("SELECT * FROM ipblock.items_base WHERE idx=%v", itemId)
+	sqlQuery := fmt.Sprintf("SELECT * FROM  items_base WHERE idx=%v", itemId)
 	rows, err := o.Mysql.Query(sqlQuery)
 
 	if err != nil {
@@ -89,7 +89,7 @@ func (o *DB) GetItem(itemId int64) (*context.ItemInfo, error) {
 }
 
 func (o *DB) GetItemByTokenId(TokenId int64) (*context.ItemInfo, error) {
-	sqlQuery := fmt.Sprintf("SELECT * FROM ipblock.items_base WHERE token_id=%v", TokenId)
+	sqlQuery := fmt.Sprintf("SELECT * FROM  items_base WHERE token_id=%v", TokenId)
 	rows, err := o.Mysql.Query(sqlQuery)
 
 	if err != nil {
@@ -116,7 +116,7 @@ func (o *DB) GetItemByTokenId(TokenId int64) (*context.ItemInfo, error) {
 }
 
 func (o *DB) GetItemList(pageInfo *context.GetItemList) ([]context.ItemInfo, int64, error) {
-	sqlQuery := fmt.Sprintf("SELECT * FROM ipblock.items_base ORDER BY idx DESC LIMIT %v,%v", pageInfo.PageSize*pageInfo.PageOffset, pageInfo.PageSize)
+	sqlQuery := fmt.Sprintf("SELECT * FROM  items_base ORDER BY idx DESC LIMIT %v,%v", pageInfo.PageSize*pageInfo.PageOffset, pageInfo.PageSize)
 	rows, err := o.Mysql.Query(sqlQuery)
 
 	if err != nil {
@@ -148,7 +148,7 @@ func (o *DB) GetItemList(pageInfo *context.GetItemList) ([]context.ItemInfo, int
 }
 
 func (o *DB) GetTotalItemSize() (int64, error) {
-	rows, err := o.Mysql.Query("SELECT COUNT(*) as count FROM ipblock.items_base")
+	rows, err := o.Mysql.Query("SELECT COUNT(*) as count FROM  items_base")
 	var count int64
 	if err != nil {
 		log.Error(err)
@@ -164,7 +164,7 @@ func (o *DB) GetTotalItemSize() (int64, error) {
 }
 
 func (o *DB) UpdateTokenID(txHash string, tokenID int64) error {
-	sqlQuery := "UPDATE ipblock.items_base set token_id=? WHERE create_hash=?"
+	sqlQuery := "UPDATE  items_base set token_id=? WHERE create_hash=?"
 
 	result, err := o.Mysql.PrepareAndExec(sqlQuery, tokenID, txHash)
 	if err != nil {
@@ -186,7 +186,7 @@ func (o *DB) UpdateTokenID(txHash string, tokenID int64) error {
 }
 
 func (o *DB) UpdateTransfer(txHash string, fromAddr, toAddr string, tokenId int64) error {
-	sqlQuery := "UPDATE ipblock.items_base set owner_wallet_address=? WHERE token_id=? and owner_wallet_address=?"
+	sqlQuery := "UPDATE  items_base set owner_wallet_address=? WHERE token_id=? and owner_wallet_address=?"
 
 	result, err := o.Mysql.PrepareAndExec(sqlQuery, toAddr, tokenId, fromAddr)
 	if err != nil {

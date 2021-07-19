@@ -51,9 +51,9 @@ func (o *DB) UpdateProductNftTokenID(createHash string, tokenId int64, state int
 func (o *DB) GetNftList(pageInfo *context.NftList) ([]context.NftInfo, int64, error) {
 	var sqlQuery string
 	if pageInfo.ProductId == 0 {
-		sqlQuery = fmt.Sprintf("SELECT * FROM  product_nft ORDER BY product_id DESC LIMIT %v,%v", pageInfo.PageSize*pageInfo.PageOffset, pageInfo.PageSize)
+		sqlQuery = fmt.Sprintf("SELECT * FROM  product_nft ORDER BY id DESC LIMIT %v,%v", pageInfo.PageSize*pageInfo.PageOffset, pageInfo.PageSize)
 	} else {
-		sqlQuery = fmt.Sprintf("SELECT * FROM  product_nft WHERE product_id=%v ORDER BY product_id DESC LIMIT %v,%v", pageInfo.ProductId, pageInfo.PageSize*pageInfo.PageOffset, pageInfo.PageSize)
+		sqlQuery = fmt.Sprintf("SELECT * FROM  product_nft WHERE product_id=%v ORDER BY id DESC LIMIT %v,%v", pageInfo.ProductId, pageInfo.PageSize*pageInfo.PageOffset, pageInfo.PageSize)
 	}
 	rows, err := o.Mysql.Query(sqlQuery)
 
@@ -69,7 +69,7 @@ func (o *DB) GetNftList(pageInfo *context.NftList) ([]context.NftInfo, int64, er
 	nfts := make([]context.NftInfo, 0)
 	for rows.Next() {
 		nft := context.NftInfo{}
-		if err := rows.Scan(&nft.ProductId, &nft.CreateTs, &nft.CreateHash, &tokenId, &nft.QuantityIndex, &ownerWalletAddr, &nft.NftUri, &state); err != nil {
+		if err := rows.Scan(&nft.NftId, &nft.ProductId, &nft.CreateTs, &nft.CreateHash, &tokenId, &nft.QuantityIndex, &ownerWalletAddr, &nft.NftUri, &state); err != nil {
 			log.Error(err)
 		}
 		nft.TokenId = tokenId.Int64
@@ -84,7 +84,7 @@ func (o *DB) GetNftList(pageInfo *context.NftList) ([]context.NftInfo, int64, er
 }
 
 func (o *DB) GetNftListByProductId(productId int64) ([]context.NftInfo, error) {
-	sqlQuery := fmt.Sprintf("SELECT * FROM  product_nft WHERE product_id=%v ORDER BY token_id DESC", productId)
+	sqlQuery := fmt.Sprintf("SELECT * FROM  product_nft WHERE product_id=%v ORDER BY id DESC", productId)
 	rows, err := o.Mysql.Query(sqlQuery)
 
 	if err != nil {
@@ -99,7 +99,7 @@ func (o *DB) GetNftListByProductId(productId int64) ([]context.NftInfo, error) {
 	nfts := make([]context.NftInfo, 0)
 	for rows.Next() {
 		nft := context.NftInfo{}
-		if err := rows.Scan(&nft.ProductId, &nft.CreateTs, &nft.CreateHash, &tokenId, &nft.QuantityIndex, &ownerWalletAddr, &nft.NftUri, &state); err != nil {
+		if err := rows.Scan(&nft.NftId, &nft.ProductId, &nft.CreateTs, &nft.CreateHash, &tokenId, &nft.QuantityIndex, &ownerWalletAddr, &nft.NftUri, &state); err != nil {
 			log.Error(err)
 		}
 		nft.TokenId = tokenId.Int64
@@ -111,10 +111,10 @@ func (o *DB) GetNftListByProductId(productId int64) ([]context.NftInfo, error) {
 	return nfts, err
 }
 
-func (o *DB) UpdateProductNftOwner(createHash, newOwner, oldOwner string, tokenId int64) (int64, error) {
+func (o *DB) UpdateProductNftOwner(oldOwner, newOwner string, tokenId int64) (int64, error) {
 	sqlQuery := "UPDATE  product_nft set owner_wallet_address=? WHERE owner_wallet_address=? and token_id=?"
 
-	result, err := o.Mysql.PrepareAndExec(sqlQuery, newOwner, createHash, oldOwner, tokenId)
+	result, err := o.Mysql.PrepareAndExec(sqlQuery, newOwner, oldOwner, tokenId)
 	if err != nil {
 		log.Error(err)
 		return 0, err

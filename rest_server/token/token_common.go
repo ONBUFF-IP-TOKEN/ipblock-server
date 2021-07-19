@@ -108,7 +108,7 @@ func (o *Token) CallBackCmdProc(cmd *basenet.CommandData) {
 				model.GetDB().InsertHistory(transInfo.TxHash, transInfo.FromAddr, transInfo.ToAddr, transInfo.TokenID, token_state_transfer)
 			}
 			// product
-			if _, err := model.GetDB().UpdateProductNftOwner(transInfo.TxHash, transInfo.FromAddr, transInfo.ToAddr, transInfo.TokenID); err == nil {
+			if _, err := model.GetDB().UpdateProductNftOwner(transInfo.FromAddr, transInfo.ToAddr, transInfo.TokenID); err == nil {
 				model.GetDB().InsertHistory(transInfo.TxHash, transInfo.FromAddr, transInfo.ToAddr, transInfo.TokenID, token_state_transfer)
 			}
 		} else if transInfo.FromAddr != gNullAddress && transInfo.ToAddr == gNullAddress {

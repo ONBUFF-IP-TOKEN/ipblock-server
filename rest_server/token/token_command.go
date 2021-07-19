@@ -216,8 +216,8 @@ func (o *TokenCmd) OrderProduct(data *basenet.CommandData) {
 		log.Error("GetNftListByProductId error : ", err)
 		return
 	} else {
-		for idx, nft := range nfts {
-			if int64(idx) == transferNftIndex {
+		for _, nft := range nfts {
+			if nft.QuantityIndex == transferNftIndex {
 				//nft 전송
 				txHash, err := o.itoken.Tokens[Token_nft].Nft_TransferERC721(nft.OwnerWalletAddr, order.WalletAddr, nft.TokenId)
 				if err != nil {

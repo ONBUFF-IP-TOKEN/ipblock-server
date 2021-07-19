@@ -6,6 +6,7 @@ import (
 )
 
 type NftInfo struct {
+	NftId           int64  `json:"nft_id"`
 	ProductId       int64  `json:"product_id"`
 	CreateTs        int64  `json:"create_ts"`
 	CreateHash      string `json:"create_hash"`

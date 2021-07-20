@@ -1,6 +1,7 @@
 package commonapi
 
 import (
+	"errors"
 	"net/http"
 	"time"
 
@@ -118,14 +119,36 @@ func PostProductOrder(order *context.OrderProduct, ctx *context.IPBlockServerCon
 					log.Error("PostProductOrder::UpdateProductRemain errr : ", err)
 					resp.SetReturn(resultcode.Result_DBError)
 				} else {
-					data := &basenet.CommandData{
-						CommandType: token.TokenCmd_OrderProduct,
-						Data:        order,
-						Callback:    nil, //콜백은 필요 없다.
-					}
-					GetTokenProc(data)
+					// 판매 가능 상품 index 추출
+					quantityIndex, tokenId, err := GetAvailableNft(productInfo.Id)
+					if err != nil {
+						resp.SetReturn(resultcode.Result_Product_LackOfQuantity)
+						model.GetDB().UpdateProductRemain(true, order.ProductId) //실패시 수량 증가
+					} else {
+						// 주문서를 작성한다.
+						orderInfo := &context.OrderInfo{
+							Date:               datetime.GetTS2MilliSec(),
+							PurchaseTxHash:     order.PurchaseTxHash,
+							State:              context.Order_state_txhash_checking,
+							ProductId:          productInfo.Id,
+							Price:              productInfo.Price,
+							QuantityIndex:      quantityIndex,
+							QuantityTotal:      productInfo.QuantityTotal,
+							CustomerWalletAddr: order.WalletAddr,
+							CustomerEmail:      order.CustomerEmail,
+							TokenId:            tokenId,
+						}
+						order.TokenId = tokenId              //보낼 토큰 정보 담아서 전달
+						model.GetDB().InsertOrder(orderInfo) // order table 추가
+						data := &basenet.CommandData{
+							CommandType: token.TokenCmd_OrderProduct,
+							Data:        order,
+							Callback:    nil, //콜백은 필요 없다.
+						}
+						GetTokenProc(data)
 
-					resp.Success()
+						resp.Success()
+					}
 				}
 			} else {
 				resp.SetReturn(resultcode.Result_Product_LackOfQuantity)
@@ -163,4 +186,22 @@ func GetTokenProc(data *basenet.CommandData) base.BaseResponse {
 	}
 
 	return resp
+}
+
+func GetAvailableNft(productId int64) (int64, int64, error) {
+	nfts, err := model.GetDB().GetNftListByProductId(productId)
+	if err != nil {
+		log.Error("GetAvailableNft error : ", err)
+		return 0, 0, err
+	}
+
+	for _, nft := range nfts {
+		if nft.OrderState == context.Nft_order_state_sale_ready {
+			// 판매 상태를 판매중으로 바꾸고 상품 정보 리턴
+			model.GetDB().UpdateProductNftOrderState(nft.TokenId, context.Nft_order_state_saleing)
+			return nft.QuantityIndex, nft.TokenId, nil
+		}
+	}
+
+	return 0, 0, errors.New("not exist nft")
 }

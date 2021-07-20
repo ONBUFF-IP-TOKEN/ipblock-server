@@ -98,7 +98,7 @@ func (o *Token) CallBackCmdProc(cmd *basenet.CommandData) {
 				model.GetDB().InsertHistory(transInfo.TxHash, transInfo.FromAddr, transInfo.ToAddr, transInfo.TokenID, token_state_mint)
 			}
 			//product
-			if _, err := model.GetDB().UpdateProductNftTokenID(transInfo.TxHash, transInfo.TokenID, context.Product_nft_state_mint); err == nil {
+			if _, err := model.GetDB().UpdateProductNftTokenID(transInfo.TxHash, transInfo.TokenID, context.Nft_state_mint); err == nil {
 				model.GetDB().InsertHistory(transInfo.TxHash, transInfo.FromAddr, transInfo.ToAddr, transInfo.TokenID, token_state_mint)
 			}
 		} else if transInfo.FromAddr != gNullAddress && transInfo.ToAddr != gNullAddress {
@@ -109,6 +109,7 @@ func (o *Token) CallBackCmdProc(cmd *basenet.CommandData) {
 			}
 			// product
 			if _, err := model.GetDB().UpdateProductNftOwner(transInfo.FromAddr, transInfo.ToAddr, transInfo.TokenID); err == nil {
+				model.GetDB().UpdateOrderState(transInfo.TokenID, context.Order_state_nft_transfer_complete)
 				model.GetDB().InsertHistory(transInfo.TxHash, transInfo.FromAddr, transInfo.ToAddr, transInfo.TokenID, token_state_transfer)
 			}
 		} else if transInfo.FromAddr != gNullAddress && transInfo.ToAddr == gNullAddress {

@@ -1,8 +1,6 @@
 package context
 
 import (
-	"strings"
-
 	"github.com/ONBUFF-IP-TOKEN/baseapp/base"
 	"github.com/ONBUFF-IP-TOKEN/ipblock-server/rest_server/controllers/resultcode"
 )
@@ -12,11 +10,6 @@ const (
 	Product_state_ready       = 1
 	Product_state_saleing     = 2
 	Product_state_soldout     = 3
-)
-
-const (
-	Product_nft_state_pending = 0
-	Product_nft_state_mint    = 1
 )
 
 // product info
@@ -149,35 +142,3 @@ type ProductListResponse struct {
 }
 
 ////////////////////////////////////////////////
-
-// product order 요청
-type OrderProduct struct {
-	WalletAddr     string `json:"wallet_address"`
-	ProductId      int64  `json:"product_id"`
-	PurchaseTxHash string `json:"purchase_tx_hash"`
-}
-
-func NewOrderProduct() *OrderProduct {
-	return new(OrderProduct)
-}
-
-func (o *OrderProduct) CheckValidate(ctx *IPBlockServerContext) *base.BaseResponse {
-	if len(o.WalletAddr) == 0 {
-		return base.MakeBaseResponse(resultcode.Result_RequireValidPageOffset)
-	}
-	if !strings.EqualFold(strings.ToUpper(o.WalletAddr), strings.ToUpper(ctx.WalletAddr())) {
-		return base.MakeBaseResponse(resultcode.Result_InvalidWalletAddress)
-	}
-	if o.ProductId <= 0 {
-		return base.MakeBaseResponse(resultcode.Result_RequireValidPageSize)
-	}
-	if len(o.PurchaseTxHash) == 0 {
-		return base.MakeBaseResponse(resultcode.Result_RequiredPurchaseTxHash)
-	}
-	return nil
-}
-
-type OrderProductesponse struct {
-	//PageInfo PageInfoResponse `json:"page_info"`
-	//Products []ProductInfo    `json:"products"`
-}

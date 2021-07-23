@@ -161,5 +161,17 @@ func (o *ExternalAPI) PostProductOrder(c echo.Context) error {
 }
 
 func (o *ExternalAPI) GetMyOrderList(c echo.Context) error {
-	return commonapi.GetVersion(c, o.BaseController.MaxVersion)
+	ctx := base.GetContext(c).(*context.IPBlockServerContext)
+
+	params := context.NewOrderList()
+	if err := ctx.EchoContext.Bind(params); err != nil {
+		log.Error(err)
+		return base.BaseJSONInternalServerError(c, err)
+	}
+
+	if err := params.CheckValidate(ctx); err != nil {
+		return c.JSON(http.StatusOK, err)
+	}
+
+	return commonapi.GetMyOrderList(params, ctx)
 }

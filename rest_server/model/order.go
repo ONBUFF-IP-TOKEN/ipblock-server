@@ -48,3 +48,30 @@ func (o *DB) UpdateOrderState(tokenId, orderState int64) (int64, error) {
 
 	return cnt, nil
 }
+
+func (o *DB) GetMyOrderList(pageInfo *context.OrderList) ([]context.OrderInfo, int64, error) {
+	sqlQuery := fmt.Sprintf("SELECT * FROM orders WHERE customer_wallet_address='%v' ORDER BY order_id DESC LIMIT %v,%v", pageInfo.WalletAddr, pageInfo.PageSize*pageInfo.PageOffset, pageInfo.PageSize)
+	rows, err := o.Mysql.Query(sqlQuery)
+	log.Info(sqlQuery)
+	if err != nil {
+		log.Error(err)
+		return nil, 0, err
+	}
+
+	defer rows.Close()
+
+	orders := make([]context.OrderInfo, 0)
+	for rows.Next() {
+		order := context.OrderInfo{}
+		rows.Scan(&order)
+		if err := rows.Scan(&order.OrderId, &order.Date, &order.PurchaseTxHash, &order.State, &order.ProductId,
+			&order.Price, &order.QuantityIndex, &order.QuantityTotal, &order.CustomerWalletAddr, &order.CustomerEmail, &order.TokenId); err != nil {
+			log.Error(err)
+		}
+		orders = append(orders, order)
+	}
+
+	totalCount := len(orders)
+
+	return orders, int64(totalCount), err
+}

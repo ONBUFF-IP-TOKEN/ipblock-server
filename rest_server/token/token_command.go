@@ -181,7 +181,7 @@ func (o *TokenCmd) OrderProduct(data *basenet.CommandData) {
 				// 구입 액수 check
 				value := new(big.Int)
 				value.SetString(hex.EncodeToString(receipt.Logs[0].Data), 16)
-				//log.Info("transfer value :", value)
+				log.Info("transfer value :", value)
 
 				// todo 물건 가격은 소숫점으로 처리 되도록 변환 해줘야함
 				transferEther := ethCtrl.Convert(value.String(), ethCtrl.Wei, ethCtrl.Ether)

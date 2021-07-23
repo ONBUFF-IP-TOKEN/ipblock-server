@@ -43,6 +43,9 @@ func (o *OrderProduct) CheckValidate(ctx *IPBlockServerContext) *base.BaseRespon
 	if len(o.PurchaseTxHash) == 0 {
 		return base.MakeBaseResponse(resultcode.Result_RequiredPurchaseTxHash)
 	}
+	if len(o.CustomerEmail) == 0 {
+		return base.MakeBaseResponse(resultcode.Result_RequireEmailInfo)
+	}
 	return nil
 }
 
@@ -70,6 +73,34 @@ type OrderInfo struct {
 
 func NewOrderInfo() *OrderInfo {
 	return new(OrderInfo)
+}
+
+////////////////////////////////////////////////
+
+// oreder list
+type OrderList struct {
+	PageInfo
+	WalletAddr string
+}
+
+func NewOrderList() *OrderList {
+	return new(OrderList)
+}
+
+func (o *OrderList) CheckValidate(ctx *IPBlockServerContext) *base.BaseResponse {
+	if o.PageOffset < 0 {
+		return base.MakeBaseResponse(resultcode.Result_RequireValidPageOffset)
+	}
+	if o.PageSize <= 0 {
+		return base.MakeBaseResponse(resultcode.Result_RequireValidPageSize)
+	}
+	o.WalletAddr = ctx.WalletAddr()
+	return nil
+}
+
+type OrderListResponse struct {
+	PageInfo PageInfoResponse `json:"page_info"`
+	Orders   []OrderInfo      `json:"orders"`
 }
 
 ////////////////////////////////////////////////

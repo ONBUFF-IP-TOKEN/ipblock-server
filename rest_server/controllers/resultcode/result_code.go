@@ -15,6 +15,7 @@ const (
 	Result_RequireDescription     = 12010
 	Result_InvalidWalletAddress   = 12011
 	Result_RequiredPurchaseTxHash = 12012
+	Result_RequireEmailInfo       = 12013
 
 	Result_Product_RequiredTitle        = 12500
 	Result_Product_RequiredThumbnailUrl = 12501
@@ -59,6 +60,7 @@ var ResultCodeText = map[int]string{
 	Result_RequireDescription:     "Description is required",
 	Result_InvalidWalletAddress:   "Invalid Wallet Address",
 	Result_RequiredPurchaseTxHash: "Require purchase tx hash info",
+	Result_RequireEmailInfo:       "Require email info",
 
 	Result_Product_RequiredTitle:        "Require product title",
 	Result_Product_RequiredThumbnailUrl: "Require product thumbnail url",

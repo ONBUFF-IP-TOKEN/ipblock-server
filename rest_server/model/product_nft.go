@@ -69,7 +69,7 @@ func (o *DB) GetNftList(pageInfo *context.NftList) ([]context.NftInfo, int64, er
 	nfts := make([]context.NftInfo, 0)
 	for rows.Next() {
 		nft := context.NftInfo{}
-		if err := rows.Scan(&nft.NftId, &nft.ProductId, &nft.CreateTs, &nft.CreateHash, &tokenId, &nft.QuantityIndex, &ownerWalletAddr, &nft.NftUri, &state); err != nil {
+		if err := rows.Scan(&nft.NftId, &nft.ProductId, &nft.CreateTs, &nft.CreateHash, &tokenId, &nft.QuantityIndex, &ownerWalletAddr, &nft.NftUri, &state, &nft.OrderState); err != nil {
 			log.Error(err)
 		}
 		nft.TokenId = tokenId.Int64

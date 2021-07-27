@@ -111,6 +111,7 @@ func (o *Token) CallBackCmdProc(cmd *basenet.CommandData) {
 			if _, err := model.GetDB().UpdateProductNftOwner(transInfo.FromAddr, transInfo.ToAddr, transInfo.TokenID); err == nil {
 				model.GetDB().UpdateOrderState(transInfo.TokenID, context.Order_state_nft_transfer_complete)
 				model.GetDB().InsertHistory(transInfo.TxHash, transInfo.FromAddr, transInfo.ToAddr, transInfo.TokenID, token_state_transfer)
+				model.GetDB().UpdateProductNftOrderState(transInfo.TokenID, context.Nft_order_state_sale_complete)
 			}
 		} else if transInfo.FromAddr != gNullAddress && transInfo.ToAddr == gNullAddress {
 			// 코인 삭체 처리 : 히스토리에 먼저 남기고 item 테이블 삭제 한다.

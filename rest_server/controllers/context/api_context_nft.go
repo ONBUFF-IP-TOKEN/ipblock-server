@@ -12,8 +12,8 @@ const (
 
 const (
 	Nft_order_state_sale_ready    = 0 // nft 판매 대기중
-	Nft_order_state_saleing       = 0 // nft 판매 진행중
-	Nft_order_state_sale_complete = 1 // nft 판매 완료
+	Nft_order_state_saleing       = 1 // nft 판매 진행중
+	Nft_order_state_sale_complete = 2 // nft 판매 완료
 )
 
 type NftInfo struct {

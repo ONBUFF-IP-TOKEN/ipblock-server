@@ -183,14 +183,16 @@ func (o *TokenCmd) OrderProduct(data *basenet.CommandData) {
 				value.SetString(hex.EncodeToString(receipt.Logs[0].Data), 16)
 				log.Info("transfer value :", value)
 
-				// todo 물건 가격은 소숫점으로 처리 되도록 변환 해줘야함
 				transferEther := ethCtrl.Convert(value.String(), ethCtrl.Wei, ethCtrl.Ether)
-				price := new(big.Rat).SetInt64(int64(productInfo.Price))
-				if transferEther.Cmp(price) != 0 {
+				price := new(big.Rat).SetFloat64(productInfo.Price)
+
+				temp1, _ := transferEther.Float64()
+				temp2, _ := price.Float64()
+				if temp1 != temp2 {
 					model.GetDB().UpdateProductRemain(true, order.ProductId)
 					model.GetDB().UpdateProductNftOrderState(order.TokenId, context.Nft_order_state_saleing)
 					model.GetDB().UpdateOrderState(order.TokenId, context.Order_state_cancel)
-					log.Error("Invalid purchase price :", transferEther.String())
+					log.Error("Invalid purchase price :", transferEther.String(), " ", price.String())
 					return
 				}
 			} else if err.Error() == "not found" {

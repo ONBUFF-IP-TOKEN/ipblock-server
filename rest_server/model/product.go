@@ -2,6 +2,7 @@ package model
 
 import (
 	"database/sql"
+	"encoding/json"
 	"fmt"
 
 	"github.com/ONBUFF-IP-TOKEN/baseutil/log"
@@ -9,10 +10,16 @@ import (
 )
 
 func (o *DB) InsertProduct(product *context.ProductInfo) (int64, error) {
-	sqlQuery := fmt.Sprintf("INSERT INTO product(product_title, product_thumbnail_url, product_price, product_type, token_type," +
-		"create_ts, creator, description, content, quantity_total, quantity_remaining, state) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)")
+	sqlQuery := fmt.Sprintf("INSERT INTO product(product_title, product_thumbnail_url, product_prices, product_type, " +
+		"create_ts, creator, description, content, quantity_total, quantity_remaining, state) VALUES (?,?,?,?,?,?,?,?,?,?,?)")
 
-	result, err := o.Mysql.PrepareAndExec(sqlQuery, product.Title, product.Thumbnail, product.Price, product.ProductType, product.TokenType,
+	prices, err := json.Marshal(product.Prices)
+	if err != nil {
+		log.Error(err)
+		return -1, err
+	}
+
+	result, err := o.Mysql.PrepareAndExec(sqlQuery, product.Title, product.Thumbnail, string(prices), product.ProductType,
 		product.CreateTs, product.Creator, product.Desc, product.Content, product.QuantityTotal, product.QuantityRemaining, product.State)
 	if err != nil {
 		log.Error(err)
@@ -45,11 +52,17 @@ func (o *DB) DeleteProduct(product *context.UnregisterProduct) (bool, error) {
 }
 
 func (o *DB) UpdateProduct(product *context.ProductInfo) (int64, error) {
-	sqlQuery := "UPDATE product set product_title=?, product_thumbnail_url=?, product_price=?, product_type=?, " +
-		"token_type=?, creator=?, description=?, content=?, state=? WHERE product_id=?"
+	sqlQuery := "UPDATE product set product_title=?, product_thumbnail_url=?, product_prices=?, product_type=?, " +
+		"creator=?, description=?, content=?, state=? WHERE product_id=?"
 
-	result, err := o.Mysql.PrepareAndExec(sqlQuery, product.Title, product.Thumbnail, product.Price, product.ProductType,
-		product.TokenType, product.Creator, product.Desc, product.Content, product.State, product.Id)
+	prices, err := json.Marshal(product.Prices)
+	if err != nil {
+		log.Error(err)
+		return -1, err
+	}
+
+	result, err := o.Mysql.PrepareAndExec(sqlQuery, product.Title, product.Thumbnail, string(prices), product.ProductType,
+		product.Creator, product.Desc, product.Content, product.State, product.Id)
 	if err != nil {
 		log.Error(err)
 		return 0, err
@@ -91,17 +104,23 @@ func (o *DB) GetProductList(pageInfo *context.ProductList) ([]context.ProductInf
 
 	defer rows.Close()
 
-	var creator, thumbnail, content sql.NullString
+	var creator, thumbnail, content, prices sql.NullString
 	products := make([]context.ProductInfo, 0)
 	for rows.Next() {
 		product := context.ProductInfo{}
-		if err := rows.Scan(&product.Id, &product.Title, &thumbnail, &product.Price, &product.ProductType, &product.TokenType,
+		if err := rows.Scan(&product.Id, &product.Title, &thumbnail, &prices, &product.ProductType,
 			&product.CreateTs, &creator, &product.Desc, &content, &product.QuantityTotal, &product.QuantityRemaining, &product.State); err != nil {
 			log.Error(err)
 		}
 		product.Thumbnail = thumbnail.String
 		product.Creator = creator.String
 		product.Content = content.String
+
+		//prices 변환
+		aPrices := []context.ProductPrice{}
+		json.Unmarshal([]byte(prices.String), &aPrices)
+		product.Prices = aPrices
+
 		products = append(products, product)
 	}
 
@@ -159,16 +178,21 @@ func (o *DB) GetProductInfo(productId int64) (*context.ProductInfo, error) {
 
 	defer rows.Close()
 
-	var creator, thumbnail, content sql.NullString
+	var creator, thumbnail, content, prices sql.NullString
 	product := &context.ProductInfo{}
 	for rows.Next() {
-		if err := rows.Scan(&product.Id, &product.Title, &thumbnail, &product.Price, &product.ProductType, &product.TokenType,
+		if err := rows.Scan(&product.Id, &product.Title, &thumbnail, &prices, &product.ProductType,
 			&product.CreateTs, &creator, &product.Desc, &content, &product.QuantityTotal, &product.QuantityRemaining, &product.State); err != nil {
 			log.Error(err)
 		}
 		product.Thumbnail = thumbnail.String
 		product.Creator = creator.String
 		product.Content = content.String
+
+		//prices 변환
+		aPrices := []context.ProductPrice{}
+		json.Unmarshal([]byte(prices.String), &aPrices)
+		product.Prices = aPrices
 	}
 
 	return product, nil

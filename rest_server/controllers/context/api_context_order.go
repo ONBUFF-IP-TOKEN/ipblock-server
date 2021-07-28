@@ -17,10 +17,12 @@ const (
 
 // product order 요청
 type OrderProduct struct {
-	WalletAddr     string `json:"wallet_address"`
-	ProductId      int64  `json:"product_id"`
-	PurchaseTxHash string `json:"purchase_tx_hash"`
-	CustomerEmail  string `json:"customer_email"`
+	WalletAddr     string  `json:"wallet_address"`
+	ProductId      int64   `json:"product_id"`
+	PurchaseTxHash string  `json:"purchase_tx_hash"`
+	CustomerEmail  string  `json:"customer_email"`
+	Price          float64 `json:"product_price"`
+	TokenType      string  `json:"token_type"`
 
 	QuantityIndex int64
 	TokenId       int64
@@ -64,6 +66,7 @@ type OrderInfo struct {
 	State              int64   `json:"state"`
 	ProductId          int64   `json:"product_id"`
 	Price              float64 `json:"product_price"`
+	TokenType          string  `json:"token_type"`
 	QuantityIndex      int64   `json:"quantity_index"`
 	QuantityTotal      int64   `json:"quantity_total"`
 	CustomerWalletAddr string  `json:"customer_wallet_address"`

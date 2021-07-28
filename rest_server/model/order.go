@@ -9,10 +9,10 @@ import (
 )
 
 func (o *DB) InsertOrder(order *context.OrderInfo) (int64, error) {
-	sqlQuery := fmt.Sprintf("INSERT INTO orders(order_date, purchase_tx_hash, order_state, product_id, product_price, quantity_index, quantity_total," +
-		"customer_wallet_address, customer_email, token_id) VALUES (?,?,?,?,?,?,?,?,?,?)")
+	sqlQuery := fmt.Sprintf("INSERT INTO orders(order_date, purchase_tx_hash, order_state, product_id, product_price, token_type, quantity_index, quantity_total," +
+		"customer_wallet_address, customer_email, token_id) VALUES (?,?,?,?,?,?,?,?,?,?,?)")
 
-	result, err := o.Mysql.PrepareAndExec(sqlQuery, order.Date, order.PurchaseTxHash, order.State, order.ProductId, order.Price, order.QuantityIndex,
+	result, err := o.Mysql.PrepareAndExec(sqlQuery, order.Date, order.PurchaseTxHash, order.State, order.ProductId, order.Price, order.TokenType, order.QuantityIndex,
 		order.QuantityTotal, order.CustomerWalletAddr, order.CustomerEmail, order.TokenId)
 	if err != nil {
 		log.Error(err)
@@ -65,7 +65,7 @@ func (o *DB) GetMyOrderList(pageInfo *context.OrderList) ([]context.OrderInfo, i
 		order := context.OrderInfo{}
 		rows.Scan(&order)
 		if err := rows.Scan(&order.OrderId, &order.Date, &order.PurchaseTxHash, &order.State, &order.ProductId,
-			&order.Price, &order.QuantityIndex, &order.QuantityTotal, &order.CustomerWalletAddr, &order.CustomerEmail, &order.TokenId); err != nil {
+			&order.Price, &order.TokenType, &order.QuantityIndex, &order.QuantityTotal, &order.CustomerWalletAddr, &order.CustomerEmail, &order.TokenId); err != nil {
 			log.Error(err)
 		}
 		orders = append(orders, order)

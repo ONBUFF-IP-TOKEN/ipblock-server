@@ -12,21 +12,26 @@ const (
 	Product_state_soldout     = 3
 )
 
+//product_prict struct
+type ProductPrice struct {
+	TokenType string  `json:"token_type"`
+	Price     float64 `json:"price"`
+}
+
 // product info
 type ProductInfo struct {
-	Id                int64   `json:"product_id"`
-	Title             string  `json:"product_title"`
-	Thumbnail         string  `json:"product_thumbnail_url"`
-	Price             float64 `json:"product_price"`
-	ProductType       string  `json:"product_type"`
-	TokenType         string  `json:"token_type"`
-	CreateTs          int64   `json:"create_ts"`
-	Creator           string  `json:"creator"`
-	Desc              string  `json:"description"`
-	Content           string  `json:"content"`
-	QuantityTotal     int64   `json:"quantity_total"`
-	QuantityRemaining int64   `json:"quantity_remaining"`
-	State             int64   `json:"state"`
+	Id                int64          `json:"product_id"`
+	Title             string         `json:"product_title"`
+	Thumbnail         string         `json:"product_thumbnail_url"`
+	Prices            []ProductPrice `json:"product_prices"`
+	ProductType       string         `json:"product_type"`
+	CreateTs          int64          `json:"create_ts"`
+	Creator           string         `json:"creator"`
+	Desc              string         `json:"description"`
+	Content           string         `json:"content"`
+	QuantityTotal     int64          `json:"quantity_total"`
+	QuantityRemaining int64          `json:"quantity_remaining"`
+	State             int64          `json:"state"`
 }
 
 func NewProductInfo() *ProductInfo {

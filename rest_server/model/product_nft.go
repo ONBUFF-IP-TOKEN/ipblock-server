@@ -78,7 +78,7 @@ func (o *DB) GetNftList(pageInfo *context.NftList) ([]context.NftInfo, int64, er
 		nfts = append(nfts, nft)
 	}
 
-	totalCount, err := o.GetTotalProductSize()
+	totalCount, err := o.GetTotalNftSize(pageInfo.ProductId)
 
 	return nfts, totalCount, err
 }
@@ -119,11 +119,6 @@ func (o *DB) UpdateProductNftOwner(oldOwner, newOwner string, tokenId int64) (in
 		return 0, err
 	}
 	cnt, err := result.RowsAffected()
-	if cnt == 0 {
-		err = errors.New("RowsAffected none")
-		log.Error(err)
-		return 0, err
-	}
 	if err != nil {
 		log.Error(err)
 		return 0, err
@@ -154,8 +149,15 @@ func (o *DB) UpdateProductNftOrderState(tokenId int64, orderState int64) (int64,
 	return cnt, nil
 }
 
-func (o *DB) GetTotalNftSize() (int64, error) {
-	rows, err := o.Mysql.Query("SELECT COUNT(*) as count FROM  product_nft")
+func (o *DB) GetTotalNftSize(productId int64) (int64, error) {
+	var sqlQuery string
+	if productId == 0 {
+		sqlQuery = fmt.Sprintf("SELECT COUNT(*) as count FROM product_nft")
+	} else {
+		sqlQuery = fmt.Sprintf("SELECT COUNT(*) as count FROM product_nft WHERE product_id=%v", productId)
+	}
+	rows, err := o.Mysql.Query(sqlQuery)
+
 	var count int64
 	if err != nil {
 		log.Error(err)

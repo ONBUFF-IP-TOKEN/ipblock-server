@@ -109,17 +109,17 @@ func (o *TokenCmd) DeleteToken(data interface{}) {
 }
 
 func (o *TokenCmd) OrderProduct(data *basenet.CommandData) {
-	order := data.Data.(*context.OrderProduct)
-	productInfo, err := model.GetDB().GetProductInfo(order.ProductId)
-	if err != nil {
-		log.Error("OrderProduct GetProductInfo error ", err, " product_id:")
-		return
-	}
-	token := o.itoken.Tokens[Token_nft]
-	// 1. receipt 정상 체크
 	go func() {
+		order := data.Data.(*context.OrderProduct)
+		_, err := model.GetDB().GetProductInfo(order.ProductId)
+		if err != nil {
+			log.Error("OrderProduct GetProductInfo error ", err, " product_id:")
+			return
+		}
+		token := o.itoken.Tokens[Token_nft]
 		errCnt := 0
 	POLLING:
+		//transaction이 정상인지 체크
 		tx, isPanding, err := token.eth.GetTransactionByTxHash(order.PurchaseTxHash)
 		if err == nil {
 			if isPanding {
@@ -128,6 +128,7 @@ func (o *TokenCmd) OrderProduct(data *basenet.CommandData) {
 				errCnt = 0
 				goto POLLING
 			}
+			// 1. receipt 정상 체크
 			receipt, err := token.eth.GetTransactionReceipt(tx)
 			if err == nil {
 				log.Info("GetTransactionReceipt Type:", receipt.Type)
@@ -186,15 +187,20 @@ func (o *TokenCmd) OrderProduct(data *basenet.CommandData) {
 				transferEther := ethCtrl.Convert(value.String(), ethCtrl.Wei, ethCtrl.Ether)
 
 				var price big.Rat
-				_ = productInfo
+				productInfo, err := model.GetDB().GetProductInfo(order.ProductId)
+				if err != nil {
+					model.GetDB().UpdateProductRemain(true, order.ProductId)
+					model.GetDB().UpdateProductNftOrderState(order.TokenId, context.Nft_order_state_sale_ready)
+					model.GetDB().UpdateOrderState(order.TokenId, context.Order_state_cancel)
+					log.Error("OrderProduct GetProductInfo error ", err, " product_id:")
+					return
+				}
 				for _, pricePos := range productInfo.Prices {
 					if strings.EqualFold(pricePos.TokenType, order.TokenType) {
 						price = *price.SetFloat64(pricePos.Price)
 						break
 					}
 				}
-				//fPrice, _ := strconv.ParseFloat(productInfo.Price, 64)
-				//price := new(big.Rat).SetFloat64(fPrice)
 
 				temp1, _ := transferEther.Float64()
 				temp2, _ := price.Float64()

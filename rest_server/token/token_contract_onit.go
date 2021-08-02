@@ -141,12 +141,14 @@ func (o *Token) CheckTransferReceipt(purchaseInfo *context.PostPurchaseItem, ite
 				goto POLLING
 			}
 		} else {
-			log.Debug("GetTransactionByTxHash error : ", err)
+
 			if errCnt > 3 {
 				log.Error("GetTransactionByTxHash max try : ", purchaseInfo.PurchaseTxHash)
 				return
 			}
+			time.Sleep(time.Second * 2)
 			errCnt++
+			log.Debug("GetTransactionByTxHash error : ", err, " 재시도:", errCnt)
 			goto POLLING
 		}
 	}()

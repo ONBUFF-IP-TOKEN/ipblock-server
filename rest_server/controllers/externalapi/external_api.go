@@ -44,17 +44,41 @@ func PreCheck(c echo.Context) base.PreCheckResponse {
 				Response:  res,
 			}
 		}
-		walletAddr, isValid := auth.GetIAuth().IsValidAuthToken(author[0][7:])
-		if !isValid {
-			// auth token 오류 리턴
-			res := base.MakeBaseResponse(resultcode.Result_Auth_InvalidJwt)
+		if !conf.Auth.InternalAuth {
+			walletAddr, isValid := auth.GetIAuth().IsValidAuthToken(author[0][7:])
+			if !isValid {
+				// auth token 오류 리턴
+				res := base.MakeBaseResponse(resultcode.Result_Auth_InvalidJwt)
 
-			return base.PreCheckResponse{
-				IsSucceed: false,
-				Response:  res,
+				return base.PreCheckResponse{
+					IsSucceed: false,
+					Response:  res,
+				}
 			}
+			base.GetContext(c).(*context.IPBlockServerContext).SetWalletAddr(*walletAddr)
+		} else {
+			// membership server 인증 진행
+			walletAddr, _, isValid := auth.GetIAuth().GetAuthInfo(author[0][7:])
+			if !isValid {
+				// auth token 오류 리턴
+				res := base.MakeBaseResponse(resultcode.Result_Auth_InvalidJwt)
+
+				return base.PreCheckResponse{
+					IsSucceed: false,
+					Response:  res,
+				}
+			}
+
+			if ret, err := auth.CheckAuthToken(walletAddr, author[0][7:]); err != nil || !ret {
+				res := base.MakeBaseResponse(resultcode.Result_Auth_InvalidJwt)
+				return base.PreCheckResponse{
+					IsSucceed: false,
+					Response:  res,
+				}
+			}
+
+			base.GetContext(c).(*context.IPBlockServerContext).SetWalletAddr(walletAddr)
 		}
-		base.GetContext(c).(*context.IPBlockServerContext).SetWalletAddr(*walletAddr)
 	} else {
 		//base.GetContext(c).(*context.IPBlockServerContext).SetWalletAddr("0x9Ec7EDE9204E17dfa34e1d381ED5f49A0D578e96")
 		base.GetContext(c).(*context.IPBlockServerContext).SetWalletAddr("0x38f998d033990a315b08afc0f78059fb7d11dc4d")

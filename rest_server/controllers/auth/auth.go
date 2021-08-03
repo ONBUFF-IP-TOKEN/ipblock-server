@@ -134,15 +134,22 @@ func (o *IAuth) DecryptJwt(jwtStr string) (string, int64, error) {
 	return fmt.Sprintf("%v", atClaims["wallet_address"]), int64(expireDate), nil
 }
 
+func (o *IAuth) GetAuthInfo(authToken string) (string, int64, bool) {
+	walletAddr, expireDate, err := o.DecryptJwt(authToken)
+	if err != nil || len(walletAddr) == 0 {
+		return walletAddr, expireDate, false
+	}
+
+	return walletAddr, expireDate, true
+}
+
 // auto token 유효한지 검증
 func (o *IAuth) IsValidAuthToken(authToken string) (*string, bool) {
-	// todo 기능 구현
 	walletAddr, expireDate, err := o.DecryptJwt(authToken)
 	if err != nil || len(walletAddr) == 0 {
 		return nil, false
 	}
-	//log.Debug("auth check wallet address:", walletAddr)
-	//log.Debug("auth check expiredate:", expireDate)
+
 	if time.Now().Unix() > expireDate {
 		log.Info("out of auth token exipre date :", walletAddr)
 		return nil, false

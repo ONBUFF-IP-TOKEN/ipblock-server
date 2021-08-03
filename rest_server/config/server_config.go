@@ -28,6 +28,9 @@ type ApiAuth struct {
 	TokenExpiryPeriod int64  `yaml:"token_expiry_period"`
 	SignExpiryPeriod  int64  `yaml:"sign_expiry_period"`
 	AesKey            string `yaml:"aes_key"`
+	InternalAuth      bool   `json:"internal_auth" yaml:"internal_auth"`
+	ApiAuthDomain     string `json:"api_auth_domain" yaml:"api_auth_domain"`
+	ApiAuthVerify     string `json:"api_auth_verify" yaml:"api_auth_verify"`
 }
 
 type ServerConfig struct {

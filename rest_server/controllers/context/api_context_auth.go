@@ -43,3 +43,15 @@ type LoginResponse struct {
 }
 
 /////////////////////////
+
+// verify auth token
+type VerifyAuthToken struct {
+	WalletAddr string `json:"wallet_address" validate:"required"`
+	AuthToken  string `json:"auth_token" validate:"required"`
+}
+
+func NewVerifyAuthToken() *VerifyAuthToken {
+	return new(VerifyAuthToken)
+}
+
+/////////////////////////

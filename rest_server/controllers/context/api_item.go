@@ -57,12 +57,9 @@ func NewRegisterItem() *RegisterItem {
 	return new(RegisterItem)
 }
 
-func (o *RegisterItem) CheckValidate(ctx *IPBlockServerContext) *base.BaseResponse {
+func (o *RegisterItem) CheckValidate() *base.BaseResponse {
 	if len(o.WalletAddr) == 0 {
 		return base.MakeBaseResponse(resultcode.Result_RequireWalletAddress)
-	}
-	if o.WalletAddr != ctx.WalletAddr() {
-		return base.MakeBaseResponse(resultcode.Result_InvalidWalletAddress)
 	}
 	if len(o.Title) == 0 {
 		return base.MakeBaseResponse(resultcode.Result_RequireTitle)
@@ -105,12 +102,9 @@ func NewUnregisterItem() *UnregisterItem {
 	return new(UnregisterItem)
 }
 
-func (o *UnregisterItem) CheckValidate(ctx *IPBlockServerContext) *base.BaseResponse {
+func (o *UnregisterItem) CheckValidate() *base.BaseResponse {
 	if len(o.WalletAddr) == 0 {
 		return base.MakeBaseResponse(resultcode.Result_RequireWalletAddress)
-	}
-	if o.WalletAddr != ctx.WalletAddr() {
-		return base.MakeBaseResponse(resultcode.Result_InvalidWalletAddress)
 	}
 	if o.ItemId <= 0 {
 		return base.MakeBaseResponse(resultcode.Result_RequireValidItemId)
@@ -162,12 +156,9 @@ func NewPostPurchaseItem() *PostPurchaseItem {
 	return new(PostPurchaseItem)
 }
 
-func (o *PostPurchaseItem) CheckValidate(ctx *IPBlockServerContext) *base.BaseResponse {
+func (o *PostPurchaseItem) CheckValidate() *base.BaseResponse {
 	if len(o.WalletAddr) == 0 {
 		return base.MakeBaseResponse(resultcode.Result_RequireWalletAddress)
-	}
-	if o.WalletAddr != ctx.WalletAddr() {
-		return base.MakeBaseResponse(resultcode.Result_InvalidWalletAddress)
 	}
 	if o.ItemId < 0 {
 		return base.MakeBaseResponse(resultcode.Result_RequireValidItemId)
@@ -225,10 +216,8 @@ func NewGetHistoryTransferMe() *GetHistoryTransferMe {
 	return new(GetHistoryTransferMe)
 }
 
-func (o *GetHistoryTransferMe) CheckValidate(ctx *IPBlockServerContext) *base.BaseResponse {
-	if o.WalletAddr != ctx.WalletAddr() {
-		return base.MakeBaseResponse(resultcode.Result_InvalidWalletAddress)
-	}
+func (o *GetHistoryTransferMe) CheckValidate() *base.BaseResponse {
+
 	if o.PageOffset < 0 {
 		return base.MakeBaseResponse(resultcode.Result_RequireValidPageOffset)
 	}

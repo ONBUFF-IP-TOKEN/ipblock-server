@@ -13,14 +13,13 @@ import (
 )
 
 func PostRegisterItem(c echo.Context) error {
-	ctx := base.GetContext(c).(*context.IPBlockServerContext)
 	params := context.NewRegisterItem()
-	if err := ctx.EchoContext.Bind(params); err != nil {
+	if err := c.Bind(params); err != nil {
 		log.Error(err)
 		return base.BaseJSONInternalServerError(c, err)
 	}
 
-	if err := params.CheckValidate(ctx); err != nil {
+	if err := params.CheckValidate(); err != nil {
 		return c.JSON(http.StatusOK, err)
 	}
 
@@ -46,14 +45,13 @@ func PostRegisterItem(c echo.Context) error {
 }
 
 func DeleteUnregisterItem(c echo.Context) error {
-	ctx := base.GetContext(c).(*context.IPBlockServerContext)
 	params := context.NewUnregisterItem()
-	if err := ctx.EchoContext.Bind(params); err != nil {
+	if err := c.Bind(params); err != nil {
 		log.Error(err)
 		return base.BaseJSONInternalServerError(c, err)
 	}
 
-	if err := params.CheckValidate(ctx); err != nil {
+	if err := params.CheckValidate(); err != nil {
 		return c.JSON(http.StatusOK, err)
 	}
 
@@ -81,9 +79,8 @@ func DeleteUnregisterItem(c echo.Context) error {
 }
 
 func GetItemList(c echo.Context) error {
-	ctx := base.GetContext(c).(*context.IPBlockServerContext)
 	params := context.NewGetItemList()
-	if err := ctx.EchoContext.Bind(params); err != nil {
+	if err := c.Bind(params); err != nil {
 		log.Error(err)
 		return base.BaseJSONInternalServerError(c, err)
 	}
@@ -114,14 +111,13 @@ func GetItemList(c echo.Context) error {
 }
 
 func PostPurchaseItem(c echo.Context) error {
-	ctx := base.GetContext(c).(*context.IPBlockServerContext)
 	params := context.NewPostPurchaseItem()
-	if err := ctx.EchoContext.Bind(params); err != nil {
+	if err := c.Bind(params); err != nil {
 		log.Error(err)
 		return base.BaseJSONInternalServerError(c, err)
 	}
 
-	if err := params.CheckValidate(ctx); err != nil {
+	if err := params.CheckValidate(); err != nil {
 		return c.JSON(http.StatusOK, err)
 	}
 

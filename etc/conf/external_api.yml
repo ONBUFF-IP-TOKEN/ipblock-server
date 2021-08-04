@@ -24,32 +24,32 @@
           handler: "PostRegisterItem" # item 등록
           method: "post"
           uri: "/:apiver/item/register"
-          precheck: true
+          precheck: false
         -
           handler: "DeleteUnregisterItem" # 등록된 item 삭제 요청
           method: "delete"
           uri: "/:apiver/item/unregister"
-          precheck: true
+          precheck: false
         -
           handler: "GetItemList"  # 등록된 item 리스트 요청
           method: "get"
           uri: "/:apiver/item/list"
-          precheck: true
+          precheck: false
         -
           handler: "PostPurchaseItem" # item 구매
           method: "post"
           uri: "/:apiver/item/purchase"
-          precheck: true
+          precheck: false
         - 
           handler: "GetHistoryTransferItem"   # Item transfer History 조회
           method: "get"
           uri: "/:apiver/history/transfer/item"
-          precheck: true
+          precheck: false
         - 
           handler: "GetHistoryTransferMe"   # 나의 transfer History 조회
           method: "get"
           uri: "/:apiver/history/transfer/me"
-          precheck: true
+          precheck: false
         - # 신규 ipblock api (v1.1)
           handler: "GetProductList" # 등록된 product 리스트 요청
           method: "get"

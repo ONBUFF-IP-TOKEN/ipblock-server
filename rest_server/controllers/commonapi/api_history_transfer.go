@@ -12,9 +12,8 @@ import (
 )
 
 func GetHistoryTransferItem(c echo.Context) error {
-	ctx := base.GetContext(c).(*context.IPBlockServerContext)
 	params := context.NewGetHistoryTransferItem()
-	if err := ctx.EchoContext.Bind(params); err != nil {
+	if err := c.Bind(params); err != nil {
 		log.Error(err)
 		return base.BaseJSONInternalServerError(c, err)
 	}
@@ -44,13 +43,12 @@ func GetHistoryTransferItem(c echo.Context) error {
 }
 
 func GetHistoryTransferMe(c echo.Context) error {
-	ctx := base.GetContext(c).(*context.IPBlockServerContext)
 	params := context.NewGetHistoryTransferMe()
-	if err := ctx.EchoContext.Bind(params); err != nil {
+	if err := c.Bind(params); err != nil {
 		log.Error(err)
 		return base.BaseJSONInternalServerError(c, err)
 	}
-	if err := params.CheckValidate(ctx); err != nil {
+	if err := params.CheckValidate(); err != nil {
 		return c.JSON(http.StatusOK, err)
 	}
 

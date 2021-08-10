@@ -29,13 +29,23 @@ const (
 	Result_Product_NotOnSale            = 12509
 	Result_Product_LackOfQuantity       = 12510
 
-	Result_DBError        = 13000
-	Result_DBNotExistItem = 13001
+	Result_DBError           = 13000
+	Result_DBNotExistItem    = 13001
+	Result_DBNotExistProduct = 13002
 
 	Result_TokenError               = 14000
 	Result_TokenERC721CreateError   = 14001
 	Result_TokenERC721BurnError     = 14002
 	Result_TokenERC721TransferError = 14003
+
+	Result_Auc_Product_Requiredtitle        = 15000
+	Result_Auc_Product_RequireDescription   = 15001
+	Result_Auc_Product_RequireMediaOriginal = 15002
+	Result_Auc_Product_RequireMediaThumnail = 15003
+	Result_Auc_Product_RequireOwnerInfo     = 15004
+	Result_Auc_Product_RequireCreatorInfo   = 15005
+	Result_Auc_Product_RequirePriceInfo     = 15006
+	Result_Auc_Product_RequireProductId     = 15007
 
 	Result_Auth_RequireMessage    = 20000
 	Result_Auth_RequireSign       = 20001
@@ -74,13 +84,22 @@ var ResultCodeText = map[int]string{
 	Result_Product_NotOnSale:            "Not on sale",
 	Result_Product_LackOfQuantity:       "Lack of Quantity",
 
-	Result_DBError:        "Internal DB error",
-	Result_DBNotExistItem: "Not exist item",
+	Result_DBError:           "Internal DB error",
+	Result_DBNotExistItem:    "Not exist item",
+	Result_DBNotExistProduct: "Not exist Product",
 
 	Result_TokenError:               "Internal Token error",
 	Result_TokenERC721CreateError:   "ERC721 create error",
 	Result_TokenERC721BurnError:     "ERC721 burn error",
 	Result_TokenERC721TransferError: "ERC721 transfer error",
+
+	Result_Auc_Product_Requiredtitle:        "Require product title",
+	Result_Auc_Product_RequireDescription:   "Require description",
+	Result_Auc_Product_RequireMediaOriginal: "Require Media original",
+	Result_Auc_Product_RequireMediaThumnail: "Require Media thumnail",
+	Result_Auc_Product_RequireOwnerInfo:     "Require owner info",
+	Result_Auc_Product_RequireCreatorInfo:   "Require creator info",
+	Result_Auc_Product_RequireProductId:     "Require product id",
 
 	Result_Auth_RequireMessage:    "Message is required",
 	Result_Auth_RequireSign:       "Sign info is required",

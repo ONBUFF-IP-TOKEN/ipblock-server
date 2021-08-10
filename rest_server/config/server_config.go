@@ -20,6 +20,7 @@ type TokenInfo struct {
 	ServerPrivateKey string   `yaml:"server_private_key"`
 	TokenAddrs       []string `yaml:"token_address"`
 	NftUriDomain     string   `yaml:"nft_uri_domain"`
+	NftUriDomainAut  string   `yaml:"nft_uri_domain_aution"`
 }
 
 type ApiAuth struct {

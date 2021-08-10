@@ -25,5 +25,4 @@ type NftUriInfo struct {
 
 func GetNftUri(domain string, productId, quantityIndex int64) string {
 	return domain + strconv.FormatInt(productId, 10) + "_" + strconv.FormatInt(quantityIndex, 10) + ".json"
-
 }

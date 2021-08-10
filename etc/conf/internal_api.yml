@@ -3,7 +3,7 @@
     - 
       group: "ipblock-server"
       minversion: "m1.0"
-      maxversion: "m1.1"
+      maxversion: "m1.2"
       list: 
         - 
           handler: "GetHealthCheck"
@@ -44,6 +44,21 @@
           handler: "GetNftList" # 등록된 product nft 리스트 요청
           method: "get"
           uri: "/:apiver/nft/list"
+          precheck: true
+        - # 플랫폼 api (m1.2)
+          handler: "PostAucProductRegister" # 물건 등록
+          method: "post"
+          uri: "/:apiver/auc/product/register"
+          precheck: true
+        -
+          handler: "DeleteAucProductRemove" # 물건 삭제
+          method: "delete"
+          uri: "/:apiver/auc/product/remove"
+          precheck: true
+        -
+          handler: "GetAucProductList" # 등록된 product 리스트 요청
+          method: "get"
+          uri: "/:apiver/auc/product/list"
           precheck: true
 
         

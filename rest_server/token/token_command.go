@@ -13,14 +13,16 @@ import (
 	"github.com/ONBUFF-IP-TOKEN/baseutil/log"
 	"github.com/ONBUFF-IP-TOKEN/ipblock-server/rest_server/config"
 	"github.com/ONBUFF-IP-TOKEN/ipblock-server/rest_server/controllers/context"
+	"github.com/ONBUFF-IP-TOKEN/ipblock-server/rest_server/controllers/context/context_auc"
 	"github.com/ONBUFF-IP-TOKEN/ipblock-server/rest_server/controllers/resultcode"
 	"github.com/ONBUFF-IP-TOKEN/ipblock-server/rest_server/model"
 )
 
 const (
-	TokenCmd_CreateNft    uint32 = 0
-	TokenCmd_DeleteToken  uint32 = 1
-	TokenCmd_OrderProduct uint32 = 2
+	TokenCmd_CreateNft     uint32 = 0
+	TokenCmd_DeleteToken   uint32 = 1
+	TokenCmd_OrderProduct  uint32 = 2
+	TokenCmd_CreatNftByAut uint32 = 3
 )
 
 type TokenCmd struct {
@@ -72,6 +74,8 @@ func (o *TokenCmd) CommandProc(data *basenet.CommandData) error {
 			o.DeleteToken(data.Data)
 		case TokenCmd_OrderProduct:
 			o.OrderProduct(data)
+		case TokenCmd_CreatNftByAut:
+			o.CreateNftbyAut(data.Data, data.Callback)
 		}
 
 		end := time.Now()
@@ -100,6 +104,24 @@ func (o *TokenCmd) CreateNft(data interface{}, cb chan interface{}) {
 	}
 
 	cb <- base.MakeBaseResponse(resultcode.Result_Success)
+}
+
+func (o *TokenCmd) CreateNftbyAut(data interface{}, cb chan interface{}) {
+	product := data.(*context_auc.ProductInfo)
+
+	uri := GetNftUri(o.conf.NftUriDomainAut, product.Id, 0)
+	if txHash, err := o.itoken.Tokens[Token_nft].Nft_CreateERC721(o.conf.ServerWalletAddr, uri); err != nil {
+		log.Error("Nft_CreateERC721 error :", err)
+		cb <- base.MakeBaseResponse(resultcode.Result_TokenERC721CreateError)
+	} else {
+		// txhash update
+		if _, err := model.GetDB().UpdateAucProductNft(product, o.conf.TokenAddrs[Token_nft], txHash, uri); err != nil {
+			log.Error("UpdateAucProductNft fail : ", err, " product_id:", product.Id, " txhash:", txHash)
+			cb <- base.MakeBaseResponse(resultcode.Result_DBError)
+		} else {
+			cb <- base.MakeBaseResponse(resultcode.Result_Success)
+		}
+	}
 }
 
 func (o *TokenCmd) DeleteToken(data interface{}) {

@@ -101,6 +101,10 @@ func (o *Token) CallBackCmdProc(cmd *basenet.CommandData) {
 			if _, err := model.GetDB().UpdateProductNftTokenID(transInfo.TxHash, transInfo.TokenID, context.Nft_state_mint); err == nil {
 				model.GetDB().InsertHistory(transInfo.TxHash, transInfo.FromAddr, transInfo.ToAddr, transInfo.TokenID, token_state_mint)
 			}
+			//aution product
+			if _, err := model.GetDB().UpdateAucProductNftTokenId(transInfo.TxHash, transInfo.TokenID); err != nil {
+				log.Error("UpdateAucProductNftTokenId error : ", err)
+			}
 		} else if transInfo.FromAddr != gNullAddress && transInfo.ToAddr != gNullAddress {
 			// 코인 전송 처리
 			// devlab

@@ -190,6 +190,23 @@ func (o *InternalAPI) PostAucProductRegister(c echo.Context) error {
 	return commonapi_auc.PostAucProductRegister(params, ctx)
 }
 
+// auc 물품 업데이트
+func (o *InternalAPI) PostAucProductUpdate(c echo.Context) error {
+	ctx := base.GetContext(c).(*context.IPBlockServerContext)
+
+	params := context_auc.NewUpdateProduct()
+	if err := ctx.EchoContext.Bind(params); err != nil {
+		log.Error(err)
+		return base.BaseJSONInternalServerError(c, err)
+	}
+
+	if err := params.CheckValidate(); err != nil {
+		return c.JSON(http.StatusOK, err)
+	}
+
+	return commonapi_auc.PostAucProductUpdate(&params.ProductInfo, ctx)
+}
+
 // auc 물품 삭제
 func (o *InternalAPI) DeleteAucProductRemove(c echo.Context) error {
 	ctx := base.GetContext(c).(*context.IPBlockServerContext)
@@ -207,6 +224,7 @@ func (o *InternalAPI) DeleteAucProductRemove(c echo.Context) error {
 	return commonapi_auc.DeleteAucProductRemove(params, ctx)
 }
 
+// auc 물품 리스트 요청
 func (o *InternalAPI) GetAucProductList(c echo.Context) error {
 	ctx := base.GetContext(c).(*context.IPBlockServerContext)
 
@@ -221,4 +239,72 @@ func (o *InternalAPI) GetAucProductList(c echo.Context) error {
 	}
 
 	return commonapi_auc.GetAucProductList(params, ctx)
+}
+
+// 경매 등록
+func (o *InternalAPI) PostAucAuctionRegister(c echo.Context) error {
+	ctx := base.GetContext(c).(*context.IPBlockServerContext)
+
+	params := context_auc.NewAucAuctionRegister()
+	if err := ctx.EchoContext.Bind(params); err != nil {
+		log.Error(err)
+		return base.BaseJSONInternalServerError(c, err)
+	}
+
+	if err := params.CheckValidate(); err != nil {
+		return c.JSON(http.StatusOK, err)
+	}
+
+	return commonapi_auc.PostAucAuctionRegister(params, ctx)
+}
+
+// 경매 업데이트
+func (o *InternalAPI) PostAucAuctionUpdate(c echo.Context) error {
+	ctx := base.GetContext(c).(*context.IPBlockServerContext)
+
+	params := context_auc.NewAucAuctionUpdate()
+	if err := ctx.EchoContext.Bind(params); err != nil {
+		log.Error(err)
+		return base.BaseJSONInternalServerError(c, err)
+	}
+
+	if err := params.CheckValidate(); err != nil {
+		return c.JSON(http.StatusOK, err)
+	}
+
+	return commonapi_auc.PostAucAuctionUpdate(params, ctx)
+}
+
+// 경매 리스트 요청
+func (o *InternalAPI) PostAucAuctionList(c echo.Context) error {
+	ctx := base.GetContext(c).(*context.IPBlockServerContext)
+
+	params := context_auc.NewAuctionList()
+	if err := ctx.EchoContext.Bind(params); err != nil {
+		log.Error(err)
+		return base.BaseJSONInternalServerError(c, err)
+	}
+
+	if err := params.CheckValidate(); err != nil {
+		return c.JSON(http.StatusOK, err)
+	}
+
+	return commonapi_auc.PostAucAuctionList(params, ctx)
+}
+
+// 경매 삭제
+func (o *InternalAPI) DeleteAucAuctiontRemove(c echo.Context) error {
+	ctx := base.GetContext(c).(*context.IPBlockServerContext)
+
+	params := context_auc.NewRemoveAuction()
+	if err := ctx.EchoContext.Bind(params); err != nil {
+		log.Error(err)
+		return base.BaseJSONInternalServerError(c, err)
+	}
+
+	if err := params.CheckValidate(); err != nil {
+		return c.JSON(http.StatusOK, err)
+	}
+
+	return commonapi_auc.DeleteAucAuctiontRemove(params, ctx)
 }

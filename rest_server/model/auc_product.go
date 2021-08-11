@@ -39,6 +39,38 @@ func (o *DB) InsertAucProduct(product *context_auc.ProductInfo) (int64, error) {
 	return insertId, nil
 }
 
+func (o *DB) UpdateAucProduct(product *context_auc.ProductInfo) (int64, error) {
+	sqlQuery := fmt.Sprintf("UPDATE auc_products set title=?, description=?, " +
+		"media_original=?, media_original_type=?, media_thumnail=?, media_thumnail_type=?, " +
+		"links=?, videos=?, " +
+		"owner_nickname=?, owner_wallet_address=?, creator_nickname=?, creator_wallet_address=?, " +
+		"prices=?, content=? WHERE product_id=?")
+
+	title, _ := json.Marshal(product.Title)
+	desc, _ := json.Marshal(product.Desc)
+	links, _ := json.Marshal(product.Links)
+	videos, _ := json.Marshal(product.Videos)
+	prices, _ := json.Marshal(product.Prices)
+
+	result, err := o.Mysql.PrepareAndExec(sqlQuery, string(title), string(desc),
+		product.MediaOriginal, product.MediaOriginalType, product.MediaThumnail, product.MediaThumnailType,
+		string(links), string(videos),
+		product.OwnerNickName, product.OwnerWalletAddr, product.CreatorNickName, product.CreatorWalletAddr,
+		string(prices), product.Content, product.Id)
+
+	if err != nil {
+		log.Error(err)
+		return -1, err
+	}
+	Id, err := result.RowsAffected()
+	if err != nil {
+		log.Error(err)
+		return -1, err
+	}
+	log.Debug("update id:", Id)
+	return Id, nil
+}
+
 func (o *DB) UpdateAucProductNft(product *context_auc.ProductInfo, nftContract, creatHash, uri string) (int64, error) {
 	sqlQuery := "UPDATE auc_products set nft_contract=?, nft_create_txhash=?, nft_uri=? WHERE product_id=?"
 
@@ -147,7 +179,23 @@ func (o *DB) GetAucProductList(pageInfo *context_auc.ProductList) ([]context_auc
 		products = append(products, product)
 	}
 
-	totalCount, err := o.GetTotalProductSize()
+	totalCount, err := o.GetTotalAucProductSize()
 
 	return products, totalCount, err
+}
+
+func (o *DB) GetTotalAucProductSize() (int64, error) {
+	rows, err := o.Mysql.Query("SELECT COUNT(*) as count FROM auc_products")
+	var count int64
+	if err != nil {
+		log.Error(err)
+		return count, err
+	}
+
+	defer rows.Close()
+	for rows.Next() {
+		rows.Scan(&count)
+	}
+
+	return count, nil
 }

@@ -38,14 +38,22 @@ const (
 	Result_TokenERC721BurnError     = 14002
 	Result_TokenERC721TransferError = 14003
 
-	Result_Auc_Product_Requiredtitle        = 15000
-	Result_Auc_Product_RequireDescription   = 15001
-	Result_Auc_Product_RequireMediaOriginal = 15002
-	Result_Auc_Product_RequireMediaThumnail = 15003
-	Result_Auc_Product_RequireOwnerInfo     = 15004
-	Result_Auc_Product_RequireCreatorInfo   = 15005
-	Result_Auc_Product_RequirePriceInfo     = 15006
-	Result_Auc_Product_RequireProductId     = 15007
+	Result_Auc_Product_Requiredtitle         = 15000
+	Result_Auc_Product_RequireDescription    = 15001
+	Result_Auc_Product_RequireMediaOriginal  = 15002
+	Result_Auc_Product_RequireMediaThumnail  = 15003
+	Result_Auc_Product_RequireOwnerInfo      = 15004
+	Result_Auc_Product_RequireCreatorInfo    = 15005
+	Result_Auc_Product_RequirePriceInfo      = 15006
+	Result_Auc_Product_RequireProductId      = 15007
+	Result_Auc_Auction_RequireBidStartAmount = 15008
+	Result_Auc_Auction_RequireBidUnit        = 15009
+	Result_Auc_Auction_RequireStartTs        = 15010
+	Result_Auc_Auction_RequireEndTs          = 15011
+	Result_Auc_Auction_RequireRound          = 15012
+	Result_Auc_Auction_RequireActiveState    = 15013
+	Result_Auc_Auction_RequireProductId      = 15014
+	Result_Auc_Auction_RequireAucId          = 15015
 
 	Result_Auth_RequireMessage    = 20000
 	Result_Auth_RequireSign       = 20001
@@ -93,13 +101,21 @@ var ResultCodeText = map[int]string{
 	Result_TokenERC721BurnError:     "ERC721 burn error",
 	Result_TokenERC721TransferError: "ERC721 transfer error",
 
-	Result_Auc_Product_Requiredtitle:        "Require product title",
-	Result_Auc_Product_RequireDescription:   "Require description",
-	Result_Auc_Product_RequireMediaOriginal: "Require Media original",
-	Result_Auc_Product_RequireMediaThumnail: "Require Media thumnail",
-	Result_Auc_Product_RequireOwnerInfo:     "Require owner info",
-	Result_Auc_Product_RequireCreatorInfo:   "Require creator info",
-	Result_Auc_Product_RequireProductId:     "Require product id",
+	Result_Auc_Product_Requiredtitle:         "Require product title",
+	Result_Auc_Product_RequireDescription:    "Require description",
+	Result_Auc_Product_RequireMediaOriginal:  "Require Media original",
+	Result_Auc_Product_RequireMediaThumnail:  "Require Media thumnail",
+	Result_Auc_Product_RequireOwnerInfo:      "Require owner info",
+	Result_Auc_Product_RequireCreatorInfo:    "Require creator info",
+	Result_Auc_Product_RequireProductId:      "Require product id",
+	Result_Auc_Auction_RequireBidStartAmount: "Require bid start amount",
+	Result_Auc_Auction_RequireBidUnit:        "Require bid unit",
+	Result_Auc_Auction_RequireStartTs:        "Require bid start time",
+	Result_Auc_Auction_RequireEndTs:          "Require bid end time",
+	Result_Auc_Auction_RequireRound:          "Require bid round",
+	Result_Auc_Auction_RequireActiveState:    "Require bid active state",
+	Result_Auc_Auction_RequireProductId:      "Require bid product id",
+	Result_Auc_Auction_RequireAucId:          "Require auc id",
 
 	Result_Auth_RequireMessage:    "Message is required",
 	Result_Auth_RequireSign:       "Sign info is required",

@@ -119,6 +119,8 @@ func (o *TokenCmd) CreateNftbyAut(data interface{}, cb chan interface{}) {
 			log.Error("UpdateAucProductNft fail : ", err, " product_id:", product.Id, " txhash:", txHash)
 			cb <- base.MakeBaseResponse(resultcode.Result_DBError)
 		} else {
+			// product list cache 전체 삭제
+			model.GetDB().DeleteProductList()
 			cb <- base.MakeBaseResponse(resultcode.Result_Success)
 		}
 	}

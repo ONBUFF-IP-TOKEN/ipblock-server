@@ -39,17 +39,37 @@ func PostAucProductRegister(product *context_auc.ProductInfo, ctx *context.IPBlo
 	return ctx.EchoContext.JSON(http.StatusOK, resp)
 }
 
+func PostAucProductUpdate(product *context_auc.ProductInfo, ctx *context.IPBlockServerContext) error {
+	resp := new(base.BaseResponse)
+	resp.Success()
+
+	//1. auc_product table에 업데이트
+	if _, err := model.GetDB().UpdateAucProduct(product); err != nil {
+		log.Error("UpdateAucProduct error : ", err)
+		resp.SetReturn(resultcode.Result_DBError)
+	} else {
+		// product list cache 전체 삭제
+		model.GetDB().DeleteProductList()
+		resp.Value = product
+	}
+
+	return ctx.EchoContext.JSON(http.StatusOK, resp)
+}
+
 func DeleteAucProductRemove(product *context_auc.RemoveProduct, ctx *context.IPBlockServerContext) error {
 	resp := new(base.BaseResponse)
 	resp.Success()
 
 	//1. auc_products table 에서 삭제
 	if ret, err := model.GetDB().DeleteAucProduct(product.Id); err != nil {
-		log.Error("InsertProduct :", err)
+		log.Error("DeleteAucProductRemove :", err)
 		resp.SetReturn(resultcode.Result_DBError)
 	} else {
 		if !ret {
 			resp.SetReturn(resultcode.Result_DBNotExistProduct)
+		} else {
+			// 성공시 product list cache 전체 삭제
+			model.GetDB().DeleteProductList()
 		}
 	}
 	return ctx.EchoContext.JSON(http.StatusOK, resp)
@@ -57,19 +77,31 @@ func DeleteAucProductRemove(product *context_auc.RemoveProduct, ctx *context.IPB
 
 func GetAucProductList(productList *context_auc.ProductList, ctx *context.IPBlockServerContext) error {
 	resp := new(base.BaseResponse)
-	products, totalCount, err := model.GetDB().GetAucProductList(productList)
-	if err != nil {
-		resp.SetReturn(resultcode.Result_DBError)
-	} else {
+
+	//redis exist check
+	if pageInfo, products, err := model.GetDB().GetProductListCache(&productList.PageInfo); err == nil {
 		resp.Success()
-		pageInfo := context_auc.PageInfoResponse{
-			PageOffset: productList.PageOffset,
-			PageSize:   int64(len(products)),
-			TotalSize:  totalCount,
-		}
 		resp.Value = context_auc.ProductListResponse{
-			PageInfo: pageInfo,
-			Products: products,
+			PageInfo: *pageInfo,
+			Products: *products,
+		}
+	} else {
+		// cache 에 없다면 db에서 직접 로드
+		products, totalCount, err := model.GetDB().GetAucProductList(productList)
+		if err != nil {
+			resp.SetReturn(resultcode.Result_DBError)
+		} else {
+			resp.Success()
+			pageInfo := context_auc.PageInfoResponse{
+				PageOffset: productList.PageOffset,
+				PageSize:   int64(len(products)),
+				TotalSize:  totalCount,
+			}
+			resp.Value = context_auc.ProductListResponse{
+				PageInfo: pageInfo,
+				Products: products,
+			}
+			model.GetDB().SetProductListCache(&productList.PageInfo, &pageInfo, &products)
 		}
 	}
 

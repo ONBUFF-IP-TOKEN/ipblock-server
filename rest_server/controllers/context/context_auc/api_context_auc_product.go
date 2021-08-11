@@ -67,6 +67,42 @@ func (o *ProductInfo) CheckValidate() *base.BaseResponse {
 
 ////////////////////////////////////////////////
 
+// product 업데이트
+type UpdateProduct struct {
+	ProductInfo
+}
+
+func NewUpdateProduct() *UpdateProduct {
+	return new(UpdateProduct)
+}
+
+func (o *UpdateProduct) CheckValidate() *base.BaseResponse {
+	if len(o.Title.En) == 0 || len(o.Title.Ko) == 0 {
+		return base.MakeBaseResponse(resultcode.Result_Auc_Product_Requiredtitle)
+	}
+	if len(o.Desc.En) == 0 || len(o.Desc.Ko) == 0 {
+		return base.MakeBaseResponse(resultcode.Result_Auc_Product_RequireDescription)
+	}
+	if len(o.MediaOriginal) == 0 || len(o.MediaOriginalType) == 0 {
+		return base.MakeBaseResponse(resultcode.Result_Auc_Product_RequireMediaOriginal)
+	}
+	if len(o.MediaThumnail) == 0 || len(o.MediaThumnailType) == 0 {
+		return base.MakeBaseResponse(resultcode.Result_Auc_Product_RequireMediaThumnail)
+	}
+	if len(o.OwnerNickName) == 0 || len(o.OwnerWalletAddr) == 0 {
+		return base.MakeBaseResponse(resultcode.Result_Auc_Product_RequireOwnerInfo)
+	}
+	if len(o.CreatorNickName) == 0 || len(o.CreatorWalletAddr) == 0 {
+		return base.MakeBaseResponse(resultcode.Result_Auc_Product_RequireCreatorInfo)
+	}
+	if len(o.Prices) == 0 {
+		return base.MakeBaseResponse(resultcode.Result_Auc_Product_RequirePriceInfo)
+	}
+	return nil
+}
+
+////////////////////////////////////////////////
+
 // proudct 삭제
 type RemoveProduct struct {
 	Id int64 `query:"product_id"`

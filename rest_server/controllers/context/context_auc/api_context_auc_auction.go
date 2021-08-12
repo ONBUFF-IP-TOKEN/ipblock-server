@@ -10,11 +10,11 @@ type AucAuction struct {
 	BidStartAmount float64     `json:"bid_start_amount"`
 	BidCurAmount   float64     `json:"bid_cur_amount"`
 	BidUnit        float64     `json:"bid_unit"`
+	BidDeposit     float64     `json:"bid_deposit"`
 	AucStartTs     int64       `json:"auc_start_ts"`
 	AucEndTs       int64       `json:"auc_end_ts"`
 	AucState       int64       `json:"auc_state"`
 	AucRound       int64       `json:"auc_round"`
-	AucDeposit     int64       `json:"auc_deposit"`
 	CreateTs       int64       `json:"create_ts"`
 	ActiveState    int64       `json:"active_state"`
 	ProductId      int64       `json:"product_id"`

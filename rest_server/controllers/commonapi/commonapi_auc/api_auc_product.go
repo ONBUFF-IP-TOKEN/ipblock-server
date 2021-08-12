@@ -48,8 +48,6 @@ func PostAucProductUpdate(product *context_auc.ProductInfo, ctx *context.IPBlock
 		log.Error("UpdateAucProduct error : ", err)
 		resp.SetReturn(resultcode.Result_DBError)
 	} else {
-		// product list cache 전체 삭제
-		model.GetDB().DeleteProductList()
 		resp.Value = product
 	}
 
@@ -67,9 +65,6 @@ func DeleteAucProductRemove(product *context_auc.RemoveProduct, ctx *context.IPB
 	} else {
 		if !ret {
 			resp.SetReturn(resultcode.Result_DBNotExistProduct)
-		} else {
-			// 성공시 product list cache 전체 삭제
-			model.GetDB().DeleteProductList()
 		}
 	}
 	return ctx.EchoContext.JSON(http.StatusOK, resp)

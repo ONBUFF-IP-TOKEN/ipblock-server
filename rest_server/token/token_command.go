@@ -121,6 +121,7 @@ func (o *TokenCmd) CreateNftbyAut(data interface{}, cb chan interface{}) {
 		} else {
 			// product list cache 전체 삭제
 			model.GetDB().DeleteProductList()
+			model.GetDB().DeleteAuctionList()
 			cb <- base.MakeBaseResponse(resultcode.Result_Success)
 		}
 	}

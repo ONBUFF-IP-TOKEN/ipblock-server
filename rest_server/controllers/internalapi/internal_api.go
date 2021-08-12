@@ -276,7 +276,7 @@ func (o *InternalAPI) PostAucAuctionUpdate(c echo.Context) error {
 }
 
 // 경매 리스트 요청
-func (o *InternalAPI) PostAucAuctionList(c echo.Context) error {
+func (o *InternalAPI) GetAucAuctionList(c echo.Context) error {
 	ctx := base.GetContext(c).(*context.IPBlockServerContext)
 
 	params := context_auc.NewAuctionList()
@@ -289,7 +289,7 @@ func (o *InternalAPI) PostAucAuctionList(c echo.Context) error {
 		return c.JSON(http.StatusOK, err)
 	}
 
-	return commonapi_auc.PostAucAuctionList(params, ctx)
+	return commonapi_auc.GetAucAuctionList(params, ctx)
 }
 
 // 경매 삭제

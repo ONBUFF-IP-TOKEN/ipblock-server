@@ -67,7 +67,13 @@ func (o *DB) UpdateAucProduct(product *context_auc.ProductInfo) (int64, error) {
 		log.Error(err)
 		return -1, err
 	}
-	log.Debug("update id:", Id)
+	log.Debug("UpdateAucProduct id:", Id)
+
+	// product list cache 전체 삭제
+	o.DeleteProductList()
+	// auction list cache 전체 삭제
+	o.DeleteAuctionList()
+
 	return Id, nil
 }
 
@@ -101,6 +107,11 @@ func (o *DB) DeleteAucProduct(productId int64) (bool, error) {
 		log.Error(err)
 		return false, err
 	}
+
+	// product list cache 전체 삭제
+	o.DeleteProductList()
+	// auction list cache 전체 삭제
+	o.DeleteAuctionList()
 
 	return true, nil
 }
@@ -166,7 +177,7 @@ func (o *DB) GetAucProductList(pageInfo *context_auc.ProductList) ([]context_auc
 
 		product.NftContract = nftContract.String
 		product.NftId = nftId.Int64
-		product.NftCreateTxHash = nftContract.String
+		product.NftCreateTxHash = nftCreateHash.String
 		product.NftUri = nftUri.String
 
 		//prices 변환

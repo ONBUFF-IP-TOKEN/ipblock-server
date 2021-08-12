@@ -1,6 +1,8 @@
 package model
 
 import (
+	"database/sql"
+	"encoding/json"
 	"fmt"
 
 	"github.com/ONBUFF-IP-TOKEN/baseutil/log"
@@ -9,12 +11,12 @@ import (
 
 func (o *DB) InsertAucAuction(auction *context_auc.AucAuctionRegister) (int64, error) {
 	sqlQuery := fmt.Sprintf("INSERT INTO auc_auctions (bid_start_amount, bid_cur_amount, bid_unit, " +
-		"auc_start_ts, auc_end_ts, auc_state, auc_round, " +
+		"auc_start_ts, auc_end_ts, auc_state, auc_round, auc_deposit," +
 		"create_ts, active_state, product_id " +
 		") VALUES (?,?,?,?,?,?,?,?,?,?)")
 
 	result, err := o.Mysql.PrepareAndExec(sqlQuery, auction.BidStartAmount, auction.BidCurAmount, auction.BidUnit,
-		auction.AucStartTs, auction.AucEndTs, auction.AucState, auction.AucRound,
+		auction.AucStartTs, auction.AucEndTs, auction.AucState, auction.AucRound, auction.AucDeposit,
 		auction.CreateTs, auction.ActiveState, auction.ProductId)
 
 	if err != nil {
@@ -34,11 +36,11 @@ func (o *DB) InsertAucAuction(auction *context_auc.AucAuctionRegister) (int64, e
 
 func (o *DB) UpdateAucAuction(auction *context_auc.AucAuctionUpdate) (int64, error) {
 	sqlQuery := fmt.Sprintf("UPDATE auc_auctions set bid_start_amount=?, bid_cur_amount=?, bid_unit=?, " +
-		"auc_start_ts=?, auc_end_ts=?, auc_state=?, auc_round=?, " +
+		"auc_start_ts=?, auc_end_ts=?, auc_state=?, auc_round=?, auc_deposit=?, " +
 		"create_ts=?, active_state=?, product_id=? WHERE auc_id=?")
 
 	result, err := o.Mysql.PrepareAndExec(sqlQuery, auction.BidStartAmount, auction.BidCurAmount, auction.BidUnit,
-		auction.AucStartTs, auction.AucEndTs, auction.AucState, auction.AucRound,
+		auction.AucStartTs, auction.AucEndTs, auction.AucState, auction.AucRound, auction.AucDeposit,
 		auction.CreateTs, auction.ActiveState, auction.ProductId, auction.Id)
 
 	if err != nil {
@@ -58,7 +60,8 @@ func (o *DB) UpdateAucAuction(auction *context_auc.AucAuctionUpdate) (int64, err
 }
 
 func (o *DB) GetAucAuctionList(pageInfo *context_auc.AuctionList) ([]context_auc.AucAuction, int64, error) {
-	sqlQuery := fmt.Sprintf("SELECT * FROM auc_auctions ORDER BY auc_id DESC LIMIT %v,%v", pageInfo.PageSize*pageInfo.PageOffset, pageInfo.PageSize)
+	sqlQuery := fmt.Sprintf("SELECT * FROM auc_auctions LEFT JOIN auc_products on auc_auctions.product_id = auc_products.product_id "+
+		"ORDER BY auc_id DESC LIMIT %v,%v", pageInfo.PageSize*pageInfo.PageOffset, pageInfo.PageSize)
 	rows, err := o.Mysql.Query(sqlQuery)
 
 	if err != nil {
@@ -68,15 +71,56 @@ func (o *DB) GetAucAuctionList(pageInfo *context_auc.AuctionList) ([]context_auc
 
 	defer rows.Close()
 
+	var title, desc, links, videos, prices, content sql.NullString
+	var nftId sql.NullInt64
+	var nftContract, nftCreateHash, nftUri sql.NullString
+
 	auctions := make([]context_auc.AucAuction, 0)
 	for rows.Next() {
 		auction := context_auc.AucAuction{}
+		product := context_auc.ProductInfo{}
 		if err := rows.Scan(&auction.Id, &auction.BidStartAmount, &auction.BidCurAmount, &auction.BidUnit,
-			&auction.AucStartTs, &auction.AucEndTs, &auction.AucState, &auction.AucRound,
-			&auction.CreateTs, &auction.ActiveState, &auction.ProductId); err != nil {
+			&auction.AucStartTs, &auction.AucEndTs, &auction.AucState, &auction.AucRound, &auction.AucDeposit,
+			&auction.CreateTs, &auction.ActiveState, &auction.ProductId,
+
+			&product.Id, &title, &product.CreateTs, &desc,
+			&product.MediaOriginal, &product.MediaOriginalType, &product.MediaThumnail, &product.MediaThumnailType,
+			&links, &videos,
+			&product.OwnerNickName, &product.OwnerWalletAddr, &product.CreatorNickName, &product.CreatorWalletAddr,
+			&nftContract, &nftId, &nftCreateHash, &nftUri, &product.NftState,
+			&prices, &content); err != nil {
 			log.Error(err)
 		}
 
+		aTitle := context_auc.Localization{}
+		json.Unmarshal([]byte(title.String), &aTitle)
+		product.Title = aTitle
+
+		aDesc := context_auc.Localization{}
+		json.Unmarshal([]byte(desc.String), &aDesc)
+		product.Desc = aDesc
+
+		aLinks := []context_auc.Urls{}
+		json.Unmarshal([]byte(links.String), &aLinks)
+		product.Links = aLinks
+
+		aVideos := []context_auc.Urls{}
+		json.Unmarshal([]byte(videos.String), &aVideos)
+		product.Videos = aVideos
+
+		product.NftContract = nftContract.String
+		product.NftId = nftId.Int64
+		product.NftCreateTxHash = nftCreateHash.String
+		product.NftUri = nftUri.String
+
+		//prices 변환
+		aPrices := []context_auc.ProductPrice{}
+		json.Unmarshal([]byte(prices.String), &aPrices)
+		product.Prices = aPrices
+
+		product.Content = content.String
+
+		auction.ProductInfo = product
 		auctions = append(auctions, auction)
 	}
 

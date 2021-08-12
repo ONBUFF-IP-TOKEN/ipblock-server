@@ -107,6 +107,7 @@ func (o *Token) CallBackCmdProc(cmd *basenet.CommandData) {
 			} else {
 				// product list cache 전체 삭제
 				model.GetDB().DeleteProductList()
+				model.GetDB().DeleteAuctionList()
 			}
 		} else if transInfo.FromAddr != gNullAddress && transInfo.ToAddr != gNullAddress {
 			// 코인 전송 처리

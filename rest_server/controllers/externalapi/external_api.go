@@ -9,7 +9,9 @@ import (
 	"github.com/ONBUFF-IP-TOKEN/ipblock-server/rest_server/config"
 	"github.com/ONBUFF-IP-TOKEN/ipblock-server/rest_server/controllers/auth"
 	"github.com/ONBUFF-IP-TOKEN/ipblock-server/rest_server/controllers/commonapi"
+	"github.com/ONBUFF-IP-TOKEN/ipblock-server/rest_server/controllers/commonapi/commonapi_auc"
 	"github.com/ONBUFF-IP-TOKEN/ipblock-server/rest_server/controllers/context"
+	"github.com/ONBUFF-IP-TOKEN/ipblock-server/rest_server/controllers/context/context_auc"
 	"github.com/ONBUFF-IP-TOKEN/ipblock-server/rest_server/controllers/resultcode"
 	"github.com/labstack/echo"
 )
@@ -198,4 +200,21 @@ func (o *ExternalAPI) GetMyOrderList(c echo.Context) error {
 	}
 
 	return commonapi.GetMyOrderList(params, ctx)
+}
+
+// 경매 리스트 요청
+func (o *ExternalAPI) GetAucAuctionList(c echo.Context) error {
+	ctx := base.GetContext(c).(*context.IPBlockServerContext)
+
+	params := context_auc.NewAuctionList()
+	if err := ctx.EchoContext.Bind(params); err != nil {
+		log.Error(err)
+		return base.BaseJSONInternalServerError(c, err)
+	}
+
+	if err := params.CheckValidate(); err != nil {
+		return c.JSON(http.StatusOK, err)
+	}
+
+	return commonapi_auc.GetAucAuctionList(params, ctx)
 }

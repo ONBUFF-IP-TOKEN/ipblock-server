@@ -76,7 +76,7 @@
           uri: "/:apiver/auc/auction/update"
           precheck: true
         -
-          handler: "PostAucAuctionList" # 경매 리스트 요청
+          handler: "GetAucAuctionList" # 경매 리스트 요청
           method: "get"
           uri: "/:apiver/auc/auction/list"
           precheck: true

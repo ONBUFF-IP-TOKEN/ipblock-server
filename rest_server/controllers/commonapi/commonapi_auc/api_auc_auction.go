@@ -43,7 +43,7 @@ func PostAucAuctionUpdate(auction *context_auc.AucAuctionUpdate, ctx *context.IP
 	return ctx.EchoContext.JSON(http.StatusOK, resp)
 }
 
-func PostAucAuctionList(auctionList *context_auc.AuctionList, ctx *context.IPBlockServerContext) error {
+func GetAucAuctionList(auctionList *context_auc.AuctionList, ctx *context.IPBlockServerContext) error {
 	resp := new(base.BaseResponse)
 
 	//redis exist check

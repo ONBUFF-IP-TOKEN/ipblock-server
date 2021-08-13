@@ -9,15 +9,19 @@ import (
 )
 
 const (
-	Bid_state_ready   = 0
-	Bid_state_submit  = 1
-	Bid_state_success = 2
-	Bid_state_giveup  = 3
-	Bid_state_fail    = 4
+	Bid_state_ready   = 0 // 입찰 준비
+	Bid_state_submit  = 1 // 입찰 완료
+	Bid_state_success = 2 // 낙찰 성공
+	Bid_state_fail    = 3 // 입찰 실패
 
-	Deposit_state_checking = 0
-	Deposit_state_complete = 1
-	Deposit_state_fail     = 2
+	Deposit_state_fail     = 0 // 보증금 확인 안됨
+	Deposit_state_checking = 1 // 보증금 확인중
+	Deposit_state_complete = 2 // 보증금 확인 완료
+
+	Bid_winner_state_none            = 0 // 낙찰 결재 안됨
+	Bid_winner_state_submit_checking = 1 // 낙찰 결재 확인중
+	Bid_winner_state_submit_complete = 2 // 낙찰 결재 확인 완료
+	Bid_winner_state_giveup          = 3 // 낙찰 포기
 )
 
 type Bid struct {
@@ -28,6 +32,8 @@ type Bid struct {
 	BidTs                 int64   `json:"bid_ts"`
 	BidAttendeeWalletAddr string  `query:"bid_attendee_wallet_address" json:"bid_attendee_wallet_address"`
 	BidAmount             float64 `json:"bid_amount"`
+	BidWinnerTxHash       string  `json:"bid_winner_txhash"`
+	BidWinnerState        int64   `json:"bid_winner_state"`
 	DepositAmount         float64 `json:"deposit_amount"`
 	DepositTxHash         string  `json:"deposit_txhash"`
 	DepositState          int64   `json:"deposit_state"`
@@ -141,6 +147,59 @@ func (o *BidAttendeeList) CheckValidate(ctx *context.IPBlockServerContext) *base
 type BidListResponse struct {
 	PageInfo PageInfoResponse `json:"page_info"`
 	Bids     []Bid            `json:"bids"`
+}
+
+////////////////////////////////////////////////
+
+// 낙찰 받기
+type BidWinner struct {
+	Bid
+}
+
+func NewBidSuccess() *BidWinner {
+	return new(BidWinner)
+}
+
+func (o *BidWinner) CheckValidate(ctx *context.IPBlockServerContext) *base.BaseResponse {
+	if o.AucId <= 0 {
+		return base.MakeBaseResponse(resultcode.Result_Auc_Bid_RequireAucId)
+	}
+	if len(o.BidAttendeeWalletAddr) == 0 {
+		return base.MakeBaseResponse(resultcode.Result_Auc_Bid_RequireWalletAddress)
+	}
+	if len(o.BidWinnerTxHash) == 0 {
+		return base.MakeBaseResponse(resultcode.Result_Auc_Bid_RequireDepositTxHash)
+	}
+	if !strings.EqualFold(o.BidAttendeeWalletAddr, ctx.WalletAddr()) {
+		return base.MakeBaseResponse(resultcode.Result_Auc_Bid_InvalidWalletAddress)
+	}
+
+	return nil
+}
+
+////////////////////////////////////////////////
+
+// 낙찰 포기
+type BidWinnerGiveup struct {
+	Bid
+}
+
+func NewBidSuccessGiveup() *BidWinnerGiveup {
+	return new(BidWinnerGiveup)
+}
+
+func (o *BidWinnerGiveup) CheckValidate(ctx *context.IPBlockServerContext) *base.BaseResponse {
+	if o.AucId <= 0 {
+		return base.MakeBaseResponse(resultcode.Result_Auc_Bid_RequireAucId)
+	}
+	if len(o.BidAttendeeWalletAddr) == 0 {
+		return base.MakeBaseResponse(resultcode.Result_Auc_Bid_RequireWalletAddress)
+	}
+	if !strings.EqualFold(o.BidAttendeeWalletAddr, ctx.WalletAddr()) {
+		return base.MakeBaseResponse(resultcode.Result_Auc_Bid_InvalidWalletAddress)
+	}
+
+	return nil
 }
 
 ////////////////////////////////////////////////

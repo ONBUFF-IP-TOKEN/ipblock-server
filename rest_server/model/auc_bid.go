@@ -1,6 +1,8 @@
 package model
 
 import (
+	"database/sql"
+	"errors"
 	"fmt"
 
 	"github.com/ONBUFF-IP-TOKEN/baseutil/log"
@@ -66,6 +68,56 @@ func (o *DB) UpdateAucBidSubmit(bidSubmit *context_auc.BidSubmit) (int64, error)
 	return id, nil
 }
 
+//낙찰자 정보 업데이트
+func (o *DB) UpdateAucBidWinner(bid *context_auc.BidWinner) (int64, error) {
+	sqlQuery := fmt.Sprintf("UPDATE auc_bids set bid_winner_txhash=?, bid_winner_state=? WHERE auc_id=? and bid_attendee_wallet_address=?")
+
+	result, err := o.Mysql.PrepareAndExec(sqlQuery, bid.BidWinnerTxHash, bid.BidWinnerState, bid.AucId, bid.BidAttendeeWalletAddr)
+
+	if err != nil {
+		log.Error(err)
+		return -1, err
+	}
+	id, err := result.RowsAffected()
+	if err != nil {
+		log.Error(err)
+		return -1, err
+	}
+	if id == 0 {
+		err = errors.New("RowsAffected none")
+		log.Error(err)
+		return id, err
+	}
+	log.Debug("UpdateAucBidWinner id:", id)
+
+	return id, nil
+}
+
+// 낙찰자 상태 정보 업데이트
+func (o *DB) UpdateAucBidWinnerState(bid *context_auc.Bid, state int) (int64, error) {
+	sqlQuery := fmt.Sprintf("UPDATE auc_bids set bid_winner_state=? WHERE auc_id=? and bid_attendee_wallet_address=?")
+
+	result, err := o.Mysql.PrepareAndExec(sqlQuery, state, bid.AucId, bid.BidAttendeeWalletAddr)
+
+	if err != nil {
+		log.Error(err)
+		return -1, err
+	}
+	id, err := result.RowsAffected()
+	if err != nil {
+		log.Error(err)
+		return -1, err
+	}
+	// if id == 0 {
+	// 	err = errors.New("RowsAffected none")
+	// 	log.Error(err)
+	// 	return id, err
+	// }
+	log.Debug("UpdateAucBidWinner id:", id)
+
+	return id, nil
+}
+
 func (o *DB) GetAucBidBestAttendee(aucId int64) (*context_auc.Bid, error) {
 	sqlQuery := fmt.Sprintf("SELECT * FROM auc_bids ORDER BY bid_amount DESC limit 1")
 	rows, err := o.Mysql.Query(sqlQuery)
@@ -77,12 +129,15 @@ func (o *DB) GetAucBidBestAttendee(aucId int64) (*context_auc.Bid, error) {
 
 	defer rows.Close()
 
+	var bidWinnerTxHash sql.NullString
 	bid := &context_auc.Bid{}
 	for rows.Next() {
 		if err := rows.Scan(&bid.Id, &bid.AucId, &bid.ProductId,
-			&bid.BidState, &bid.BidTs, &bid.BidAttendeeWalletAddr, &bid.BidAmount,
+			&bid.BidState, &bid.BidTs, &bid.BidAttendeeWalletAddr, &bid.BidAmount, &bidWinnerTxHash, &bid.BidWinnerState,
 			&bid.DepositAmount, &bid.DepositTxHash, &bid.DepositState); err != nil {
 			log.Error(err)
+		} else {
+			bid.BidWinnerTxHash = bidWinnerTxHash.String
 		}
 	}
 
@@ -103,12 +158,15 @@ func (o *DB) GetAucBidAttendee(aucId int64, walletAddr string) (*context_auc.Bid
 
 	defer rows.Close()
 
+	var bidWinnerTxHash sql.NullString
 	bid := &context_auc.Bid{}
 	for rows.Next() {
 		if err := rows.Scan(&bid.Id, &bid.AucId, &bid.ProductId,
-			&bid.BidState, &bid.BidTs, &bid.BidAttendeeWalletAddr, &bid.BidAmount,
+			&bid.BidState, &bid.BidTs, &bid.BidAttendeeWalletAddr, &bid.BidAmount, &bidWinnerTxHash, &bid.BidWinnerState,
 			&bid.DepositAmount, &bid.DepositTxHash, &bid.DepositState); err != nil {
 			log.Error(err)
+		} else {
+			bid.BidWinnerTxHash = bidWinnerTxHash.String
 		}
 	}
 
@@ -129,14 +187,16 @@ func (o *DB) GetAucBidBestAttendeeList(pageInfo *context_auc.BidAttendeeList) ([
 
 	defer rows.Close()
 
+	var bidWinnerTxHash sql.NullString
 	bids := make([]context_auc.Bid, 0)
 	for rows.Next() {
 		bid := context_auc.Bid{}
 		if err := rows.Scan(&bid.Id, &bid.AucId, &bid.ProductId,
-			&bid.BidState, &bid.BidTs, &bid.BidAttendeeWalletAddr, &bid.BidAmount,
+			&bid.BidState, &bid.BidTs, &bid.BidAttendeeWalletAddr, &bid.BidAmount, &bidWinnerTxHash, &bid.BidWinnerState,
 			&bid.DepositAmount, &bid.DepositTxHash, &bid.DepositState); err != nil {
 			log.Error(err)
 		} else {
+			bid.BidWinnerTxHash = bidWinnerTxHash.String
 			bids = append(bids, bid)
 		}
 	}

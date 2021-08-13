@@ -286,3 +286,37 @@ func (o *ExternalAPI) GetAucBidList(c echo.Context) error {
 
 	return commonapi_auc.GetAucBidList(params, ctx)
 }
+
+// 낙찰 받기
+func (o *ExternalAPI) PostAucBidWinnerSubmit(c echo.Context) error {
+	ctx := base.GetContext(c).(*context.IPBlockServerContext)
+
+	params := context_auc.NewBidSuccess()
+	if err := ctx.EchoContext.Bind(params); err != nil {
+		log.Error(err)
+		return base.BaseJSONInternalServerError(c, err)
+	}
+
+	if err := params.CheckValidate(ctx); err != nil {
+		return c.JSON(http.StatusOK, err)
+	}
+
+	return commonapi_auc.PostAucBidWinnerSubmit(params, ctx)
+}
+
+// 낙찰 포기
+func (o *ExternalAPI) PostAucBidWinnerGiveUp(c echo.Context) error {
+	ctx := base.GetContext(c).(*context.IPBlockServerContext)
+
+	params := context_auc.NewBidSuccessGiveup()
+	if err := ctx.EchoContext.Bind(params); err != nil {
+		log.Error(err)
+		return base.BaseJSONInternalServerError(c, err)
+	}
+
+	if err := params.CheckValidate(ctx); err != nil {
+		return c.JSON(http.StatusOK, err)
+	}
+
+	return commonapi_auc.NewBidSuccessGiveup(params, ctx)
+}

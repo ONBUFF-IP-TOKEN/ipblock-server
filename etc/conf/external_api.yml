@@ -73,22 +73,49 @@
         - 
           handler: "GetAucBidDeposit" # 입찰 여부 확인
           method : "get"
-          uri: "/:apiver/auc/auction/bid/deposit"
+          uri: "/:apiver/auc/bid/deposit"
           precheck: true
         -
           handler: "PostAucBidDeposit" # 입찰 보증금 결재 정보 전송
           method: "post"
-          uri: "/:apiver/auc/auction/bid/deposit"
+          uri: "/:apiver/auc/bid/deposit"
           precheck: true
         -
           handler: "PostAucBidSubmit" # 입찰 하기
           method: "post"
-          uri: "/:apiver/auc/auction/bid/submit"
+          uri: "/:apiver/auc/bid/submit"
           precheck: true
         - 
           handler: "GetAucBidList" # 입찰자 리스트 요청
           method: "get"
-          uri: "/:apiver/auc/auction/bid/list"
+          uri: "/:apiver/auc/bid/list"
           precheck: true
+        - 
+          handler: "PostAucBidWinnerSubmit" # 낙찰 받기
+          method: "post"
+          uri: "/:apiver/auc/bid/winner/submit"
+          precheck: true
+        - 
+          handler: "PostAucBidWinnerGiveUp" # 낙찰 포기
+          method: "post"
+          uri: "/:apiver/auc/bid/winner/giveup"
+          precheck: true
+        # - 
+        #   handler: "GetAucBidListMe" # 내 입찰자 리스트 요청
+        #   method: "get"
+        #   uri: "/:apiver/auc/bid/list/me"
+        #   precheck: true
+        # - 
+        #   handler: "GetAucBidWinnerListMe" # 내 낙찰 리스트 요청
+        #   method: "get"
+        #   uri: "/:apiver/auc/bid/winner/list/me"
+        #   precheck: true
+        # - 
+        #   handler: "GetAucNftListMe" # 내 NFT 리스트 요청
+        #   method: "get"
+        #   uri: "/:apiver/auc/nft/list/me"
+        #   precheck: true
+
+
 
 

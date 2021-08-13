@@ -55,6 +55,8 @@ const (
 	Result_Auc_Auction_RequireActiveState    = 15106
 	Result_Auc_Auction_RequireProductId      = 15107
 	Result_Auc_Auction_RequireAucId          = 15108
+	Result_Auc_Auction_NotPeriod             = 15109 // 경매기간이 아니다.
+	Result_Auc_Auction_NotOverYet            = 15110 // 아직 경매가 끝나지 않았다.
 
 	Result_Auc_Bid_RequireAucId         = 15201
 	Result_Auc_Bid_RequireWalletAddress = 15202
@@ -65,6 +67,7 @@ const (
 	Result_Auc_Bid_NotBestBidAmount     = 15207 // 입찰 가격이 기존 가격보다 낮을때 에러
 	Result_Auc_Bid_RequireDeposit       = 15208 // 입찰전에 보증금 지불을 하지 먼저 하지 않았을때 에러
 	Result_Auc_Bid_AlreadyDeposit       = 15209 // 이미 입찰 보증금을 지불하였다.
+	Result_Auc_Bid_NotWinner            = 15210 // 낙찰자가 아니다.
 
 	Result_Auth_RequireMessage    = 20000
 	Result_Auth_RequireSign       = 20001
@@ -128,6 +131,9 @@ var ResultCodeText = map[int]string{
 	Result_Auc_Auction_RequireActiveState:    "Require bid active state",
 	Result_Auc_Auction_RequireProductId:      "Require bid product id",
 	Result_Auc_Auction_RequireAucId:          "Require auc id",
+	Result_Auc_Auction_NotPeriod:             "Not auction period",
+	Result_Auc_Auction_NotOverYet:            "Auction is not over yet",
+	Result_Auc_Bid_NotWinner:                 "Not winner",
 
 	Result_Auc_Bid_RequireAucId:         "Require bid auc id",
 	Result_Auc_Bid_RequireWalletAddress: "Require bid wallet address",

@@ -24,6 +24,7 @@ const (
 	TokenCmd_OrderProduct             uint32 = 2
 	TokenCmd_CreatNftByAut            uint32 = 3
 	TokenCmd_Bid_Deposit_CheckReceipt uint32 = 4
+	TokenCmd_Bid_Success_CheckReceipt uint32 = 5
 )
 
 type TokenCmd struct {
@@ -79,6 +80,8 @@ func (o *TokenCmd) CommandProc(data *basenet.CommandData) error {
 			o.CreateNftbyAut(data.Data, data.Callback)
 		case TokenCmd_Bid_Deposit_CheckReceipt:
 			o.BidDepositCheckReceipt(data.Data)
+		case TokenCmd_Bid_Success_CheckReceipt:
+			o.BidSuccessCheckReceipt(data.Data)
 		}
 
 		end := time.Now()

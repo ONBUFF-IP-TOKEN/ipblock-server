@@ -12,6 +12,7 @@ import (
 	"github.com/ONBUFF-IP-TOKEN/ipblock-server/rest_server/model"
 )
 
+// 경매 등록
 func PostAucAuctionRegister(auction *context_auc.AucAuctionRegister, ctx *context.IPBlockServerContext) error {
 	resp := new(base.BaseResponse)
 	resp.Success()
@@ -28,6 +29,7 @@ func PostAucAuctionRegister(auction *context_auc.AucAuctionRegister, ctx *contex
 	return ctx.EchoContext.JSON(http.StatusOK, resp)
 }
 
+//경매 정보 업데이트
 func PostAucAuctionUpdate(auction *context_auc.AucAuctionUpdate, ctx *context.IPBlockServerContext) error {
 	resp := new(base.BaseResponse)
 	resp.Success()
@@ -43,6 +45,7 @@ func PostAucAuctionUpdate(auction *context_auc.AucAuctionUpdate, ctx *context.IP
 	return ctx.EchoContext.JSON(http.StatusOK, resp)
 }
 
+// 경매 정보 리스트 요청
 func GetAucAuctionList(auctionList *context_auc.AuctionList, ctx *context.IPBlockServerContext) error {
 	resp := new(base.BaseResponse)
 
@@ -76,6 +79,7 @@ func GetAucAuctionList(auctionList *context_auc.AuctionList, ctx *context.IPBloc
 	return ctx.EchoContext.JSON(http.StatusOK, resp)
 }
 
+// 경매 삭제
 func DeleteAucAuctiontRemove(product *context_auc.RemoveAuction, ctx *context.IPBlockServerContext) error {
 	resp := new(base.BaseResponse)
 	resp.Success()

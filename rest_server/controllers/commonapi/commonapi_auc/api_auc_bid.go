@@ -24,7 +24,7 @@ func GetAucBidDeposit(bid *context_auc.BidDepositVerify, ctx *context.IPBlockSer
 	if bid, err := model.GetDB().GetAucBidAttendee(bid.AucId, bid.BidAttendeeWalletAddr); err != nil {
 		resp.SetReturn(resultcode.Result_DBError)
 	} else {
-		if bid == nil || bid.BidState == context_auc.Deposit_state_fail {
+		if bid == nil || bid.DepositState == context_auc.Deposit_state_fail {
 			//보증금을 지불한적이 없음
 			resp.SetReturn(resultcode.Result_Auc_Bid_RequireDeposit)
 		}
@@ -61,9 +61,20 @@ func PostAucBidDeposit(bidDeposit *context_auc.BidDeposit, ctx *context.IPBlockS
 	} else {
 		if bid != nil &&
 			strings.EqualFold(bid.BidAttendeeWalletAddr, bidDeposit.BidAttendeeWalletAddr) &&
-			bid.BidState != context_auc.Deposit_state_fail {
+			bid.DepositState != context_auc.Deposit_state_fail {
 			log.Error("Alreay deposit submit auc_id:", bid.AucId, " wallet:", bidDeposit.BidAttendeeWalletAddr)
 			resp.SetReturn(resultcode.Result_Auc_Bid_AlreadyDeposit)
+			return ctx.EchoContext.JSON(http.StatusOK, resp)
+		}
+	}
+
+	// 지불 hash가 기존에 지불한적이 있었던 해쉬정보인지 체크
+	if exist, err := model.GetDB().GetAucBidBestAttendeeByTxhash(bidDeposit.DepositTxHash); err != nil {
+		resp.SetReturn(resultcode.Result_DBError)
+		return ctx.EchoContext.JSON(http.StatusOK, resp)
+	} else {
+		if exist {
+			resp.SetReturn(resultcode.Result_Reused_Txhash)
 			return ctx.EchoContext.JSON(http.StatusOK, resp)
 		}
 	}
@@ -73,6 +84,7 @@ func PostAucBidDeposit(bidDeposit *context_auc.BidDeposit, ctx *context.IPBlockS
 	bidDeposit.BidTs = datetime.GetTS2MilliSec()
 	bidDeposit.DepositAmount = float64(auction.BidDeposit)
 	bidDeposit.DepositState = context_auc.Deposit_state_checking
+	bidDeposit.TokenType = auction.ProductInfo.Prices[0].TokenType
 
 	// auc_bids table에 최초 저장
 	if id, err := model.GetDB().InsertAucBid(bidDeposit); err != nil {
@@ -179,12 +191,23 @@ func PostAucBidWinnerSubmit(bid *context_auc.BidWinner, ctx *context.IPBlockServ
 		} else {
 			if successBid != nil && successBid.BidState == context_auc.Bid_state_success {
 				// 낙찰자 확인 완료
-				// 입찰 정보 채우기
-				tempBid := bid
+				// 기존 입찰 정보 채우기
+				tempBid := *bid
 				bid.Bid = *successBid
-				bid.BidWinnerTxHash = tempBid.BidWinnerTxHash
+				bid.Bid.BidWinnerTxHash = tempBid.BidWinnerTxHash
 
 				bid.BidWinnerState = context_auc.Bid_winner_state_submit_checking
+
+				// 지불 hash가 기존에 지불한적이 있었던 해쉬정보인지 체크
+				if exist, err := model.GetDB().GetAucBidBestAttendeeByTxhash(bid.BidWinnerTxHash); err != nil {
+					resp.SetReturn(resultcode.Result_DBError)
+					return ctx.EchoContext.JSON(http.StatusOK, resp)
+				} else {
+					if exist {
+						resp.SetReturn(resultcode.Result_Reused_Txhash)
+						return ctx.EchoContext.JSON(http.StatusOK, resp)
+					}
+				}
 
 				// 2. 낙찰 정보 db 업데이트
 				if _, err := model.GetDB().UpdateAucBidWinner(bid); err != nil {
@@ -192,7 +215,7 @@ func PostAucBidWinnerSubmit(bid *context_auc.BidWinner, ctx *context.IPBlockServ
 				} else {
 					// 3. 영수증 확인 go 채널로 전달
 					data := &basenet.CommandData{
-						CommandType: token.TokenCmd_Bid_Success_CheckReceipt,
+						CommandType: token.TokenCmd_Bid_Winner_CheckReceipt,
 						Data:        bid,
 					}
 					commonapi.GetTokenProc(data)

@@ -12,10 +12,10 @@ import (
 func (o *DB) InsertAucBid(bid *context_auc.BidDeposit) (int64, error) {
 	sqlQuery := fmt.Sprintf("INSERT INTO auc_bids (auc_id, product_id, " +
 		"bid_state, bid_ts, bid_attendee_wallet_address, " +
-		"deposit_amount, deposit_txhash, deposit_state ) VALUES (?,?,?,?,?,?,?,?)")
+		"deposit_amount, deposit_txhash, deposit_state, token_type ) VALUES (?,?,?,?,?,?,?,?,?)")
 
 	result, err := o.Mysql.PrepareAndExec(sqlQuery, bid.AucId, bid.ProductId,
-		bid.BidState, bid.BidTs, bid.BidAttendeeWalletAddr, bid.DepositAmount, bid.DepositTxHash, bid.DepositState)
+		bid.BidState, bid.BidTs, bid.BidAttendeeWalletAddr, bid.DepositAmount, bid.DepositTxHash, bid.DepositState, bid.TokenType)
 
 	if err != nil {
 		log.Error(err)
@@ -134,7 +134,7 @@ func (o *DB) GetAucBidBestAttendee(aucId int64) (*context_auc.Bid, error) {
 	for rows.Next() {
 		if err := rows.Scan(&bid.Id, &bid.AucId, &bid.ProductId,
 			&bid.BidState, &bid.BidTs, &bid.BidAttendeeWalletAddr, &bid.BidAmount, &bidWinnerTxHash, &bid.BidWinnerState,
-			&bid.DepositAmount, &bid.DepositTxHash, &bid.DepositState); err != nil {
+			&bid.DepositAmount, &bid.DepositTxHash, &bid.DepositState, &bid.TokenType); err != nil {
 			log.Error(err)
 		} else {
 			bid.BidWinnerTxHash = bidWinnerTxHash.String
@@ -163,7 +163,7 @@ func (o *DB) GetAucBidAttendee(aucId int64, walletAddr string) (*context_auc.Bid
 	for rows.Next() {
 		if err := rows.Scan(&bid.Id, &bid.AucId, &bid.ProductId,
 			&bid.BidState, &bid.BidTs, &bid.BidAttendeeWalletAddr, &bid.BidAmount, &bidWinnerTxHash, &bid.BidWinnerState,
-			&bid.DepositAmount, &bid.DepositTxHash, &bid.DepositState); err != nil {
+			&bid.DepositAmount, &bid.DepositTxHash, &bid.DepositState, &bid.TokenType); err != nil {
 			log.Error(err)
 		} else {
 			bid.BidWinnerTxHash = bidWinnerTxHash.String
@@ -193,7 +193,7 @@ func (o *DB) GetAucBidBestAttendeeList(pageInfo *context_auc.BidAttendeeList) ([
 		bid := context_auc.Bid{}
 		if err := rows.Scan(&bid.Id, &bid.AucId, &bid.ProductId,
 			&bid.BidState, &bid.BidTs, &bid.BidAttendeeWalletAddr, &bid.BidAmount, &bidWinnerTxHash, &bid.BidWinnerState,
-			&bid.DepositAmount, &bid.DepositTxHash, &bid.DepositState); err != nil {
+			&bid.DepositAmount, &bid.DepositTxHash, &bid.DepositState, &bid.TokenType); err != nil {
 			log.Error(err)
 		} else {
 			bid.BidWinnerTxHash = bidWinnerTxHash.String
@@ -204,6 +204,36 @@ func (o *DB) GetAucBidBestAttendeeList(pageInfo *context_auc.BidAttendeeList) ([
 	totalCount, err := o.GetTotalAucBidSize()
 
 	return bids, totalCount, err
+}
+
+func (o *DB) GetAucBidBestAttendeeByTxhash(txHash string) (bool, error) {
+	sqlQuery := fmt.Sprintf("SELECT * FROM auc_bids WHERE deposit_txhash = '%v' OR bid_winner_txhash = '%v'", txHash, txHash)
+	rows, err := o.Mysql.Query(sqlQuery)
+
+	if err != nil {
+		log.Error(err)
+		return false, err
+	}
+
+	defer rows.Close()
+
+	var bidWinnerTxHash sql.NullString
+	cnt := 0
+	for rows.Next() {
+		bid := context_auc.Bid{}
+		if err := rows.Scan(&bid.Id, &bid.AucId, &bid.ProductId,
+			&bid.BidState, &bid.BidTs, &bid.BidAttendeeWalletAddr, &bid.BidAmount, &bidWinnerTxHash, &bid.BidWinnerState,
+			&bid.DepositAmount, &bid.DepositTxHash, &bid.DepositState, &bid.TokenType); err != nil {
+			log.Error(err)
+		} else {
+			cnt++
+		}
+	}
+
+	if cnt == 0 {
+		return false, nil
+	}
+	return true, nil
 }
 
 func (o *DB) GetTotalAucBidSize() (int64, error) {

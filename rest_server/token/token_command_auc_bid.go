@@ -32,15 +32,20 @@ func (o *TokenCmd) BidDepositCheckReceipt(data interface{}) {
 			// 1. receipt 정상 체크
 			receipt, err := token.eth.GetTransactionReceipt(tx)
 			if err == nil {
+				log.Info("tx ether value :", tx.Value())
+				log.Info("tx to:", tx.To())
+
 				log.Info("GetTransactionReceipt Type:", receipt.Type)
 				log.Info("GetTransactionReceipt PostState:", receipt.PostState)
 				log.Info("GetTransactionReceipt status :", receipt.Status)
 				log.Info("GetTransactionReceipt CumulativeGasUsed:", receipt.CumulativeGasUsed)
 				//log.Info("GetTransactionReceipt Bloom :", receipt.Bloom)
 
-				log.Info("GetTransactionReceipt topics 0 : ", receipt.Logs[0].Topics[0].Hex())
-				log.Info("GetTransactionReceipt topics 1 : ", receipt.Logs[0].Topics[1].Hex())
-				log.Info("GetTransactionReceipt topics 2 : ", receipt.Logs[0].Topics[2].Hex())
+				if len(receipt.Logs) > 0 {
+					log.Info("GetTransactionReceipt topics 0 : ", receipt.Logs[0].Topics[0].Hex())
+					log.Info("GetTransactionReceipt topics 1 : ", receipt.Logs[0].Topics[1].Hex())
+					log.Info("GetTransactionReceipt topics 2 : ", receipt.Logs[0].Topics[2].Hex())
+				}
 
 				log.Info("GetTransactionReceipt TxHash:", receipt.TxHash.Hex())
 				log.Info("GetTransactionReceipt contractAddress :", receipt.ContractAddress.Hex())
@@ -48,7 +53,6 @@ func (o *TokenCmd) BidDepositCheckReceipt(data interface{}) {
 				log.Info("GetTransactionReceipt blockhash :", receipt.BlockHash.Hex())
 				log.Info("GetTransactionReceipt blocknumber :", receipt.BlockNumber)
 				log.Info("GetTransactionReceipt TransactionIndex:", receipt.TransactionIndex)
-
 				for _, logInfo := range receipt.Logs {
 					fmt.Printf("GetTransactionReceipt Logs %+v\n", logInfo)
 				}
@@ -60,43 +64,71 @@ func (o *TokenCmd) BidDepositCheckReceipt(data interface{}) {
 					return
 				}
 
-				//token contract address check
-				log.Info("token address : ", receipt.Logs[0].Address.Hex())
-				if !strings.EqualFold(strings.ToUpper(o.conf.TokenAddrs[Token_onit]), strings.ToUpper(receipt.Logs[0].Address.Hex())) {
-					model.GetDB().UpdateAucBidDepositState(bid, context_auc.Deposit_state_fail)
-					log.Error("Invalid token address :", receipt.Logs[0].Address.Hex())
-					return
-				}
+				if bid.TokenType == "ETH" {
+					// 이더리움 전송인 경우
+					if !strings.EqualFold(receipt.ContractAddress.Hex(), "0x0000000000000000000000000000000000000000") {
+						model.GetDB().UpdateAucBidDepositState(bid, context_auc.Deposit_state_fail)
+						return
+					}
 
-				//받는 사람 보내는 사람 check
-				fromAddr := strings.Replace(receipt.Logs[0].Topics[1].Hex(), "000000000000000000000000", "", -1)
-				toAddr := strings.Replace(receipt.Logs[0].Topics[2].Hex(), "000000000000000000000000", "", -1)
-				if !strings.EqualFold(strings.ToUpper(bid.BidAttendeeWalletAddr), strings.ToUpper(fromAddr)) {
-					model.GetDB().UpdateAucBidDepositState(bid, context_auc.Deposit_state_fail)
-					log.Error("Invalid from address :", fromAddr)
-					return
-				}
-				if !strings.EqualFold(strings.ToUpper(o.conf.ServerWalletAddr), strings.ToUpper(toAddr)) {
-					model.GetDB().UpdateAucBidDepositState(bid, context_auc.Deposit_state_fail)
-					log.Error("Invalid to address :", toAddr)
-					return
-				}
-				// 구입 액수 check
-				value := new(big.Int)
-				value.SetString(hex.EncodeToString(receipt.Logs[0].Data), 16)
-				log.Info("transfer value :", value)
+					// 받는 사람 check
+					log.Info("ac list: ", tx.AccessList())
+					if !strings.EqualFold(strings.ToUpper(o.conf.ServerWalletAddr), strings.ToUpper(tx.To().String())) {
+						model.GetDB().UpdateAucBidDepositState(bid, context_auc.Deposit_state_fail)
+						log.Error("Invalid to address :", tx.To().String())
+						return
+					}
 
-				transferEther := ethCtrl.Convert(value.String(), ethCtrl.Wei, ethCtrl.Ether)
+					// 구입 액수 check
+					transferEther := ethCtrl.Convert(tx.Value().String(), ethCtrl.Wei, ethCtrl.Ether)
+					var price big.Rat
+					price = *price.SetFloat64(bid.DepositAmount)
 
-				var price big.Rat
-				price = *price.SetFloat64(bid.BidAmount)
+					temp1, _ := transferEther.Float64()
+					temp2, _ := price.Float64()
+					if temp1 != temp2 {
+						model.GetDB().UpdateAucBidDepositState(bid, context_auc.Deposit_state_fail)
+						log.Error("Invalid purchase receipt price :", temp1, " real price :", temp2)
+						return
+					}
+				} else {
+					//token contract address check
+					log.Info("token address : ", receipt.Logs[0].Address.Hex())
+					if !strings.EqualFold(strings.ToUpper(o.conf.TokenAddrs[Token_onit]), strings.ToUpper(receipt.Logs[0].Address.Hex())) {
+						model.GetDB().UpdateAucBidDepositState(bid, context_auc.Deposit_state_fail)
+						log.Error("Invalid token address :", receipt.Logs[0].Address.Hex())
+						return
+					}
+					//받는 사람 보내는 사람 check
+					fromAddr := strings.Replace(receipt.Logs[0].Topics[1].Hex(), "000000000000000000000000", "", -1)
+					toAddr := strings.Replace(receipt.Logs[0].Topics[2].Hex(), "000000000000000000000000", "", -1)
+					if !strings.EqualFold(strings.ToUpper(bid.BidAttendeeWalletAddr), strings.ToUpper(fromAddr)) {
+						model.GetDB().UpdateAucBidDepositState(bid, context_auc.Deposit_state_fail)
+						log.Error("Invalid from address :", fromAddr)
+						return
+					}
+					if !strings.EqualFold(strings.ToUpper(o.conf.ServerWalletAddr), strings.ToUpper(toAddr)) {
+						model.GetDB().UpdateAucBidDepositState(bid, context_auc.Deposit_state_fail)
+						log.Error("Invalid to address :", toAddr)
+						return
+					}
+					// 구입 액수 check
+					value := new(big.Int)
+					value.SetString(hex.EncodeToString(receipt.Logs[0].Data), 16)
+					log.Info("transfer value :", value)
 
-				temp1, _ := transferEther.Float64()
-				temp2, _ := price.Float64()
-				if temp1 != temp2 {
-					model.GetDB().UpdateAucBidDepositState(bid, context_auc.Deposit_state_fail)
-					log.Error("Invalid purchase receipt price :", temp1, " real price :", temp2)
-					return
+					transferEther := ethCtrl.Convert(value.String(), ethCtrl.Wei, ethCtrl.Ether)
+
+					var price big.Rat
+					price = *price.SetFloat64(bid.DepositAmount)
+
+					temp1, _ := transferEther.Float64()
+					temp2, _ := price.Float64()
+					if temp1 != temp2 {
+						model.GetDB().UpdateAucBidDepositState(bid, context_auc.Deposit_state_fail)
+						log.Error("Invalid purchase receipt price :", temp1, " real price :", temp2)
+						return
+					}
 				}
 			} else if err.Error() == "not found" {
 				log.Debug("not found retry GetTransactionReceipt : ", bid.DepositTxHash, " bid id:", bid.Id)
@@ -125,7 +157,7 @@ func (o *TokenCmd) BidDepositCheckReceipt(data interface{}) {
 	}()
 }
 
-func (o *TokenCmd) BidSuccessCheckReceipt(data interface{}) {
+func (o *TokenCmd) BidWinnerCheckReceipt(data interface{}) {
 	go func() {
 		bid := data.(*context_auc.BidWinner)
 		token := o.itoken.Tokens[Token_onit]
@@ -144,15 +176,19 @@ func (o *TokenCmd) BidSuccessCheckReceipt(data interface{}) {
 			// 1. receipt 정상 체크
 			receipt, err := token.eth.GetTransactionReceipt(tx)
 			if err == nil {
+				log.Info("tx ether value :", tx.Value())
+				log.Info("tx to:", tx.To())
 				log.Info("GetTransactionReceipt Type:", receipt.Type)
 				log.Info("GetTransactionReceipt PostState:", receipt.PostState)
 				log.Info("GetTransactionReceipt status :", receipt.Status)
 				log.Info("GetTransactionReceipt CumulativeGasUsed:", receipt.CumulativeGasUsed)
 				//log.Info("GetTransactionReceipt Bloom :", receipt.Bloom)
 
-				log.Info("GetTransactionReceipt topics 0 : ", receipt.Logs[0].Topics[0].Hex())
-				log.Info("GetTransactionReceipt topics 1 : ", receipt.Logs[0].Topics[1].Hex())
-				log.Info("GetTransactionReceipt topics 2 : ", receipt.Logs[0].Topics[2].Hex())
+				if len(receipt.Logs) > 0 {
+					log.Info("GetTransactionReceipt topics 0 : ", receipt.Logs[0].Topics[0].Hex())
+					log.Info("GetTransactionReceipt topics 1 : ", receipt.Logs[0].Topics[1].Hex())
+					log.Info("GetTransactionReceipt topics 2 : ", receipt.Logs[0].Topics[2].Hex())
+				}
 
 				log.Info("GetTransactionReceipt TxHash:", receipt.TxHash.Hex())
 				log.Info("GetTransactionReceipt contractAddress :", receipt.ContractAddress.Hex())
@@ -172,43 +208,73 @@ func (o *TokenCmd) BidSuccessCheckReceipt(data interface{}) {
 					return
 				}
 
-				//token contract address check
-				log.Info("token address : ", receipt.Logs[0].Address.Hex())
-				if !strings.EqualFold(strings.ToUpper(o.conf.TokenAddrs[Token_onit]), strings.ToUpper(receipt.Logs[0].Address.Hex())) {
-					model.GetDB().UpdateAucBidWinnerState(&bid.Bid, context_auc.Bid_winner_state_none)
-					log.Error("Invalid token address :", receipt.Logs[0].Address.Hex())
-					return
-				}
+				if bid.TokenType == "ETH" {
+					// 이더리움 전송인 경우
+					if !strings.EqualFold(receipt.ContractAddress.Hex(), "0x0000000000000000000000000000000000000000") {
+						model.GetDB().UpdateAucBidWinnerState(&bid.Bid, context_auc.Bid_winner_state_none)
+						log.Error("Invalid ethereum contract address :", receipt.ContractAddress.Hex())
+						return
+					}
 
-				//받는 사람 보내는 사람 check
-				fromAddr := strings.Replace(receipt.Logs[0].Topics[1].Hex(), "000000000000000000000000", "", -1)
-				toAddr := strings.Replace(receipt.Logs[0].Topics[2].Hex(), "000000000000000000000000", "", -1)
-				if !strings.EqualFold(strings.ToUpper(bid.BidAttendeeWalletAddr), strings.ToUpper(fromAddr)) {
-					model.GetDB().UpdateAucBidWinnerState(&bid.Bid, context_auc.Bid_winner_state_none)
-					log.Error("Invalid from address :", fromAddr)
-					return
-				}
-				if !strings.EqualFold(strings.ToUpper(o.conf.ServerWalletAddr), strings.ToUpper(toAddr)) {
-					model.GetDB().UpdateAucBidWinnerState(&bid.Bid, context_auc.Bid_winner_state_none)
-					log.Error("Invalid to address :", toAddr)
-					return
-				}
-				// 구입 액수 check
-				value := new(big.Int)
-				value.SetString(hex.EncodeToString(receipt.Logs[0].Data), 16)
-				log.Info("transfer value :", value)
+					// 받는 사람 check
+					log.Info("ac list: ", tx.AccessList())
+					if !strings.EqualFold(strings.ToUpper(o.conf.ServerWalletAddr), strings.ToUpper(tx.To().String())) {
+						model.GetDB().UpdateAucBidWinnerState(&bid.Bid, context_auc.Bid_winner_state_none)
+						log.Error("Invalid to address :", tx.To().String())
+						return
+					}
 
-				transferEther := ethCtrl.Convert(value.String(), ethCtrl.Wei, ethCtrl.Ether)
+					// 구입 액수 check
+					transferEther := ethCtrl.Convert(tx.Value().String(), ethCtrl.Wei, ethCtrl.Ether)
+					var price big.Rat
+					price = *price.SetFloat64(bid.DepositAmount)
 
-				var price big.Rat
-				price = *price.SetFloat64(bid.DepositAmount)
+					temp1, _ := transferEther.Float64()
+					temp2, _ := price.Float64()
+					if temp1 != temp2 {
+						model.GetDB().UpdateAucBidWinnerState(&bid.Bid, context_auc.Bid_winner_state_none)
+						log.Error("Invalid purchase receipt price :", temp1, " real price :", temp2)
+						return
+					}
+				} else {
+					//token contract address check
+					log.Info("token address : ", receipt.Logs[0].Address.Hex())
+					if !strings.EqualFold(strings.ToUpper(o.conf.TokenAddrs[Token_onit]), strings.ToUpper(receipt.Logs[0].Address.Hex())) {
+						model.GetDB().UpdateAucBidWinnerState(&bid.Bid, context_auc.Bid_winner_state_none)
+						log.Error("Invalid token address :", receipt.Logs[0].Address.Hex())
+						return
+					}
 
-				temp1, _ := transferEther.Float64()
-				temp2, _ := price.Float64()
-				if temp1 != temp2 {
-					model.GetDB().UpdateAucBidWinnerState(&bid.Bid, context_auc.Bid_winner_state_none)
-					log.Error("Invalid purchase receipt price :", temp1, " real price :", temp2)
-					return
+					//받는 사람 보내는 사람 check
+					fromAddr := strings.Replace(receipt.Logs[0].Topics[1].Hex(), "000000000000000000000000", "", -1)
+					toAddr := strings.Replace(receipt.Logs[0].Topics[2].Hex(), "000000000000000000000000", "", -1)
+					if !strings.EqualFold(strings.ToUpper(bid.BidAttendeeWalletAddr), strings.ToUpper(fromAddr)) {
+						model.GetDB().UpdateAucBidWinnerState(&bid.Bid, context_auc.Bid_winner_state_none)
+						log.Error("Invalid from address :", fromAddr)
+						return
+					}
+					if !strings.EqualFold(strings.ToUpper(o.conf.ServerWalletAddr), strings.ToUpper(toAddr)) {
+						model.GetDB().UpdateAucBidWinnerState(&bid.Bid, context_auc.Bid_winner_state_none)
+						log.Error("Invalid to address :", toAddr)
+						return
+					}
+					// 구입 액수 check
+					value := new(big.Int)
+					value.SetString(hex.EncodeToString(receipt.Logs[0].Data), 16)
+					log.Info("transfer value :", value)
+
+					transferEther := ethCtrl.Convert(value.String(), ethCtrl.Wei, ethCtrl.Ether)
+
+					var price big.Rat
+					price = *price.SetFloat64(bid.BidAmount)
+
+					temp1, _ := transferEther.Float64()
+					temp2, _ := price.Float64()
+					if temp1 != temp2 {
+						model.GetDB().UpdateAucBidWinnerState(&bid.Bid, context_auc.Bid_winner_state_none)
+						log.Error("Invalid purchase receipt price :", temp1, " real price :", temp2)
+						return
+					}
 				}
 			} else if err.Error() == "not found" {
 				log.Debug("not found retry GetTransactionReceipt : ", bid.DepositTxHash, " bid id:", bid.Id)

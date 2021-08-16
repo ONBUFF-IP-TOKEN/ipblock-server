@@ -100,11 +100,11 @@
           method: "post"
           uri: "/:apiver/auc/bid/winner/giveup"
           precheck: true
-        # - 
-        #   handler: "GetAucBidListMe" # 내 입찰자 리스트 요청
-        #   method: "get"
-        #   uri: "/:apiver/auc/bid/list/me"
-        #   precheck: true
+        - 
+          handler: "GetAucBidListMe" # 내 입찰자 리스트 요청
+          method: "get"
+          uri: "/:apiver/auc/bid/list/me"
+          precheck: true
         # - 
         #   handler: "GetAucBidWinnerListMe" # 내 낙찰 리스트 요청
         #   method: "get"

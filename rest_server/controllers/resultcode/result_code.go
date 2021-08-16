@@ -37,6 +37,7 @@ const (
 	Result_TokenERC721CreateError   = 14001
 	Result_TokenERC721BurnError     = 14002
 	Result_TokenERC721TransferError = 14003
+	Result_Reused_Txhash            = 14004
 
 	Result_Auc_Product_Requiredtitle        = 15000
 	Result_Auc_Product_RequireDescription   = 15001
@@ -114,6 +115,7 @@ var ResultCodeText = map[int]string{
 	Result_TokenERC721CreateError:   "ERC721 create error",
 	Result_TokenERC721BurnError:     "ERC721 burn error",
 	Result_TokenERC721TransferError: "ERC721 transfer error",
+	Result_Reused_Txhash:            "Reused hash",
 
 	Result_Auc_Product_Requiredtitle:        "Require product title",
 	Result_Auc_Product_RequireDescription:   "Require description",

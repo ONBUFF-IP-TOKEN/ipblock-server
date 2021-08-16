@@ -37,6 +37,7 @@ type Bid struct {
 	DepositAmount         float64 `json:"deposit_amount"`
 	DepositTxHash         string  `json:"deposit_txhash"`
 	DepositState          int64   `json:"deposit_state"`
+	TokenType             string  `json:"token_type"`
 }
 
 // 입찰 보증금 확인

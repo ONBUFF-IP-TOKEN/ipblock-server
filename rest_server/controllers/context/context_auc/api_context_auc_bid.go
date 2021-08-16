@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	"github.com/ONBUFF-IP-TOKEN/baseapp/base"
+	"github.com/ONBUFF-IP-TOKEN/baseutil/log"
 	"github.com/ONBUFF-IP-TOKEN/ipblock-server/rest_server/controllers/context"
 	"github.com/ONBUFF-IP-TOKEN/ipblock-server/rest_server/controllers/resultcode"
 )
@@ -57,6 +58,7 @@ func (o *BidDepositVerify) CheckValidate(ctx *context.IPBlockServerContext) *bas
 		return base.MakeBaseResponse(resultcode.Result_Auc_Bid_RequireWalletAddress)
 	}
 	if !strings.EqualFold(o.BidAttendeeWalletAddr, ctx.WalletAddr()) {
+		log.Error("api:", o.BidAttendeeWalletAddr, " auth:", ctx.WalletAddr())
 		return base.MakeBaseResponse(resultcode.Result_Auc_Bid_InvalidWalletAddress)
 	}
 

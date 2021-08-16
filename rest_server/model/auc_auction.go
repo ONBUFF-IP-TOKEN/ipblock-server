@@ -10,10 +10,10 @@ import (
 )
 
 func (o *DB) InsertAucAuction(auction *context_auc.AucAuctionRegister) (int64, error) {
-	sqlQuery := fmt.Sprintf("INSERT INTO auc_auctions (bid_start_amount, bid_cur_amount, bid_unit, dib_deposit, " +
+	sqlQuery := fmt.Sprintf("INSERT INTO auc_auctions (bid_start_amount, bid_cur_amount, bid_unit, bid_deposit, " +
 		"auc_start_ts, auc_end_ts, auc_state, auc_round," +
 		"create_ts, active_state, product_id " +
-		") VALUES (?,?,?,?,?,?,?,?,?,?)")
+		") VALUES (?,?,?,?,?,?,?,?,?,?,?)")
 
 	result, err := o.Mysql.PrepareAndExec(sqlQuery, auction.BidStartAmount, auction.BidCurAmount, auction.BidUnit, auction.BidDeposit,
 		auction.AucStartTs, auction.AucEndTs, auction.AucState, auction.AucRound,

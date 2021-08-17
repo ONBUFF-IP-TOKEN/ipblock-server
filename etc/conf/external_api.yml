@@ -105,16 +105,16 @@
           method: "get"
           uri: "/:apiver/auc/bid/list/me"
           precheck: true
-        # - 
-        #   handler: "GetAucBidWinnerListMe" # 내 낙찰 리스트 요청
-        #   method: "get"
-        #   uri: "/:apiver/auc/bid/winner/list/me"
-        #   precheck: true
-        # - 
-        #   handler: "GetAucNftListMe" # 내 NFT 리스트 요청
-        #   method: "get"
-        #   uri: "/:apiver/auc/nft/list/me"
-        #   precheck: true
+        - 
+          handler: "GetAucBidWinnerListMe" # 내 낙찰 리스트 요청
+          method: "get"
+          uri: "/:apiver/auc/bid/winner/list/me"
+          precheck: true
+        - 
+          handler: "GetAucNftListMe" # 내 NFT 리스트 요청
+          method: "get"
+          uri: "/:apiver/auc/nft/list/me"
+          precheck: true
 
 
 

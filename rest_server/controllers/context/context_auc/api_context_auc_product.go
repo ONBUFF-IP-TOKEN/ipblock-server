@@ -63,6 +63,9 @@ func (o *ProductInfo) CheckValidate() *base.BaseResponse {
 	if len(o.Prices) == 0 {
 		return base.MakeBaseResponse(resultcode.Result_Auc_Product_RequirePriceInfo)
 	}
+	if len(o.IpOwnerShip) == 0 {
+		return base.MakeBaseResponse(resultcode.Result_Auc_Product_RequireIPOwnerShip)
+	}
 	return nil
 }
 

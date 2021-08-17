@@ -44,7 +44,7 @@ func (o *DB) GetAucBidListMe(pageInfo *context_auc.MeBidList, walletaddr string,
 			&links, &videos,
 			&bid.ProductInfo.OwnerNickName, &bid.ProductInfo.OwnerWalletAddr, &bid.ProductInfo.CreatorNickName, &bid.ProductInfo.CreatorWalletAddr,
 			&nftContract, &nftId, &nftCreateHash, &nftUri, &bid.ProductInfo.NftState,
-			&prices, &content); err != nil {
+			&prices, &content, &bid.ProductInfo.IpOwnerShip); err != nil {
 			log.Error(err)
 		} else {
 			aTitle := context_auc.Localization{}

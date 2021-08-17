@@ -88,7 +88,7 @@ func (o *DB) GetAucAuctionList(pageInfo *context_auc.AuctionList) ([]context_auc
 			&links, &videos,
 			&product.OwnerNickName, &product.OwnerWalletAddr, &product.CreatorNickName, &product.CreatorWalletAddr,
 			&nftContract, &nftId, &nftCreateHash, &nftUri, &product.NftState,
-			&prices, &content); err != nil {
+			&prices, &content, &product.IpOwnerShip); err != nil {
 			log.Error(err)
 		}
 
@@ -156,7 +156,7 @@ func (o *DB) GetAucAuction(aucId int64) (*context_auc.AucAuction, error) {
 			&links, &videos,
 			&product.OwnerNickName, &product.OwnerWalletAddr, &product.CreatorNickName, &product.CreatorWalletAddr,
 			&nftContract, &nftId, &nftCreateHash, &nftUri, &product.NftState,
-			&prices, &content); err != nil {
+			&prices, &content, &product.IpOwnerShip); err != nil {
 			log.Error(err)
 		}
 

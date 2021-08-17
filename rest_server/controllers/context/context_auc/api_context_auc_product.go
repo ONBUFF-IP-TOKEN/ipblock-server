@@ -33,7 +33,8 @@ type ProductInfo struct {
 
 	Prices []ProductPrice `json:"product_prices"`
 
-	Content string `json:"content"`
+	Content     string `json:"content"`
+	IpOwnerShip string `json:"ip_ownership"`
 }
 
 func NewProductInfo() *ProductInfo {

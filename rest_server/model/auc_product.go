@@ -12,7 +12,7 @@ import (
 func (o *DB) InsertAucProduct(product *context_auc.ProductInfo) (int64, error) {
 	sqlQuery := fmt.Sprintf("INSERT INTO auc_products (title, create_ts, description, media_original, media_original_type, media_thumnail, media_thumnail_type, " +
 		"links, videos, owner_nickname, owner_wallet_address, creator_nickname, creator_wallet_address," +
-		"prices, content ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)")
+		"prices, content, ip_ownership ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)")
 
 	title, _ := json.Marshal(product.Title)
 	desc, _ := json.Marshal(product.Desc)
@@ -24,7 +24,7 @@ func (o *DB) InsertAucProduct(product *context_auc.ProductInfo) (int64, error) {
 		product.MediaOriginal, product.MediaOriginalType, product.MediaThumnail, product.MediaThumnailType,
 		string(links), string(videos),
 		product.OwnerNickName, product.OwnerWalletAddr, product.CreatorNickName, product.CreatorWalletAddr,
-		string(prices), product.Content)
+		string(prices), product.Content, product.IpOwnerShip)
 
 	if err != nil {
 		log.Error(err)
@@ -44,7 +44,7 @@ func (o *DB) UpdateAucProduct(product *context_auc.ProductInfo) (int64, error) {
 		"media_original=?, media_original_type=?, media_thumnail=?, media_thumnail_type=?, " +
 		"links=?, videos=?, " +
 		"owner_nickname=?, owner_wallet_address=?, creator_nickname=?, creator_wallet_address=?, " +
-		"prices=?, content=? WHERE product_id=?")
+		"prices=?, content=?, ip_ownership=? WHERE product_id=?")
 
 	title, _ := json.Marshal(product.Title)
 	desc, _ := json.Marshal(product.Desc)
@@ -56,7 +56,7 @@ func (o *DB) UpdateAucProduct(product *context_auc.ProductInfo) (int64, error) {
 		product.MediaOriginal, product.MediaOriginalType, product.MediaThumnail, product.MediaThumnailType,
 		string(links), string(videos),
 		product.OwnerNickName, product.OwnerWalletAddr, product.CreatorNickName, product.CreatorWalletAddr,
-		string(prices), product.Content, product.Id)
+		string(prices), product.Content, product.IpOwnerShip, product.Id)
 
 	if err != nil {
 		log.Error(err)
@@ -155,7 +155,7 @@ func (o *DB) GetAucProductList(pageInfo *context_auc.ProductList) ([]context_auc
 			&links, &videos,
 			&product.OwnerNickName, &product.OwnerWalletAddr, &product.CreatorNickName, &product.CreatorWalletAddr,
 			&nftContract, &nftId, &nftCreateHash, &nftUri, &product.NftState,
-			&prices, &content); err != nil {
+			&prices, &content, &product.IpOwnerShip); err != nil {
 			log.Error(err)
 		}
 

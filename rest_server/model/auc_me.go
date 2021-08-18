@@ -78,13 +78,20 @@ func (o *DB) GetAucBidListMe(pageInfo *context_auc.MeBidList, walletaddr string,
 		}
 	}
 
-	totalCount, err := o.GetTotalAucMeBidSize(walletaddr)
+	totalCount, err := o.GetTotalAucMeBidSize(walletaddr, winner)
 
 	return meBids, totalCount, err
 }
 
-func (o *DB) GetTotalAucMeBidSize(walletAddr string) (int64, error) {
-	sqlQuery := fmt.Sprintf("SELECT COUNT(*) as count FROM auc_bids WHERE bid_attendee_wallet_Address = '%v'", walletAddr)
+func (o *DB) GetTotalAucMeBidSize(walletAddr string, winner bool) (int64, error) {
+	var sqlQuery string
+	if !winner {
+		sqlQuery = fmt.Sprintf("SELECT COUNT(*) as count FROM auc_bids WHERE bid_attendee_wallet_Address = '%v'", walletAddr)
+	} else {
+		sqlQuery = fmt.Sprintf("SELECT COUNT(*) as count FROM auc_bids WHERE bid_attendee_wallet_Address = '%v' AND bid_state=%v",
+			walletAddr, context_auc.Bid_state_success)
+	}
+
 	rows, err := o.Mysql.Query(sqlQuery)
 	var count int64
 	if err != nil {

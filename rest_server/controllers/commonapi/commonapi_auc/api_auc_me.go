@@ -33,6 +33,7 @@ func GetAucBidListMe(pageInfo *context_auc.MeBidList, ctx *context.IPBlockServer
 	return ctx.EchoContext.JSON(http.StatusOK, resp)
 }
 
+// 내 낙찰 내역
 func GetAucBidWinnerListMe(pageInfo *context_auc.MeBidList, ctx *context.IPBlockServerContext) error {
 	resp := new(base.BaseResponse)
 	resp.Success()

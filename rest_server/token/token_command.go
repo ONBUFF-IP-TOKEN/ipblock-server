@@ -49,7 +49,7 @@ func (o *TokenCmd) StartTokenCommand() {
 	context.GetChanInstance().Put(context.TokenChannel, o.command)
 
 	go func() {
-		ticker := time.NewTicker(1 * time.Millisecond)
+		ticker := time.NewTicker(10 * time.Millisecond)
 
 		defer func() {
 			ticker.Stop()

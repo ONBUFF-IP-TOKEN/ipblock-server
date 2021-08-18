@@ -10,21 +10,19 @@ import (
 )
 
 func (o *DB) InsertAucProduct(product *context_auc.ProductInfo) (int64, error) {
-	sqlQuery := fmt.Sprintf("INSERT INTO auc_products (title, create_ts, description, media_original, media_original_type, media_thumnail, media_thumnail_type, " +
-		"links, videos, owner_nickname, owner_wallet_address, creator_nickname, creator_wallet_address," +
-		"prices, content, ip_ownership ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)")
+	sqlQuery := fmt.Sprintf("INSERT INTO auc_products (title, create_ts, description, " +
+		"owner_nickname, owner_wallet_address, creator_nickname, creator_wallet_address," +
+		"prices, content, ip_ownership, media ) VALUES (?,?,?,?,?,?,?,?,?,?,?)")
 
 	title, _ := json.Marshal(product.Title)
 	desc, _ := json.Marshal(product.Desc)
-	links, _ := json.Marshal(product.Links)
-	videos, _ := json.Marshal(product.Videos)
 	prices, _ := json.Marshal(product.Prices)
+	content, _ := json.Marshal(product.Content)
+	media, _ := json.Marshal(product.Media)
 
 	result, err := o.Mysql.PrepareAndExec(sqlQuery, string(title), product.CreateTs, string(desc),
-		product.MediaOriginal, product.MediaOriginalType, product.MediaThumnail, product.MediaThumnailType,
-		string(links), string(videos),
 		product.OwnerNickName, product.OwnerWalletAddr, product.CreatorNickName, product.CreatorWalletAddr,
-		string(prices), product.Content, product.IpOwnerShip)
+		string(prices), content, product.IpOwnerShip, media)
 
 	if err != nil {
 		log.Error(err)
@@ -41,22 +39,18 @@ func (o *DB) InsertAucProduct(product *context_auc.ProductInfo) (int64, error) {
 
 func (o *DB) UpdateAucProduct(product *context_auc.ProductInfo) (int64, error) {
 	sqlQuery := fmt.Sprintf("UPDATE auc_products set title=?, description=?, " +
-		"media_original=?, media_original_type=?, media_thumnail=?, media_thumnail_type=?, " +
-		"links=?, videos=?, " +
 		"owner_nickname=?, owner_wallet_address=?, creator_nickname=?, creator_wallet_address=?, " +
-		"prices=?, content=?, ip_ownership=? WHERE product_id=?")
+		"prices=?, content=?, ip_ownership=?, media=? WHERE product_id=?")
 
 	title, _ := json.Marshal(product.Title)
 	desc, _ := json.Marshal(product.Desc)
-	links, _ := json.Marshal(product.Links)
-	videos, _ := json.Marshal(product.Videos)
 	prices, _ := json.Marshal(product.Prices)
+	content, _ := json.Marshal(product.Content)
+	media, _ := json.Marshal(product.Media)
 
 	result, err := o.Mysql.PrepareAndExec(sqlQuery, string(title), string(desc),
-		product.MediaOriginal, product.MediaOriginalType, product.MediaThumnail, product.MediaThumnailType,
-		string(links), string(videos),
 		product.OwnerNickName, product.OwnerWalletAddr, product.CreatorNickName, product.CreatorWalletAddr,
-		string(prices), product.Content, product.IpOwnerShip, product.Id)
+		string(prices), content, product.IpOwnerShip, media, product.Id)
 
 	if err != nil {
 		log.Error(err)
@@ -144,18 +138,16 @@ func (o *DB) GetAucProductList(pageInfo *context_auc.ProductList) ([]context_auc
 
 	defer rows.Close()
 
-	var title, desc, links, videos, prices, content sql.NullString
+	var title, desc, prices, content, media sql.NullString
 	var nftId sql.NullInt64
 	var nftContract, nftCreateHash, nftUri sql.NullString
 	products := make([]context_auc.ProductInfo, 0)
 	for rows.Next() {
 		product := context_auc.ProductInfo{}
 		if err := rows.Scan(&product.Id, &title, &product.CreateTs, &desc,
-			&product.MediaOriginal, &product.MediaOriginalType, &product.MediaThumnail, &product.MediaThumnailType,
-			&links, &videos,
 			&product.OwnerNickName, &product.OwnerWalletAddr, &product.CreatorNickName, &product.CreatorWalletAddr,
 			&nftContract, &nftId, &nftCreateHash, &nftUri, &product.NftState,
-			&prices, &content, &product.IpOwnerShip); err != nil {
+			&prices, &content, &product.IpOwnerShip, &media); err != nil {
 			log.Error(err)
 		}
 
@@ -167,14 +159,6 @@ func (o *DB) GetAucProductList(pageInfo *context_auc.ProductList) ([]context_auc
 		json.Unmarshal([]byte(desc.String), &aDesc)
 		product.Desc = aDesc
 
-		aLinks := []context_auc.Urls{}
-		json.Unmarshal([]byte(links.String), &aLinks)
-		product.Links = aLinks
-
-		aVideos := []context_auc.Urls{}
-		json.Unmarshal([]byte(videos.String), &aVideos)
-		product.Videos = aVideos
-
 		product.NftContract = nftContract.String
 		product.NftId = nftId.Int64
 		product.NftCreateTxHash = nftCreateHash.String
@@ -185,7 +169,15 @@ func (o *DB) GetAucProductList(pageInfo *context_auc.ProductList) ([]context_auc
 		json.Unmarshal([]byte(prices.String), &aPrices)
 		product.Prices = aPrices
 
-		product.Content = content.String
+		//content 변환
+		aContent := context_auc.Content{}
+		json.Unmarshal([]byte(content.String), &aContent)
+		product.Content = aContent
+
+		//media 변환
+		aMedia := context_auc.MediaInfo{}
+		json.Unmarshal([]byte(media.String), &aMedia)
+		product.Media = aMedia
 
 		products = append(products, product)
 	}

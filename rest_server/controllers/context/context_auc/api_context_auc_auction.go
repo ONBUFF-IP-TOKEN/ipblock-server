@@ -18,6 +18,7 @@ type AucAuction struct {
 	CreateTs       int64       `json:"create_ts"`
 	ActiveState    int64       `json:"active_state"`
 	ProductId      int64       `json:"product_id"`
+	Recommand      int64       `json:"recommand"`
 	ProductInfo    ProductInfo `json:"product"`
 }
 

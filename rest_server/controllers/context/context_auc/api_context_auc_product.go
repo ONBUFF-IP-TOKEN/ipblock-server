@@ -5,20 +5,46 @@ import (
 	"github.com/ONBUFF-IP-TOKEN/ipblock-server/rest_server/controllers/resultcode"
 )
 
+type CardInfo struct {
+	BackgroundColor string `json:"bg_color"`     // 0xffffff
+	BorderColor     string `json:"border_color"` // 0xffcc00
+	CardGrade       string `json:"card_grade"`   // level 4
+}
+
+// content info
+type Content struct {
+	CardInfo CardInfo `json:"card_info"`
+
+	BackgroundColor string `json:"bg_color"` // 0xffffff
+}
+
+// media info
+type MediaInfo struct {
+	MediaOriginal     string `json:"media_origin"`      // url
+	MediaOriginalType string `json:"media_origin_type"` // video/mp4, image/png....
+
+	MainImg         string `json:"main_img"`
+	MainImgThumnail string `json:"main_img_thumnail"`
+	MainImgType     string `json:"main_img_type"` // image/gif, image/png
+
+	SubImg         []string `json:"sub_img"`
+	SubImgThumnail []string `json:"sub_img_thumnail"`
+	SubImgType     string   `json:"sub_img_type"` // image/png
+
+	CertifiImg         string `json:"certifi_img"`
+	CertifiIMgThumnail string `json:"certifi_img_thumnail"`
+	CertifiImgType     string `json:"certifi_img_type"` // image/png
+
+	Links  []string `json:"links"`
+	Videos []string `json:"videos"`
+}
+
 // product
 type ProductInfo struct {
 	Id       int64        `json:"product_id"`
 	Title    Localization `json:"title"`
 	CreateTs int64        `json:"create_ts"`
 	Desc     Localization `json:"desc"`
-
-	MediaOriginal     string `json:"media_original"`
-	MediaOriginalType string `json:"media_original_type"`
-	MediaThumnail     string `json:"media_thumnail"`
-	MediaThumnailType string `json:"media_thumnail_type"`
-
-	Links  []Urls `json:"links"`
-	Videos []Urls `json:"videos"`
 
 	OwnerNickName     string `json:"owner_nickname"`
 	OwnerWalletAddr   string `json:"owner_wallet_address"`
@@ -33,8 +59,10 @@ type ProductInfo struct {
 
 	Prices []ProductPrice `json:"product_prices"`
 
-	Content     string `json:"content"`
-	IpOwnerShip string `json:"ip_ownership"`
+	Content     Content `json:"content"`
+	IpOwnerShip string  `json:"ip_ownership"`
+
+	Media MediaInfo `json:"media"`
 }
 
 func NewProductInfo() *ProductInfo {
@@ -47,12 +75,6 @@ func (o *ProductInfo) CheckValidate() *base.BaseResponse {
 	}
 	if len(o.Desc.En) == 0 || len(o.Desc.Ko) == 0 {
 		return base.MakeBaseResponse(resultcode.Result_Auc_Product_RequireDescription)
-	}
-	if len(o.MediaOriginal) == 0 || len(o.MediaOriginalType) == 0 {
-		return base.MakeBaseResponse(resultcode.Result_Auc_Product_RequireMediaOriginal)
-	}
-	if len(o.MediaThumnail) == 0 || len(o.MediaThumnailType) == 0 {
-		return base.MakeBaseResponse(resultcode.Result_Auc_Product_RequireMediaThumnail)
 	}
 	if len(o.OwnerNickName) == 0 || len(o.OwnerWalletAddr) == 0 {
 		return base.MakeBaseResponse(resultcode.Result_Auc_Product_RequireOwnerInfo)
@@ -86,12 +108,6 @@ func (o *UpdateProduct) CheckValidate() *base.BaseResponse {
 	}
 	if len(o.Desc.En) == 0 || len(o.Desc.Ko) == 0 {
 		return base.MakeBaseResponse(resultcode.Result_Auc_Product_RequireDescription)
-	}
-	if len(o.MediaOriginal) == 0 || len(o.MediaOriginalType) == 0 {
-		return base.MakeBaseResponse(resultcode.Result_Auc_Product_RequireMediaOriginal)
-	}
-	if len(o.MediaThumnail) == 0 || len(o.MediaThumnailType) == 0 {
-		return base.MakeBaseResponse(resultcode.Result_Auc_Product_RequireMediaThumnail)
 	}
 	if len(o.OwnerNickName) == 0 || len(o.OwnerWalletAddr) == 0 {
 		return base.MakeBaseResponse(resultcode.Result_Auc_Product_RequireOwnerInfo)

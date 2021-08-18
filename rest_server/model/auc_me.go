@@ -29,7 +29,7 @@ func (o *DB) GetAucBidListMe(pageInfo *context_auc.MeBidList, walletaddr string,
 	defer rows.Close()
 
 	var bidWinnerTxHash sql.NullString
-	var title, desc, links, videos, prices, content sql.NullString
+	var title, desc, prices, content, media sql.NullString
 	var nftId sql.NullInt64
 	var nftContract, nftCreateHash, nftUri sql.NullString
 
@@ -40,11 +40,9 @@ func (o *DB) GetAucBidListMe(pageInfo *context_auc.MeBidList, walletaddr string,
 			&bid.Bid.DepositAmount, &bid.Bid.DepositTxHash, &bid.Bid.DepositState, &bid.Bid.TokenType,
 
 			&bid.ProductInfo.Id, &title, &bid.ProductInfo.CreateTs, &desc,
-			&bid.ProductInfo.MediaOriginal, &bid.ProductInfo.MediaOriginalType, &bid.ProductInfo.MediaThumnail, &bid.ProductInfo.MediaThumnailType,
-			&links, &videos,
 			&bid.ProductInfo.OwnerNickName, &bid.ProductInfo.OwnerWalletAddr, &bid.ProductInfo.CreatorNickName, &bid.ProductInfo.CreatorWalletAddr,
 			&nftContract, &nftId, &nftCreateHash, &nftUri, &bid.ProductInfo.NftState,
-			&prices, &content, &bid.ProductInfo.IpOwnerShip); err != nil {
+			&prices, &content, &bid.ProductInfo.IpOwnerShip, &media); err != nil {
 			log.Error(err)
 		} else {
 			aTitle := context_auc.Localization{}
@@ -54,14 +52,6 @@ func (o *DB) GetAucBidListMe(pageInfo *context_auc.MeBidList, walletaddr string,
 			aDesc := context_auc.Localization{}
 			json.Unmarshal([]byte(desc.String), &aDesc)
 			bid.ProductInfo.Desc = aDesc
-
-			aLinks := []context_auc.Urls{}
-			json.Unmarshal([]byte(links.String), &aLinks)
-			bid.ProductInfo.Links = aLinks
-
-			aVideos := []context_auc.Urls{}
-			json.Unmarshal([]byte(videos.String), &aVideos)
-			bid.ProductInfo.Videos = aVideos
 
 			bid.ProductInfo.NftContract = nftContract.String
 			bid.ProductInfo.NftId = nftId.Int64
@@ -73,7 +63,15 @@ func (o *DB) GetAucBidListMe(pageInfo *context_auc.MeBidList, walletaddr string,
 			json.Unmarshal([]byte(prices.String), &aPrices)
 			bid.ProductInfo.Prices = aPrices
 
-			bid.ProductInfo.Content = content.String
+			//content 변환
+			aContent := context_auc.Content{}
+			json.Unmarshal([]byte(content.String), &aContent)
+			bid.ProductInfo.Content = aContent
+
+			//media 변환
+			aMedia := context_auc.MediaInfo{}
+			json.Unmarshal([]byte(media.String), &aMedia)
+			bid.ProductInfo.Media = aMedia
 
 			bid.Bid.BidWinnerTxHash = bidWinnerTxHash.String
 			meBids = append(meBids, bid)

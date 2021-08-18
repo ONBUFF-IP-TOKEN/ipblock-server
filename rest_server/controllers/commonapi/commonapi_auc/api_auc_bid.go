@@ -127,19 +127,28 @@ func PostAucBidSubmit(bidSubmit *context_auc.BidSubmit, ctx *context.IPBlockServ
 			log.Error("not exist bids data")
 			resp.SetReturn(resultcode.Result_Auc_Bid_RequireDeposit)
 		} else {
-			// 2. 이미 내가 최고 입찰자 인지 확인
-			if strings.EqualFold(bid.BidAttendeeWalletAddr, ctx.WalletAddr()) {
-				resp.SetReturn(resultcode.Result_Auc_Bid_AlreadyBestAttendee)
+			if bid.BidAmount == 0 {
+				// 입찰 보증금만 내고 최고 입찰자가 없는경우 바로 입찰 성공 (auc_bids table update)
+				bidSubmit.BidState = context_auc.Bid_state_submit
+				if _, err := model.GetDB().UpdateAucBidSubmit(bidSubmit); err != nil {
+					log.Error("UpdateAucBidSubmit :", err)
+					resp.SetReturn(resultcode.Result_DBError)
+				}
 			} else {
-				// 3. 내가 제시한 입찰가가 최고가 인지 확인
-				if bidSubmit.BidAmount <= bid.BidAmount {
-					resp.SetReturn(resultcode.Result_Auc_Bid_NotBestBidAmount)
+				// 2. 이미 내가 최고 입찰자 인지 확인
+				if strings.EqualFold(bid.BidAttendeeWalletAddr, ctx.WalletAddr()) {
+					resp.SetReturn(resultcode.Result_Auc_Bid_AlreadyBestAttendee)
 				} else {
-					// 4. 입찰 성공 (auc_bids table update)
-					bidSubmit.BidState = context_auc.Bid_state_submit
-					if _, err := model.GetDB().UpdateAucBidSubmit(bidSubmit); err != nil {
-						log.Error("UpdateAucBidSubmit :", err)
-						resp.SetReturn(resultcode.Result_DBError)
+					// 3. 내가 제시한 입찰가가 최고가 인지 확인
+					if bidSubmit.BidAmount <= bid.BidAmount {
+						resp.SetReturn(resultcode.Result_Auc_Bid_NotBestBidAmount)
+					} else {
+						// 4. 입찰 성공 (auc_bids table update)
+						bidSubmit.BidState = context_auc.Bid_state_submit
+						if _, err := model.GetDB().UpdateAucBidSubmit(bidSubmit); err != nil {
+							log.Error("UpdateAucBidSubmit :", err)
+							resp.SetReturn(resultcode.Result_DBError)
+						}
 					}
 				}
 			}

@@ -119,7 +119,7 @@ func (o *DB) UpdateAucBidWinnerState(bid *context_auc.Bid, state int) (int64, er
 }
 
 func (o *DB) GetAucBidBestAttendee(aucId int64) (*context_auc.Bid, error) {
-	sqlQuery := fmt.Sprintf("SELECT * FROM auc_bids WHERE bid_amount != 0 ORDER BY bid_amount DESC limit 1")
+	sqlQuery := fmt.Sprintf("SELECT * FROM auc_bids ORDER BY bid_amount DESC limit 1")
 	rows, err := o.Mysql.Query(sqlQuery)
 
 	if err != nil {

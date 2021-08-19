@@ -237,6 +237,26 @@ func (o *DB) GetAucBidBestAttendeeByTxhash(txHash string) (bool, error) {
 	return true, nil
 }
 
+func (o *DB) DeleteAucBid(bid *context_auc.BidRemove) (bool, error) {
+	sqlQuery := "DELETE FROM auc_bids WHERE auc_id=? AND bid_attendee_wallet_address=?"
+
+	result, err := o.Mysql.PrepareAndExec(sqlQuery, bid.AucId, bid.BidAttendeeWalletAddr)
+	if err != nil {
+		log.Error(err)
+		return false, err
+	}
+	cnt, err := result.RowsAffected()
+	if cnt == 0 {
+		log.Error(err)
+		return false, err
+	}
+
+	// bid list cache 전체 삭제
+	o.DeleteBidList(bid.AucId)
+
+	return true, nil
+}
+
 func (o *DB) GetTotalAucBidSize() (int64, error) {
 	rows, err := o.Mysql.Query("SELECT COUNT(*) as count FROM auc_bids WHERE bid_amount != 0")
 	var count int64

@@ -85,4 +85,8 @@
           method: "delete"
           uri: "/:apiver/auc/auction/remove"
           precheck: true
-        
+        -
+          handler: "DeleteAucBidRemove" # 입찰 삭제
+          method: "delete"
+          uri: "/:apiver/auc/bid/remove"
+          precheck: true

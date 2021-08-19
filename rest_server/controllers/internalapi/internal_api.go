@@ -308,3 +308,20 @@ func (o *InternalAPI) DeleteAucAuctiontRemove(c echo.Context) error {
 
 	return commonapi_auc.DeleteAucAuctiontRemove(params, ctx)
 }
+
+// 입찰 정보 삭제 (보증금 납부부터 다시 해야함)
+func (o *InternalAPI) DeleteAucBidRemove(c echo.Context) error {
+	ctx := base.GetContext(c).(*context.IPBlockServerContext)
+
+	params := context_auc.NewBidRemove()
+	if err := ctx.EchoContext.Bind(params); err != nil {
+		log.Error(err)
+		return base.BaseJSONInternalServerError(c, err)
+	}
+
+	if err := params.CheckValidate(); err != nil {
+		return c.JSON(http.StatusOK, err)
+	}
+
+	return commonapi_auc.DeleteAucBidRemove(params, ctx)
+}

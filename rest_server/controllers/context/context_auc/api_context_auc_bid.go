@@ -206,3 +206,23 @@ func (o *BidWinnerGiveup) CheckValidate(ctx *context.IPBlockServerContext) *base
 }
 
 ////////////////////////////////////////////////
+
+// 입찰 삭제
+type BidRemove struct {
+	Bid
+}
+
+func NewBidRemove() *BidRemove {
+	return new(BidRemove)
+}
+
+func (o *BidRemove) CheckValidate() *base.BaseResponse {
+	if o.AucId <= 0 {
+		return base.MakeBaseResponse(resultcode.Result_Auc_Bid_RequireAucId)
+	}
+	if len(o.BidAttendeeWalletAddr) == 0 {
+		return base.MakeBaseResponse(resultcode.Result_Auc_Bid_RequireWalletAddress)
+	}
+
+	return nil
+}

@@ -318,3 +318,20 @@ func IsAuctionEnd(auction *context_auc.AucAuction, aucId int64) bool {
 
 	return auction.AucEndTs < datetime.GetTS2MilliSec()
 }
+
+// 입찰 삭제
+func DeleteAucBidRemove(bid *context_auc.BidRemove, ctx *context.IPBlockServerContext) error {
+	resp := new(base.BaseResponse)
+	resp.Success()
+
+	//1. auc_products table 에서 삭제
+	if ret, err := model.GetDB().DeleteAucBid(bid); err != nil {
+		log.Error("DeleteAucAuctiontRemove :", err)
+		resp.SetReturn(resultcode.Result_DBError)
+	} else {
+		if !ret {
+			resp.SetReturn(resultcode.Result_DBNotExistProduct)
+		}
+	}
+	return ctx.EchoContext.JSON(http.StatusOK, resp)
+}

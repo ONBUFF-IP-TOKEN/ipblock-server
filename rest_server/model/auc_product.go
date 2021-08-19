@@ -34,6 +34,8 @@ func (o *DB) InsertAucProduct(product *context_auc.ProductInfo) (int64, error) {
 		return -1, err
 	}
 	log.Debug("insert id:", insertId)
+	product.Id = insertId
+	o.CacheSetProduct(product)
 	return insertId, nil
 }
 
@@ -63,6 +65,9 @@ func (o *DB) UpdateAucProduct(product *context_auc.ProductInfo) (int64, error) {
 	}
 	log.Debug("UpdateAucProduct id:", Id)
 
+	// cache 삭제
+	o.CacheDelProduct(product.Id)
+
 	// product list cache 전체 삭제
 	o.DeleteProductList()
 	// auction list cache 전체 삭제
@@ -71,10 +76,10 @@ func (o *DB) UpdateAucProduct(product *context_auc.ProductInfo) (int64, error) {
 	return Id, nil
 }
 
-func (o *DB) UpdateAucProductNft(product *context_auc.ProductInfo, nftContract, creatHash, uri string) (int64, error) {
+func (o *DB) UpdateAucProductNft(product *context_auc.ProductInfo) (int64, error) {
 	sqlQuery := "UPDATE auc_products set nft_contract=?, nft_create_txhash=?, nft_uri=? WHERE product_id=?"
 
-	result, err := o.Mysql.PrepareAndExec(sqlQuery, nftContract, creatHash, uri, product.Id)
+	result, err := o.Mysql.PrepareAndExec(sqlQuery, product.NftContract, product.NftCreateTxHash, product.NftUri, product.Id)
 	if err != nil {
 		log.Error(err)
 		return 0, err
@@ -84,6 +89,9 @@ func (o *DB) UpdateAucProductNft(product *context_auc.ProductInfo, nftContract, 
 		log.Error(err)
 		return 0, err
 	}
+
+	// cache 삭제
+	o.CacheDelProduct(product.Id)
 
 	return cnt, nil
 }
@@ -101,6 +109,8 @@ func (o *DB) DeleteAucProduct(productId int64) (bool, error) {
 		log.Error(err)
 		return false, err
 	}
+	// product cache 삭제
+	o.CacheDelProduct(productId)
 
 	// product list cache 전체 삭제
 	o.DeleteProductList()
@@ -124,7 +134,60 @@ func (o *DB) UpdateAucProductNftTokenId(createHash string, tokenId int64) (int64
 		return 0, err
 	}
 
+	if newProduct, err := o.GetAucProductByNftCreatHash(createHash); err == nil {
+		// product cache 업데이트
+		o.CacheDelProduct(newProduct.Id)
+	}
+
 	return cnt, nil
+}
+
+func (o *DB) GetAucProductByNftCreatHash(createHash string) (*context_auc.ProductInfo, error) {
+	sqlQuery := fmt.Sprintf("SELECT * FROM auc_products WHERE nft_create_txhash='%v'", createHash)
+	rows, err := o.Mysql.Query(sqlQuery)
+
+	if err != nil {
+		log.Error(err)
+		return nil, err
+	}
+
+	defer rows.Close()
+
+	product := &context_auc.ProductInfo{}
+	for rows.Next() {
+		var err error
+		product, err = o.MakeProduct(rows)
+		if err != nil {
+			log.Error(err)
+			continue
+		}
+	}
+	o.CacheSetProduct(product)
+	return product, err
+}
+
+func (o *DB) GetAucProductById(productId int64) (*context_auc.ProductInfo, error) {
+	sqlQuery := fmt.Sprintf("SELECT * FROM auc_products WHERE product_id=%v", productId)
+	rows, err := o.Mysql.Query(sqlQuery)
+
+	if err != nil {
+		log.Error(err)
+		return nil, err
+	}
+
+	defer rows.Close()
+
+	product := &context_auc.ProductInfo{}
+	for rows.Next() {
+		var err error
+		product, err = o.MakeProduct(rows)
+		if err != nil {
+			log.Error(err)
+			continue
+		}
+	}
+	o.CacheSetProduct(product)
+	return product, err
 }
 
 func (o *DB) GetAucProductList(pageInfo *context_auc.ProductList) ([]context_auc.ProductInfo, int64, error) {
@@ -138,53 +201,65 @@ func (o *DB) GetAucProductList(pageInfo *context_auc.ProductList) ([]context_auc
 
 	defer rows.Close()
 
-	var title, desc, prices, content, media sql.NullString
-	var nftId sql.NullInt64
-	var nftContract, nftCreateHash, nftUri sql.NullString
 	products := make([]context_auc.ProductInfo, 0)
 	for rows.Next() {
-		product := context_auc.ProductInfo{}
-		if err := rows.Scan(&product.Id, &title, &product.CreateTs, &desc,
-			&product.OwnerNickName, &product.OwnerWalletAddr, &product.CreatorNickName, &product.CreatorWalletAddr,
-			&nftContract, &nftId, &nftCreateHash, &nftUri, &product.NftState,
-			&prices, &content, &product.IpOwnerShip, &media); err != nil {
+		product, err := o.MakeProduct(rows)
+		if err != nil {
 			log.Error(err)
+			continue
 		}
-
-		aTitle := context_auc.Localization{}
-		json.Unmarshal([]byte(title.String), &aTitle)
-		product.Title = aTitle
-
-		aDesc := context_auc.Localization{}
-		json.Unmarshal([]byte(desc.String), &aDesc)
-		product.Desc = aDesc
-
-		product.NftContract = nftContract.String
-		product.NftId = nftId.Int64
-		product.NftCreateTxHash = nftCreateHash.String
-		product.NftUri = nftUri.String
-
-		//prices 변환
-		aPrices := []context_auc.ProductPrice{}
-		json.Unmarshal([]byte(prices.String), &aPrices)
-		product.Prices = aPrices
-
-		//content 변환
-		aContent := context_auc.Content{}
-		json.Unmarshal([]byte(content.String), &aContent)
-		product.Content = aContent
-
-		//media 변환
-		aMedia := context_auc.MediaInfo{}
-		json.Unmarshal([]byte(media.String), &aMedia)
-		product.Media = aMedia
-
-		products = append(products, product)
+		o.CacheSetProduct(product)
+		products = append(products, *product)
 	}
 
 	totalCount, err := o.GetTotalAucProductSize()
 
 	return products, totalCount, err
+}
+
+func (o *DB) MakeProduct(rows *sql.Rows) (*context_auc.ProductInfo, error) {
+	var title, desc, prices, content, media sql.NullString
+	var nftId sql.NullInt64
+	var nftContract, nftCreateHash, nftUri sql.NullString
+
+	product := &context_auc.ProductInfo{}
+	if err := rows.Scan(&product.Id, &title, &product.CreateTs, &desc,
+		&product.OwnerNickName, &product.OwnerWalletAddr, &product.CreatorNickName, &product.CreatorWalletAddr,
+		&nftContract, &nftId, &nftCreateHash, &nftUri, &product.NftState,
+		&prices, &content, &product.IpOwnerShip, &media); err != nil {
+		log.Error(err)
+		return nil, err
+	}
+
+	aTitle := context_auc.Localization{}
+	json.Unmarshal([]byte(title.String), &aTitle)
+	product.Title = aTitle
+
+	aDesc := context_auc.Localization{}
+	json.Unmarshal([]byte(desc.String), &aDesc)
+	product.Desc = aDesc
+
+	product.NftContract = nftContract.String
+	product.NftId = nftId.Int64
+	product.NftCreateTxHash = nftCreateHash.String
+	product.NftUri = nftUri.String
+
+	//prices 변환
+	aPrices := []context_auc.ProductPrice{}
+	json.Unmarshal([]byte(prices.String), &aPrices)
+	product.Prices = aPrices
+
+	//content 변환
+	aContent := context_auc.Content{}
+	json.Unmarshal([]byte(content.String), &aContent)
+	product.Content = aContent
+
+	//media 변환
+	aMedia := context_auc.MediaInfo{}
+	json.Unmarshal([]byte(media.String), &aMedia)
+	product.Media = aMedia
+
+	return product, nil
 }
 
 func (o *DB) GetTotalAucProductSize() (int64, error) {

@@ -133,6 +133,9 @@ func PostAucBidSubmit(bidSubmit *context_auc.BidSubmit, ctx *context.IPBlockServ
 				if _, err := model.GetDB().UpdateAucBidSubmit(bidSubmit); err != nil {
 					log.Error("UpdateAucBidSubmit :", err)
 					resp.SetReturn(resultcode.Result_DBError)
+				} else {
+					// 최고가 정보 업데이트
+					model.GetDB().UpdateAucAuctionBestBid(bidSubmit.AucId, bidSubmit.BidAmount)
 				}
 			} else {
 				// 2. 이미 내가 최고 입찰자 인지 확인
@@ -148,6 +151,9 @@ func PostAucBidSubmit(bidSubmit *context_auc.BidSubmit, ctx *context.IPBlockServ
 						if _, err := model.GetDB().UpdateAucBidSubmit(bidSubmit); err != nil {
 							log.Error("UpdateAucBidSubmit :", err)
 							resp.SetReturn(resultcode.Result_DBError)
+						} else {
+							// 최고가 정보 업데이트
+							model.GetDB().UpdateAucAuctionBestBid(bidSubmit.AucId, bidSubmit.BidAmount)
 						}
 					}
 				}
@@ -159,26 +165,34 @@ func PostAucBidSubmit(bidSubmit *context_auc.BidSubmit, ctx *context.IPBlockServ
 }
 
 // 입찰자 리스트
-func GetAucBidList(pageInfo *context_auc.BidAttendeeList, ctx *context.IPBlockServerContext) error {
+func GetAucBidList(bidList *context_auc.BidAttendeeList, ctx *context.IPBlockServerContext) error {
 	resp := new(base.BaseResponse)
 	resp.Success()
 
-	// cache 에 없다면 db에서 직접 로드
-	bids, totalCount, err := model.GetDB().GetAucBidBestAttendeeList(pageInfo)
-	if err != nil {
-		resp.SetReturn(resultcode.Result_DBError)
-	} else {
+	if pageInfo, bids, err := model.GetDB().GetBidListCache(bidList.AucId, &bidList.PageInfo); err == nil {
 		resp.Success()
-		pageInfo := context_auc.PageInfoResponse{
-			PageOffset: pageInfo.PageOffset,
-			PageSize:   int64(len(bids)),
-			TotalSize:  totalCount,
-		}
 		resp.Value = context_auc.BidListResponse{
-			PageInfo: pageInfo,
-			Bids:     bids,
+			PageInfo: *pageInfo,
+			Bids:     *bids,
 		}
-		//model.GetDB().SetProductListCache(&productList.PageInfo, &pageInfo, &products)
+	} else {
+		// cache 에 없다면 db에서 직접 로드
+		bids, totalCount, err := model.GetDB().GetAucBidBestAttendeeList(bidList)
+		if err != nil {
+			resp.SetReturn(resultcode.Result_DBError)
+		} else {
+			resp.Success()
+			pageInfo := context_auc.PageInfoResponse{
+				PageOffset: bidList.PageOffset,
+				PageSize:   int64(len(bids)),
+				TotalSize:  totalCount,
+			}
+			resp.Value = context_auc.BidListResponse{
+				PageInfo: pageInfo,
+				Bids:     bids,
+			}
+			model.GetDB().SetBidListCache(bidList.AucId, &bidList.PageInfo, &pageInfo, &bids)
+		}
 	}
 
 	return ctx.EchoContext.JSON(http.StatusOK, resp)

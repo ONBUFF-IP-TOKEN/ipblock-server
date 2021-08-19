@@ -115,14 +115,17 @@ func (o *TokenCmd) CreateNft(data interface{}, cb chan interface{}) {
 func (o *TokenCmd) CreateNftbyAut(data interface{}, cb chan interface{}) {
 	product := data.(*context_auc.ProductInfo)
 
-	uri := GetNftUri(o.conf.NftUriDomainAut, product.Id, 0)
-	if txHash, err := o.itoken.Tokens[Token_nft].Nft_CreateERC721(o.conf.ServerWalletAddr, uri); err != nil {
+	var err error
+
+	product.NftUri = GetNftUri(o.conf.NftUriDomainAut, product.Id, 0)
+	product.NftContract = o.conf.TokenAddrs[Token_nft]
+	if product.NftCreateTxHash, err = o.itoken.Tokens[Token_nft].Nft_CreateERC721(o.conf.ServerWalletAddr, product.NftUri); err != nil {
 		log.Error("Nft_CreateERC721 error :", err)
 		cb <- base.MakeBaseResponse(resultcode.Result_TokenERC721CreateError)
 	} else {
 		// txhash update
-		if _, err := model.GetDB().UpdateAucProductNft(product, o.conf.TokenAddrs[Token_nft], txHash, uri); err != nil {
-			log.Error("UpdateAucProductNft fail : ", err, " product_id:", product.Id, " txhash:", txHash)
+		if _, err := model.GetDB().UpdateAucProductNft(product); err != nil {
+			log.Error("UpdateAucProductNft fail : ", err, " product_id:", product.Id, " txhash:", product.NftCreateTxHash)
 			cb <- base.MakeBaseResponse(resultcode.Result_DBError)
 		} else {
 			// product list cache 전체 삭제

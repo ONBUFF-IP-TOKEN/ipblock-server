@@ -27,6 +27,7 @@ func (o *DB) InsertAucBid(bid *context_auc.BidDeposit) (int64, error) {
 		return -1, err
 	}
 	log.Debug("InsertAucBid id:", insertId)
+	o.DeleteBidList(bid.AucId)
 	return insertId, nil
 }
 
@@ -45,7 +46,7 @@ func (o *DB) UpdateAucBidDepositState(bid *context_auc.BidDeposit, state int64) 
 		return -1, err
 	}
 	log.Debug("UpdateAucBidDepositState id:", id, " deposit_state:", state)
-
+	o.DeleteBidList(bid.AucId)
 	return id, nil
 }
 
@@ -64,7 +65,7 @@ func (o *DB) UpdateAucBidSubmit(bidSubmit *context_auc.BidSubmit) (int64, error)
 		return -1, err
 	}
 	log.Debug("UpdateAucBidSubmit id:", id)
-
+	o.DeleteBidList(bidSubmit.AucId)
 	return id, nil
 }
 
@@ -89,7 +90,7 @@ func (o *DB) UpdateAucBidWinner(bid *context_auc.BidWinner) (int64, error) {
 		return id, err
 	}
 	log.Debug("UpdateAucBidWinner id:", id)
-
+	o.DeleteBidList(bid.AucId)
 	return id, nil
 }
 
@@ -114,7 +115,7 @@ func (o *DB) UpdateAucBidWinnerState(bid *context_auc.Bid, state int) (int64, er
 	// 	return id, err
 	// }
 	log.Debug("UpdateAucBidWinner id:", id)
-
+	o.DeleteBidList(bid.AucId)
 	return id, nil
 }
 
@@ -177,7 +178,7 @@ func (o *DB) GetAucBidAttendee(aucId int64, walletAddr string) (*context_auc.Bid
 }
 
 func (o *DB) GetAucBidBestAttendeeList(pageInfo *context_auc.BidAttendeeList) ([]context_auc.Bid, int64, error) {
-	sqlQuery := fmt.Sprintf("SELECT * FROM auc_bids WHERE bid_amount != 0 ORDER BY bid_amount DESC LIMIT %v,%v", pageInfo.PageSize*pageInfo.PageOffset, pageInfo.PageSize)
+	sqlQuery := fmt.Sprintf("SELECT * FROM auc_bids WHERE bid_amount != 0 and auc_id=%v ORDER BY bid_amount DESC LIMIT %v,%v", pageInfo.AucId, pageInfo.PageSize*pageInfo.PageOffset, pageInfo.PageSize)
 	rows, err := o.Mysql.Query(sqlQuery)
 
 	if err != nil {

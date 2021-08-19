@@ -59,6 +59,28 @@ func (o *DB) UpdateAucAuction(auction *context_auc.AucAuctionUpdate) (int64, err
 	return id, nil
 }
 
+// 최고가 업데이트
+func (o *DB) UpdateAucAuctionBestBid(auctionId int64, curAmount float64) (int64, error) {
+	sqlQuery := fmt.Sprintf("UPDATE auc_auctions set bid_cur_amount=? WHERE auc_id=?")
+
+	result, err := o.Mysql.PrepareAndExec(sqlQuery, curAmount, auctionId)
+
+	if err != nil {
+		log.Error(err)
+		return -1, err
+	}
+	id, err := result.RowsAffected()
+	if err != nil {
+		log.Error(err)
+		return -1, err
+	}
+	log.Debug("UpdateAucAuctionBestBid id:", id)
+
+	// auction list cache 전체 삭제
+	o.DeleteAuctionList()
+	return id, nil
+}
+
 func (o *DB) GetAucAuctionList(pageInfo *context_auc.AuctionList) ([]context_auc.AucAuction, int64, error) {
 	sqlQuery := fmt.Sprintf("SELECT * FROM auc_auctions LEFT JOIN auc_products on auc_auctions.product_id = auc_products.product_id "+
 		"ORDER BY auc_id DESC LIMIT %v,%v", pageInfo.PageSize*pageInfo.PageOffset, pageInfo.PageSize)

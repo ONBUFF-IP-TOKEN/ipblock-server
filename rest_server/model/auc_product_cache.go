@@ -2,6 +2,7 @@ package model
 
 import (
 	"fmt"
+	"strconv"
 
 	"github.com/ONBUFF-IP-TOKEN/baseutil/log"
 	"github.com/ONBUFF-IP-TOKEN/ipblock-server/rest_server/config"
@@ -11,6 +12,23 @@ import (
 type ProductListCache struct {
 	PageInfo    *context_auc.PageInfoResponse `json:"page_info"`
 	ProductList *[]context_auc.ProductInfo    `json:"list"`
+}
+
+// product set
+func (o *DB) CacheSetProduct(product *context_auc.ProductInfo) error {
+	if !o.Cache.Enable() {
+		log.Warnf("redis disable")
+	}
+	ckey := genCacheKeyProduct()
+	return o.Cache.HSet(ckey, strconv.FormatInt(product.Id, 10), product)
+}
+
+func (o *DB) CacheDelProduct(prductId int64) error {
+	if !o.Cache.Enable() {
+		log.Warnf("redis disable")
+	}
+	ckey := genCacheKeyProduct()
+	return o.Cache.HDel(ckey, strconv.FormatInt(prductId, 10))
 }
 
 func (o *DB) DeleteProductList() error {
@@ -48,6 +66,10 @@ func (o *DB) GetProductListCache(pageInfo *context_auc.PageInfo) (*context_auc.P
 	err := o.Cache.HGet(cKey, field, productListCache)
 
 	return productListCache.PageInfo, productListCache.ProductList, err
+}
+
+func genCacheKeyProduct() string {
+	return config.GetInstance().DBPrefix + ":AUCTION:PRODUCT"
 }
 
 func genCacheKeyByAucProduct(id string) string {

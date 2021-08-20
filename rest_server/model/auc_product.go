@@ -156,7 +156,7 @@ func (o *DB) GetAucProductByNftCreatHash(createHash string) (*context_auc.Produc
 	product := &context_auc.ProductInfo{}
 	for rows.Next() {
 		var err error
-		product, err = o.MakeProduct(rows)
+		product, err = o.ScanProduct(rows)
 		if err != nil {
 			log.Error(err)
 			continue
@@ -167,6 +167,7 @@ func (o *DB) GetAucProductByNftCreatHash(createHash string) (*context_auc.Produc
 }
 
 func (o *DB) GetAucProductById(productId int64) (*context_auc.ProductInfo, error) {
+	var err error
 	sqlQuery := fmt.Sprintf("SELECT * FROM auc_products WHERE product_id=%v", productId)
 	rows, err := o.Mysql.Query(sqlQuery)
 
@@ -179,8 +180,7 @@ func (o *DB) GetAucProductById(productId int64) (*context_auc.ProductInfo, error
 
 	product := &context_auc.ProductInfo{}
 	for rows.Next() {
-		var err error
-		product, err = o.MakeProduct(rows)
+		product, err = o.ScanProduct(rows)
 		if err != nil {
 			log.Error(err)
 			continue
@@ -203,7 +203,7 @@ func (o *DB) GetAucProductList(pageInfo *context_auc.ProductList) ([]context_auc
 
 	products := make([]context_auc.ProductInfo, 0)
 	for rows.Next() {
-		product, err := o.MakeProduct(rows)
+		product, err := o.ScanProduct(rows)
 		if err != nil {
 			log.Error(err)
 			continue
@@ -217,7 +217,7 @@ func (o *DB) GetAucProductList(pageInfo *context_auc.ProductList) ([]context_auc
 	return products, totalCount, err
 }
 
-func (o *DB) MakeProduct(rows *sql.Rows) (*context_auc.ProductInfo, error) {
+func (o *DB) ScanProduct(rows *sql.Rows) (*context_auc.ProductInfo, error) {
 	var title, desc, prices, content, media sql.NullString
 	var nftId sql.NullInt64
 	var nftContract, nftCreateHash, nftUri sql.NullString
@@ -227,7 +227,7 @@ func (o *DB) MakeProduct(rows *sql.Rows) (*context_auc.ProductInfo, error) {
 		&product.OwnerNickName, &product.OwnerWalletAddr, &product.CreatorNickName, &product.CreatorWalletAddr,
 		&nftContract, &nftId, &nftCreateHash, &nftUri, &product.NftState,
 		&prices, &content, &product.IpOwnerShip, &media); err != nil {
-		log.Error(err)
+		log.Error("ScanProduct error: ", err)
 		return nil, err
 	}
 
@@ -263,17 +263,10 @@ func (o *DB) MakeProduct(rows *sql.Rows) (*context_auc.ProductInfo, error) {
 }
 
 func (o *DB) GetTotalAucProductSize() (int64, error) {
-	rows, err := o.Mysql.Query("SELECT COUNT(*) as count FROM auc_products")
-	var count int64
-	if err != nil {
-		log.Error(err)
-		return count, err
+	var dataCount int64
+	if err := o.Mysql.QueryRow("SELECT COUNT(*) as count FROM auc_products", &dataCount); err != nil {
+		log.Error("GetTotalAucProductSize : ", err)
+		return 0, err
 	}
-
-	defer rows.Close()
-	for rows.Next() {
-		rows.Scan(&count)
-	}
-
-	return count, nil
+	return dataCount, nil
 }

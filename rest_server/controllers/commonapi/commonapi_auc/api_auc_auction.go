@@ -49,29 +49,36 @@ func PostAucAuctionUpdate(auction *context_auc.AucAuctionUpdate, ctx *context.IP
 func GetAucAuctionList(auctionList *context_auc.AuctionList, ctx *context.IPBlockServerContext) error {
 	resp := new(base.BaseResponse)
 
-	//redis exist check
-	if pageInfo, auctions, err := model.GetDB().GetAuctionListCache(&auctionList.PageInfo); err == nil {
-		resp.Success()
-		resp.Value = context_auc.AuctionListResponse{
-			PageInfo:    *pageInfo,
-			AucAuctions: *auctions,
-		}
-	} else {
-		// cache 에 없다면 db에서 직접 로드
-		auctions, totalCount, err := model.GetDB().GetAucAuctionList(auctionList)
-		if err != nil {
-			resp.SetReturn(resultcode.Result_DBError)
-		} else {
+	// active 경매 정보만 redis에서 가져온다.
+	if auctionList.ActiveState == context_auc.Auction_active_state_active {
+		//redis exist check
+		if pageInfo, auctions, err := model.GetDB().GetAuctionListCache(&auctionList.PageInfo); err == nil {
 			resp.Success()
-			pageInfo := context_auc.PageInfoResponse{
-				PageOffset: auctionList.PageOffset,
-				PageSize:   int64(len(auctions)),
-				TotalSize:  totalCount,
-			}
 			resp.Value = context_auc.AuctionListResponse{
-				PageInfo:    pageInfo,
-				AucAuctions: auctions,
+				PageInfo:    *pageInfo,
+				AucAuctions: *auctions,
 			}
+			return ctx.EchoContext.JSON(http.StatusOK, resp)
+		}
+	}
+
+	auctions, totalCount, err := model.GetDB().GetAucAuctionList(auctionList)
+	if err != nil {
+		resp.SetReturn(resultcode.Result_DBError)
+	} else {
+		resp.Success()
+		pageInfo := context_auc.PageInfoResponse{
+			PageOffset: auctionList.PageOffset,
+			PageSize:   int64(len(auctions)),
+			TotalSize:  totalCount,
+		}
+		resp.Value = context_auc.AuctionListResponse{
+			PageInfo:    pageInfo,
+			AucAuctions: auctions,
+		}
+
+		// active 경매 정보만 redis에 남긴다.
+		if auctionList.ActiveState == context_auc.Auction_active_state_active {
 			model.GetDB().SetAuctionListCache(&auctionList.PageInfo, &pageInfo, &auctions)
 		}
 	}

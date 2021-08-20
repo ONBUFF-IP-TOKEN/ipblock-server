@@ -82,8 +82,15 @@ func (o *DB) UpdateAucAuctionBestBid(auctionId int64, curAmount float64) (int64,
 }
 
 func (o *DB) GetAucAuctionList(pageInfo *context_auc.AuctionList) ([]context_auc.AucAuction, int64, error) {
-	sqlQuery := fmt.Sprintf("SELECT * FROM auc_auctions LEFT JOIN auc_products on auc_auctions.product_id = auc_products.product_id "+
-		"ORDER BY auc_id DESC LIMIT %v,%v", pageInfo.PageSize*pageInfo.PageOffset, pageInfo.PageSize)
+	var sqlQuery string
+	if pageInfo.ActiveState == context_auc.Auction_active_state_all {
+		sqlQuery = fmt.Sprintf("SELECT * FROM auc_auctions LEFT JOIN auc_products on auc_auctions.product_id = auc_products.product_id "+
+			"ORDER BY auc_id DESC LIMIT %v,%v", pageInfo.PageSize*pageInfo.PageOffset, pageInfo.PageSize)
+	} else {
+		sqlQuery = fmt.Sprintf("SELECT * FROM auc_auctions LEFT JOIN auc_products on auc_auctions.product_id = auc_products.product_id "+
+			"WHERE active_state = %v ORDER BY auc_id DESC LIMIT %v,%v", pageInfo.ActiveState, pageInfo.PageSize*pageInfo.PageOffset, pageInfo.PageSize)
+	}
+
 	rows, err := o.Mysql.Query(sqlQuery)
 
 	if err != nil {
@@ -93,63 +100,23 @@ func (o *DB) GetAucAuctionList(pageInfo *context_auc.AuctionList) ([]context_auc
 
 	defer rows.Close()
 
-	var title, desc, prices, content, media sql.NullString
-	var nftId sql.NullInt64
-	var nftContract, nftCreateHash, nftUri sql.NullString
-
 	auctions := make([]context_auc.AucAuction, 0)
 	for rows.Next() {
-		auction := context_auc.AucAuction{}
-		product := context_auc.ProductInfo{}
-		if err := rows.Scan(&auction.Id, &auction.BidStartAmount, &auction.BidCurAmount, &auction.BidUnit, &auction.BidDeposit,
-			&auction.AucStartTs, &auction.AucEndTs, &auction.AucState, &auction.AucRound,
-			&auction.CreateTs, &auction.ActiveState, &auction.ProductId, &auction.Recommand,
-
-			&product.Id, &title, &product.CreateTs, &desc,
-			&product.OwnerNickName, &product.OwnerWalletAddr, &product.CreatorNickName, &product.CreatorWalletAddr,
-			&nftContract, &nftId, &nftCreateHash, &nftUri, &product.NftState,
-			&prices, &content, &product.IpOwnerShip, &media); err != nil {
+		auction, err := o.ScanAuction(rows)
+		if err != nil {
 			log.Error(err)
+			continue
 		}
-
-		aTitle := context_auc.Localization{}
-		json.Unmarshal([]byte(title.String), &aTitle)
-		product.Title = aTitle
-
-		aDesc := context_auc.Localization{}
-		json.Unmarshal([]byte(desc.String), &aDesc)
-		product.Desc = aDesc
-
-		product.NftContract = nftContract.String
-		product.NftId = nftId.Int64
-		product.NftCreateTxHash = nftCreateHash.String
-		product.NftUri = nftUri.String
-
-		//prices 변환
-		aPrices := []context_auc.ProductPrice{}
-		json.Unmarshal([]byte(prices.String), &aPrices)
-		product.Prices = aPrices
-
-		//content 변환
-		aContent := context_auc.Content{}
-		json.Unmarshal([]byte(content.String), &aContent)
-		product.Content = aContent
-
-		//media 변환
-		aMedia := context_auc.MediaInfo{}
-		json.Unmarshal([]byte(media.String), &aMedia)
-		product.Media = aMedia
-
-		auction.ProductInfo = product
-		auctions = append(auctions, auction)
+		auctions = append(auctions, *auction)
 	}
 
-	totalCount, err := o.GetTotalAucAuctionSize()
+	totalCount, err := o.GetTotalAucAuctionSize(pageInfo)
 
 	return auctions, totalCount, err
 }
 
 func (o *DB) GetAucAuction(aucId int64) (*context_auc.AucAuction, error) {
+	var err error
 	sqlQuery := fmt.Sprintf("SELECT * FROM auc_auctions LEFT JOIN auc_products on auc_auctions.product_id = auc_products.product_id WHERE auc_id=%v", aucId)
 	rows, err := o.Mysql.Query(sqlQuery)
 
@@ -160,53 +127,12 @@ func (o *DB) GetAucAuction(aucId int64) (*context_auc.AucAuction, error) {
 
 	defer rows.Close()
 
-	var title, desc, prices, content, media sql.NullString
-	var nftId sql.NullInt64
-	var nftContract, nftCreateHash, nftUri sql.NullString
-
 	auction := &context_auc.AucAuction{}
-	product := context_auc.ProductInfo{}
 	for rows.Next() {
-		if err := rows.Scan(&auction.Id, &auction.BidStartAmount, &auction.BidCurAmount, &auction.BidUnit, &auction.BidDeposit,
-			&auction.AucStartTs, &auction.AucEndTs, &auction.AucState, &auction.AucRound,
-			&auction.CreateTs, &auction.ActiveState, &auction.ProductId, &auction.Recommand,
-
-			&product.Id, &title, &product.CreateTs, &desc,
-			&product.OwnerNickName, &product.OwnerWalletAddr, &product.CreatorNickName, &product.CreatorWalletAddr,
-			&nftContract, &nftId, &nftCreateHash, &nftUri, &product.NftState,
-			&prices, &content, &product.IpOwnerShip, &media); err != nil {
-			log.Error(err)
+		auction, err = o.ScanAuction(rows)
+		if err != nil {
+			continue
 		}
-
-		aTitle := context_auc.Localization{}
-		json.Unmarshal([]byte(title.String), &aTitle)
-		product.Title = aTitle
-
-		aDesc := context_auc.Localization{}
-		json.Unmarshal([]byte(desc.String), &aDesc)
-		product.Desc = aDesc
-
-		product.NftContract = nftContract.String
-		product.NftId = nftId.Int64
-		product.NftCreateTxHash = nftCreateHash.String
-		product.NftUri = nftUri.String
-
-		//prices 변환
-		aPrices := []context_auc.ProductPrice{}
-		json.Unmarshal([]byte(prices.String), &aPrices)
-		product.Prices = aPrices
-
-		//content 변환
-		aContent := context_auc.Content{}
-		json.Unmarshal([]byte(content.String), &aContent)
-		product.Content = aContent
-
-		//media 변환
-		aMedia := context_auc.MediaInfo{}
-		json.Unmarshal([]byte(media.String), &aMedia)
-		product.Media = aMedia
-
-		auction.ProductInfo = product
 	}
 
 	return auction, err
@@ -232,18 +158,72 @@ func (o *DB) DeleteAucAuction(auctionId int64) (bool, error) {
 	return true, nil
 }
 
-func (o *DB) GetTotalAucAuctionSize() (int64, error) {
-	rows, err := o.Mysql.Query("SELECT COUNT(*) as count FROM auc_auctions")
+func (o *DB) GetTotalAucAuctionSize(pageInfo *context_auc.AuctionList) (int64, error) {
 	var count int64
+	var query string
+	if pageInfo.ActiveState == context_auc.Auction_active_state_all {
+		query = fmt.Sprintf("SELECT COUNT(*) as count FROM auc_auctions")
+	} else {
+		query = fmt.Sprintf("SELECT COUNT(*) as count FROM auc_auctions WHERE active_state = %v", pageInfo.ActiveState)
+	}
+	err := o.Mysql.QueryRow(query, &count)
+
 	if err != nil {
 		log.Error(err)
 		return count, err
 	}
 
-	defer rows.Close()
-	for rows.Next() {
-		rows.Scan(&count)
+	return count, nil
+}
+
+func (o *DB) ScanAuction(rows *sql.Rows) (*context_auc.AucAuction, error) {
+	var title, desc, prices, content, media sql.NullString
+	var nftId sql.NullInt64
+	var nftContract, nftCreateHash, nftUri sql.NullString
+
+	auction := &context_auc.AucAuction{}
+	product := context_auc.ProductInfo{}
+	if err := rows.Scan(&auction.Id, &auction.BidStartAmount, &auction.BidCurAmount, &auction.BidUnit, &auction.BidDeposit,
+		&auction.AucStartTs, &auction.AucEndTs, &auction.AucState, &auction.AucRound,
+		&auction.CreateTs, &auction.ActiveState, &auction.ProductId, &auction.Recommand,
+
+		&product.Id, &title, &product.CreateTs, &desc,
+		&product.OwnerNickName, &product.OwnerWalletAddr, &product.CreatorNickName, &product.CreatorWalletAddr,
+		&nftContract, &nftId, &nftCreateHash, &nftUri, &product.NftState,
+		&prices, &content, &product.IpOwnerShip, &media); err != nil {
+		log.Error("ScanAuction error :", err)
+		return nil, err
 	}
 
-	return count, nil
+	aTitle := context_auc.Localization{}
+	json.Unmarshal([]byte(title.String), &aTitle)
+	product.Title = aTitle
+
+	aDesc := context_auc.Localization{}
+	json.Unmarshal([]byte(desc.String), &aDesc)
+	product.Desc = aDesc
+
+	product.NftContract = nftContract.String
+	product.NftId = nftId.Int64
+	product.NftCreateTxHash = nftCreateHash.String
+	product.NftUri = nftUri.String
+
+	//prices 변환
+	aPrices := []context_auc.ProductPrice{}
+	json.Unmarshal([]byte(prices.String), &aPrices)
+	product.Prices = aPrices
+
+	//content 변환
+	aContent := context_auc.Content{}
+	json.Unmarshal([]byte(content.String), &aContent)
+	product.Content = aContent
+
+	//media 변환
+	aMedia := context_auc.MediaInfo{}
+	json.Unmarshal([]byte(media.String), &aMedia)
+	product.Media = aMedia
+
+	auction.ProductInfo = product
+
+	return auction, nil
 }

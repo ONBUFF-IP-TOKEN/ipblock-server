@@ -1,5 +1,11 @@
 package context_auc
 
+const (
+	Auction_active_state_all      = -1
+	Auction_active_state_inactive = 0
+	Auction_active_state_active   = 1
+)
+
 type Localization struct {
 	Ko string `json:"ko"`
 	En string `json:"en"`

@@ -216,6 +216,7 @@ func (o *ExternalAPI) GetAucAuctionList(c echo.Context) error {
 		return c.JSON(http.StatusOK, err)
 	}
 
+	params.ActiveState = context_auc.Auction_active_state_active
 	return commonapi_auc.GetAucAuctionList(params, ctx)
 }
 

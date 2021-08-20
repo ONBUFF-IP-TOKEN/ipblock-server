@@ -85,6 +85,7 @@ func (o *DB) GetAucBidListMe(pageInfo *context_auc.MeBidList, walletaddr string,
 
 func (o *DB) GetTotalAucMeBidSize(walletAddr string, winner bool) (int64, error) {
 	var sqlQuery string
+	var dataCount int64
 	if !winner {
 		sqlQuery = fmt.Sprintf("SELECT COUNT(*) as count FROM auc_bids WHERE bid_attendee_wallet_Address = '%v'", walletAddr)
 	} else {
@@ -92,17 +93,11 @@ func (o *DB) GetTotalAucMeBidSize(walletAddr string, winner bool) (int64, error)
 			walletAddr, context_auc.Bid_state_success)
 	}
 
-	rows, err := o.Mysql.Query(sqlQuery)
-	var count int64
+	err := o.Mysql.QueryRow(sqlQuery, &dataCount)
 	if err != nil {
 		log.Error(err)
-		return count, err
+		return dataCount, err
 	}
 
-	defer rows.Close()
-	for rows.Next() {
-		rows.Scan(&count)
-	}
-
-	return count, nil
+	return dataCount, nil
 }

@@ -82,6 +82,11 @@ func (o *ServerApp) NewDB(conf *config.ServerConfig) error {
 	}
 
 	gCache := basedb.GetCache(&conf.Cache)
+
+	// strPort := strconv.Itoa(conf.Cache.Port)
+	// strDatabase := strconv.Itoa(conf.Cache.DefaultDB)
+	// strPoolSize := strconv.Itoa(conf.Cache.PoolSize)
+	// redisDB, err := basedb.GetRedis(conf.Cache.Host, strPort, conf.Cache.Password, strDatabase, strPoolSize)
 	model.SetDB(mysqlDB, gCache)
 
 	return nil

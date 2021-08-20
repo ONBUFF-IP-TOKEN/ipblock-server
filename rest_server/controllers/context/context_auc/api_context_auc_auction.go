@@ -91,9 +91,10 @@ func (o *AucAuctionUpdate) CheckValidate() *base.BaseResponse {
 
 ////////////////////////////////////////////////
 
-// product list request
+// auction list request
 type AuctionList struct {
 	PageInfo
+	ActiveState int64 `query:"active_state"`
 }
 
 func NewAuctionList() *AuctionList {

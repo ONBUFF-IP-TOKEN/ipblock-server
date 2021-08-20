@@ -120,8 +120,7 @@ func (o *DB) UpdateAucBidWinnerState(bid *context_auc.Bid, state int) (int64, er
 }
 
 func (o *DB) GetAucBidBestAttendee(aucId int64) (*context_auc.Bid, error) {
-	sqlQuery := fmt.Sprintf("SELECT * FROM auc_bids ORDER BY bid_amount DESC limit 1")
-	rows, err := o.Mysql.Query(sqlQuery)
+	rows, err := o.Mysql.Query("SELECT * FROM auc_bids ORDER BY bid_amount DESC limit 1")
 
 	if err != nil {
 		log.Error(err)
@@ -130,15 +129,12 @@ func (o *DB) GetAucBidBestAttendee(aucId int64) (*context_auc.Bid, error) {
 
 	defer rows.Close()
 
-	var bidWinnerTxHash sql.NullString
 	bid := &context_auc.Bid{}
 	for rows.Next() {
-		if err := rows.Scan(&bid.Id, &bid.AucId, &bid.ProductId,
-			&bid.BidState, &bid.BidTs, &bid.BidAttendeeWalletAddr, &bid.BidAmount, &bidWinnerTxHash, &bid.BidWinnerState,
-			&bid.DepositAmount, &bid.DepositTxHash, &bid.DepositState, &bid.TokenType); err != nil {
-			log.Error(err)
-		} else {
-			bid.BidWinnerTxHash = bidWinnerTxHash.String
+		bid, err = o.ScanBid(rows)
+		if err != nil {
+			log.Error("GetAucBidBestAttendee::ScanBid error : ", err)
+			continue
 		}
 	}
 
@@ -159,15 +155,12 @@ func (o *DB) GetAucBidAttendee(aucId int64, walletAddr string) (*context_auc.Bid
 
 	defer rows.Close()
 
-	var bidWinnerTxHash sql.NullString
 	bid := &context_auc.Bid{}
 	for rows.Next() {
-		if err := rows.Scan(&bid.Id, &bid.AucId, &bid.ProductId,
-			&bid.BidState, &bid.BidTs, &bid.BidAttendeeWalletAddr, &bid.BidAmount, &bidWinnerTxHash, &bid.BidWinnerState,
-			&bid.DepositAmount, &bid.DepositTxHash, &bid.DepositState, &bid.TokenType); err != nil {
-			log.Error(err)
-		} else {
-			bid.BidWinnerTxHash = bidWinnerTxHash.String
+		bid, err = o.ScanBid(rows)
+		if err != nil {
+			log.Error("GetAucBidAttendee::ScanBid error : ", err)
+			continue
 		}
 	}
 
@@ -188,18 +181,14 @@ func (o *DB) GetAucBidBestAttendeeList(pageInfo *context_auc.BidAttendeeList) ([
 
 	defer rows.Close()
 
-	var bidWinnerTxHash sql.NullString
 	bids := make([]context_auc.Bid, 0)
 	for rows.Next() {
-		bid := context_auc.Bid{}
-		if err := rows.Scan(&bid.Id, &bid.AucId, &bid.ProductId,
-			&bid.BidState, &bid.BidTs, &bid.BidAttendeeWalletAddr, &bid.BidAmount, &bidWinnerTxHash, &bid.BidWinnerState,
-			&bid.DepositAmount, &bid.DepositTxHash, &bid.DepositState, &bid.TokenType); err != nil {
-			log.Error(err)
-		} else {
-			bid.BidWinnerTxHash = bidWinnerTxHash.String
-			bids = append(bids, bid)
+		bid, err := o.ScanBid(rows)
+		if err != nil {
+			log.Error("GetAucBidBestAttendeeList::ScanBid error : ", err)
+			continue
 		}
+		bids = append(bids, *bid)
 	}
 
 	totalCount, err := o.GetTotalAucBidSize()
@@ -218,17 +207,14 @@ func (o *DB) GetAucBidBestAttendeeByTxhash(txHash string) (bool, error) {
 
 	defer rows.Close()
 
-	var bidWinnerTxHash sql.NullString
 	cnt := 0
 	for rows.Next() {
-		bid := context_auc.Bid{}
-		if err := rows.Scan(&bid.Id, &bid.AucId, &bid.ProductId,
-			&bid.BidState, &bid.BidTs, &bid.BidAttendeeWalletAddr, &bid.BidAmount, &bidWinnerTxHash, &bid.BidWinnerState,
-			&bid.DepositAmount, &bid.DepositTxHash, &bid.DepositState, &bid.TokenType); err != nil {
-			log.Error(err)
-		} else {
-			cnt++
+		_, err := o.ScanBid(rows)
+		if err != nil {
+			log.Error("GetAucBidBestAttendeeByTxhash::ScanBid error : ", err)
+			continue
 		}
+		cnt++
 	}
 
 	if cnt == 0 {
@@ -258,17 +244,29 @@ func (o *DB) DeleteAucBid(bid *context_auc.BidRemove) (bool, error) {
 }
 
 func (o *DB) GetTotalAucBidSize() (int64, error) {
-	rows, err := o.Mysql.Query("SELECT COUNT(*) as count FROM auc_bids WHERE bid_amount != 0")
 	var count int64
+	err := o.Mysql.QueryRow("SELECT COUNT(*) as count FROM auc_bids WHERE bid_amount != 0", &count)
+
 	if err != nil {
 		log.Error(err)
 		return count, err
 	}
 
-	defer rows.Close()
-	for rows.Next() {
-		rows.Scan(&count)
+	return count, nil
+}
+
+func (o *DB) ScanBid(rows *sql.Rows) (*context_auc.Bid, error) {
+	var bidWinnerTxHash sql.NullString
+
+	bid := &context_auc.Bid{}
+	if err := rows.Scan(&bid.Id, &bid.AucId, &bid.ProductId,
+		&bid.BidState, &bid.BidTs, &bid.BidAttendeeWalletAddr, &bid.BidAmount, &bidWinnerTxHash, &bid.BidWinnerState,
+		&bid.DepositAmount, &bid.DepositTxHash, &bid.DepositState, &bid.TokenType); err != nil {
+		//log.Error("ScanBid error :", err)
+		return nil, err
 	}
 
-	return count, nil
+	bid.BidWinnerTxHash = bidWinnerTxHash.String
+
+	return bid, nil
 }

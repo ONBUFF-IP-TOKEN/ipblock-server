@@ -6,6 +6,11 @@ const (
 	Auction_active_state_active   = 1
 )
 
+const (
+	TRUE  = "1"
+	FALSE = "0"
+)
+
 type Localization struct {
 	Ko string `json:"ko"`
 	En string `json:"en"`

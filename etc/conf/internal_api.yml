@@ -90,3 +90,8 @@
           method: "delete"
           uri: "/:apiver/auc/bid/remove"
           precheck: true
+        - # SYSTEM 관련
+          handler: "DeleteSystemRedisRemove" # redis 관련 삭제
+          method: "delete"
+          uri: "/:apiver/system/redis/remove"
+          precheck: true

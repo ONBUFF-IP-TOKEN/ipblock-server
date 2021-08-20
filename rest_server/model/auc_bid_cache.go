@@ -24,7 +24,7 @@ func (o *DB) SetBidListCache(aucId int64, reqPageInfo *context_auc.PageInfo, pag
 		BidList:  data,
 	}
 
-	cKey := genCacheKeyByAucProduct("BID-LIST:" + strconv.FormatInt(aucId, 10))
+	cKey := genCacheKeyByBid("BID-LIST:" + strconv.FormatInt(aucId, 10))
 	field := fmt.Sprintf("%v-%v", reqPageInfo.PageSize, reqPageInfo.PageOffset)
 	log.Info("SetProductListCache ", field)
 	return o.Cache.HSet(cKey, field, productListCache)

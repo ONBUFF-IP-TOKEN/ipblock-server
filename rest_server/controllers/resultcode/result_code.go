@@ -70,6 +70,8 @@ const (
 	Result_Auc_Bid_RequireDeposit       = 15208 // 입찰전에 보증금 지불을 하지 먼저 하지 않았을때 에러
 	Result_Auc_Bid_AlreadyDeposit       = 15209 // 이미 입찰 보증금을 지불하였다.
 	Result_Auc_Bid_NotWinner            = 15210 // 낙찰자가 아니다.
+	Result_Auc_Bid_RequireDepoistAgree  = 15211 // 보증금 납부 약관 동의가 필요하다.
+	Result_Auc_Bid_RequirePrivacyAgree  = 15212 // 개인정보 이용 동의 약관이 필요하다.
 
 	Result_Auth_RequireMessage    = 20000
 	Result_Auth_RequireSign       = 20001
@@ -137,7 +139,6 @@ var ResultCodeText = map[int]string{
 	Result_Auc_Auction_RequireAucId:          "Require auc id",
 	Result_Auc_Auction_NotPeriod:             "Not auction period",
 	Result_Auc_Auction_NotOverYet:            "Auction is not over yet",
-	Result_Auc_Bid_NotWinner:                 "Not winner",
 
 	Result_Auc_Bid_RequireAucId:         "Require bid auc id",
 	Result_Auc_Bid_RequireWalletAddress: "Require bid wallet address",
@@ -148,6 +149,9 @@ var ResultCodeText = map[int]string{
 	Result_Auc_Bid_NotBestBidAmount:     "You not best bid amount",
 	Result_Auc_Bid_RequireDeposit:       "Require deposit send",
 	Result_Auc_Bid_AlreadyDeposit:       "Alreay submit deposit",
+	Result_Auc_Bid_NotWinner:            "Not winner",
+	Result_Auc_Bid_RequireDepoistAgree:  "Consent for deposit payment is required",
+	Result_Auc_Bid_RequirePrivacyAgree:  "Consent to the privacy policy is required",
 
 	Result_Auth_RequireMessage:    "Message is required",
 	Result_Auth_RequireSign:       "Sign info is required",

@@ -25,20 +25,26 @@ const (
 	Bid_winner_state_giveup          = 3 // 낙찰 포기
 )
 
+type TermsOfService struct {
+	DepositAgree string `json:"deposit_agree"`
+	PrivacyAgree string `json:"privacy_agree"`
+}
+
 type Bid struct {
-	Id                    int64   `json:"id"`
-	AucId                 int64   `query:"auc_id" json:"auc_id"`
-	ProductId             int64   `json:"product_id"`
-	BidState              int64   `json:"bid_state"`
-	BidTs                 int64   `json:"bid_ts"`
-	BidAttendeeWalletAddr string  `query:"bid_attendee_wallet_address" json:"bid_attendee_wallet_address"`
-	BidAmount             float64 `json:"bid_amount"`
-	BidWinnerTxHash       string  `json:"bid_winner_txhash"`
-	BidWinnerState        int64   `json:"bid_winner_state"`
-	DepositAmount         float64 `json:"deposit_amount"`
-	DepositTxHash         string  `json:"deposit_txhash"`
-	DepositState          int64   `json:"deposit_state"`
-	TokenType             string  `json:"token_type"`
+	Id                    int64          `json:"id"`
+	AucId                 int64          `query:"auc_id" json:"auc_id"`
+	ProductId             int64          `json:"product_id"`
+	BidState              int64          `json:"bid_state"`
+	BidTs                 int64          `json:"bid_ts"`
+	BidAttendeeWalletAddr string         `query:"bid_attendee_wallet_address" json:"bid_attendee_wallet_address"`
+	BidAmount             float64        `json:"bid_amount"`
+	BidWinnerTxHash       string         `json:"bid_winner_txhash"`
+	BidWinnerState        int64          `json:"bid_winner_state"`
+	DepositAmount         float64        `json:"deposit_amount"`
+	DepositTxHash         string         `json:"deposit_txhash"`
+	DepositState          int64          `json:"deposit_state"`
+	TokenType             string         `json:"token_type"`
+	TermsOfService        TermsOfService `json:"terms_of_service"`
 }
 
 // 입찰 보증금 확인
@@ -88,6 +94,12 @@ func (o *BidDeposit) CheckValidate(ctx *context.IPBlockServerContext) *base.Base
 	}
 	if !strings.EqualFold(o.BidAttendeeWalletAddr, ctx.WalletAddr()) {
 		return base.MakeBaseResponse(resultcode.Result_Auc_Bid_InvalidWalletAddress)
+	}
+	if !strings.EqualFold(o.TermsOfService.DepositAgree, "true") {
+		return base.MakeBaseResponse(resultcode.Result_Auc_Bid_RequireDepoistAgree)
+	}
+	if !strings.EqualFold(o.TermsOfService.PrivacyAgree, "true") {
+		return base.MakeBaseResponse(resultcode.Result_Auc_Bid_RequirePrivacyAgree)
 	}
 
 	return nil

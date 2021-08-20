@@ -2,6 +2,7 @@ package model
 
 import (
 	"database/sql"
+	"encoding/json"
 	"errors"
 	"fmt"
 
@@ -12,10 +13,12 @@ import (
 func (o *DB) InsertAucBid(bid *context_auc.BidDeposit) (int64, error) {
 	sqlQuery := fmt.Sprintf("INSERT INTO auc_bids (auc_id, product_id, " +
 		"bid_state, bid_ts, bid_attendee_wallet_address, " +
-		"deposit_amount, deposit_txhash, deposit_state, token_type ) VALUES (?,?,?,?,?,?,?,?,?)")
+		"deposit_amount, deposit_txhash, deposit_state, token_type, terms_of_service ) VALUES (?,?,?,?,?,?,?,?,?,?)")
+
+	tos, _ := json.Marshal(bid.TermsOfService)
 
 	result, err := o.Mysql.PrepareAndExec(sqlQuery, bid.AucId, bid.ProductId,
-		bid.BidState, bid.BidTs, bid.BidAttendeeWalletAddr, bid.DepositAmount, bid.DepositTxHash, bid.DepositState, bid.TokenType)
+		bid.BidState, bid.BidTs, bid.BidAttendeeWalletAddr, bid.DepositAmount, bid.DepositTxHash, bid.DepositState, bid.TokenType, string(tos))
 
 	if err != nil {
 		log.Error(err)
@@ -256,17 +259,21 @@ func (o *DB) GetTotalAucBidSize() (int64, error) {
 }
 
 func (o *DB) ScanBid(rows *sql.Rows) (*context_auc.Bid, error) {
-	var bidWinnerTxHash sql.NullString
+	var bidWinnerTxHash, tos sql.NullString
 
 	bid := &context_auc.Bid{}
 	if err := rows.Scan(&bid.Id, &bid.AucId, &bid.ProductId,
 		&bid.BidState, &bid.BidTs, &bid.BidAttendeeWalletAddr, &bid.BidAmount, &bidWinnerTxHash, &bid.BidWinnerState,
-		&bid.DepositAmount, &bid.DepositTxHash, &bid.DepositState, &bid.TokenType); err != nil {
+		&bid.DepositAmount, &bid.DepositTxHash, &bid.DepositState, &bid.TokenType, &tos); err != nil {
 		//log.Error("ScanBid error :", err)
 		return nil, err
 	}
 
 	bid.BidWinnerTxHash = bidWinnerTxHash.String
+
+	getTos := context_auc.TermsOfService{}
+	json.Unmarshal([]byte(tos.String), &getTos)
+	bid.TermsOfService = getTos
 
 	return bid, nil
 }

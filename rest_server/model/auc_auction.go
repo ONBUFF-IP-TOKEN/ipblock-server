@@ -182,7 +182,7 @@ func (o *DB) ScanAuction(rows *sql.Rows) (*context_auc.AucAuction, error) {
 	var nftContract, nftCreateHash, nftUri sql.NullString
 
 	auction := &context_auc.AucAuction{}
-	product := context_auc.ProductInfo{}
+	product := &context_auc.ProductInfo{}
 	if err := rows.Scan(&auction.Id, &auction.BidStartAmount, &auction.BidCurAmount, &auction.BidUnit, &auction.BidDeposit,
 		&auction.AucStartTs, &auction.AucEndTs, &auction.AucState, &auction.AucRound,
 		&auction.CreateTs, &auction.ActiveState, &auction.ProductId, &auction.Recommand,

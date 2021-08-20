@@ -95,3 +95,23 @@
           method: "delete"
           uri: "/:apiver/system/redis/remove"
           precheck: true
+        - # 공지사항 관련
+          handler: "PostNoticeRegister" # 공지 등록
+          method: "post"
+          uri: "/:apiver/notice/register"
+          precheck: true
+        -
+          handler: "GetNotice" # 공지 리스트 요청
+          method: "get"
+          uri: "/:apiver/notice/list"
+          precheck: true
+        -
+          handler: "DeleteNoticeRemove" # 공지 삭제
+          method: "delete"
+          uri: "/:apiver/notice/remove"
+          precheck: true
+        -
+          handler: "PostNoticeUpdate" # 공지 수정
+          method: "post"
+          uri: "/:apiver/notice/update"
+          precheck: true

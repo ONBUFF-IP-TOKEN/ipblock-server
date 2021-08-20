@@ -73,6 +73,9 @@ const (
 	Result_Auc_Bid_RequireDepoistAgree  = 15211 // 보증금 납부 약관 동의가 필요하다.
 	Result_Auc_Bid_RequirePrivacyAgree  = 15212 // 개인정보 이용 동의 약관이 필요하다.
 
+	Result_Auc_Notice_RequireNotice = 15301 // 공지사항이 한개라도 필요 하다.
+	Result_Auc_Notice_RequireId     = 15302 // 공지사항의 id값이 필요하다.
+
 	Result_Auth_RequireMessage    = 20000
 	Result_Auth_RequireSign       = 20001
 	Result_Auth_InvalidLoginInfo  = 20002
@@ -152,6 +155,9 @@ var ResultCodeText = map[int]string{
 	Result_Auc_Bid_NotWinner:            "Not winner",
 	Result_Auc_Bid_RequireDepoistAgree:  "Consent for deposit payment is required",
 	Result_Auc_Bid_RequirePrivacyAgree:  "Consent to the privacy policy is required",
+
+	Result_Auc_Notice_RequireNotice: "At least one notice is required.",
+	Result_Auc_Notice_RequireId:     "I need the id of the notice",
 
 	Result_Auth_RequireMessage:    "Message is required",
 	Result_Auth_RequireSign:       "Sign info is required",

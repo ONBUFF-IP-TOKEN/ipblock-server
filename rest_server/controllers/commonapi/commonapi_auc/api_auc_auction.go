@@ -10,6 +10,7 @@ import (
 	"github.com/ONBUFF-IP-TOKEN/ipblock-server/rest_server/controllers/context/context_auc"
 	"github.com/ONBUFF-IP-TOKEN/ipblock-server/rest_server/controllers/resultcode"
 	"github.com/ONBUFF-IP-TOKEN/ipblock-server/rest_server/model"
+	"github.com/labstack/echo"
 )
 
 // 경매 등록
@@ -46,7 +47,7 @@ func PostAucAuctionUpdate(auction *context_auc.AucAuctionUpdate, ctx *context.IP
 }
 
 // 경매 정보 리스트 요청
-func GetAucAuctionList(auctionList *context_auc.AuctionList, ctx *context.IPBlockServerContext) error {
+func GetAucAuctionList(auctionList *context_auc.AuctionList, c echo.Context) error {
 	resp := new(base.BaseResponse)
 
 	// active 경매 정보만 redis에서 가져온다.
@@ -58,7 +59,7 @@ func GetAucAuctionList(auctionList *context_auc.AuctionList, ctx *context.IPBloc
 				PageInfo:    *pageInfo,
 				AucAuctions: *auctions,
 			}
-			return ctx.EchoContext.JSON(http.StatusOK, resp)
+			return c.JSON(http.StatusOK, resp)
 		}
 	}
 
@@ -83,7 +84,7 @@ func GetAucAuctionList(auctionList *context_auc.AuctionList, ctx *context.IPBloc
 		}
 	}
 
-	return ctx.EchoContext.JSON(http.StatusOK, resp)
+	return c.JSON(http.StatusOK, resp)
 }
 
 // 경매 삭제

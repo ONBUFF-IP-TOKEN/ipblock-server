@@ -5,19 +5,20 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/ONBUFF-IP-TOKEN/baseutil/datetime"
 	"github.com/ONBUFF-IP-TOKEN/baseutil/log"
 	"github.com/ONBUFF-IP-TOKEN/ipblock-server/rest_server/controllers/context/context_auc"
 )
 
 func (o *DB) InsertNotice(notices *context_auc.NoticeRegister) error {
 	for _, notice := range notices.Notices {
-		sqlQuery := fmt.Sprintf("INSERT INTO auc_notices (title, description, urls) VALUES (?,?,?)")
+		sqlQuery := fmt.Sprintf("INSERT INTO auc_notices (title, description, urls, create_ts) VALUES (?,?,?,?)")
 
 		title, _ := json.Marshal(notice.Title)
 		desc, _ := json.Marshal(notice.Desc)
 		urls, _ := json.Marshal(notice.Urls)
 
-		result, err := o.Mysql.PrepareAndExec(sqlQuery, string(title), string(desc), string(urls))
+		result, err := o.Mysql.PrepareAndExec(sqlQuery, string(title), string(desc), string(urls), datetime.GetTS2MilliSec())
 
 		if err != nil {
 			log.Error(err)
@@ -126,7 +127,7 @@ func (o *DB) ScanNotice(rows *sql.Rows) (*context_auc.Notice, error) {
 	var title, desc, urls sql.NullString
 
 	notice := &context_auc.Notice{}
-	if err := rows.Scan(&notice.Id, &title, &desc, &urls); err != nil {
+	if err := rows.Scan(&notice.Id, &title, &desc, &urls, &notice.CreateTs); err != nil {
 		log.Error("ScanNotice error: ", err)
 		return nil, err
 	}

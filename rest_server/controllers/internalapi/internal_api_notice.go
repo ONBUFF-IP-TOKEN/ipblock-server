@@ -42,7 +42,7 @@ func (o *InternalAPI) GetNotice(c echo.Context) error {
 		return c.JSON(http.StatusOK, err)
 	}
 
-	return commonapi_auc.GetNotice(params, ctx)
+	return commonapi_auc.GetNotice(params, ctx.EchoContext)
 }
 
 // 공지 사항 삭제
@@ -62,7 +62,7 @@ func (o *InternalAPI) DeleteNoticeRemove(c echo.Context) error {
 	return commonapi_auc.DeleteNoticeRemove(params, ctx)
 }
 
-// 공지 사항 삭제
+// 공지 사항 수정
 func (o *InternalAPI) PostNoticeUpdate(c echo.Context) error {
 	ctx := base.GetContext(c).(*context.IPBlockServerContext)
 

@@ -9,6 +9,7 @@ import (
 	"github.com/ONBUFF-IP-TOKEN/ipblock-server/rest_server/controllers/context/context_auc"
 	"github.com/ONBUFF-IP-TOKEN/ipblock-server/rest_server/controllers/resultcode"
 	"github.com/ONBUFF-IP-TOKEN/ipblock-server/rest_server/model"
+	"github.com/labstack/echo"
 )
 
 func PostNoticeRegister(notices *context_auc.NoticeRegister, ctx *context.IPBlockServerContext) error {
@@ -23,7 +24,7 @@ func PostNoticeRegister(notices *context_auc.NoticeRegister, ctx *context.IPBloc
 	return ctx.EchoContext.JSON(http.StatusOK, resp)
 }
 
-func GetNotice(noticeList *context_auc.NoticeList, ctx *context.IPBlockServerContext) error {
+func GetNotice(noticeList *context_auc.NoticeList, c echo.Context) error {
 	resp := new(base.BaseResponse)
 
 	//redis exist check
@@ -53,7 +54,7 @@ func GetNotice(noticeList *context_auc.NoticeList, ctx *context.IPBlockServerCon
 		}
 	}
 
-	return ctx.EchoContext.JSON(http.StatusOK, resp)
+	return c.JSON(http.StatusOK, resp)
 }
 
 // 공지 사항 삭제

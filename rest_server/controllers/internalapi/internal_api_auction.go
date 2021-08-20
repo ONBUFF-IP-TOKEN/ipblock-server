@@ -59,7 +59,7 @@ func (o *InternalAPI) GetAucAuctionList(c echo.Context) error {
 		return c.JSON(http.StatusOK, err)
 	}
 
-	return commonapi_auc.GetAucAuctionList(params, ctx)
+	return commonapi_auc.GetAucAuctionList(params, c)
 }
 
 // 경매 삭제

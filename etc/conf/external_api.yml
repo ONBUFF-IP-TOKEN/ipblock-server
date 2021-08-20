@@ -69,7 +69,7 @@
           handler: "GetAucAuctionList" # 경매 리스트 요청
           method: "get"
           uri: "/:apiver/auc/auction/list"
-          precheck: true
+          precheck: false
         - 
           handler: "GetAucBidDeposit" # 입찰 여부 확인
           method : "get"
@@ -115,6 +115,11 @@
           method: "get"
           uri: "/:apiver/auc/nft/list/me"
           precheck: true
+        - # 공지사항 관련
+          handler: "GetNotice" # 공지 리스트 요청
+          method: "get"
+          uri: "/:apiver/notice/list"
+          precheck: false
 
 
 

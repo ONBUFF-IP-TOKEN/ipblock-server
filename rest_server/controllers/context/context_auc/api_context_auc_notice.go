@@ -6,10 +6,11 @@ import (
 )
 
 type Notice struct {
-	Id    int64        `json:"id"`
-	Title Localization `json:"title"`
-	Desc  Localization `json:"desc"`
-	Urls  []string     `json:"urls"`
+	Id       int64        `json:"id"`
+	Title    Localization `json:"title"`
+	Desc     Localization `json:"desc"`
+	Urls     []string     `json:"urls"`
+	CreateTs int64        `json:"create_ts"`
 }
 
 // 공지 사항 등록

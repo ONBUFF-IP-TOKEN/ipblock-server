@@ -8,7 +8,8 @@ import (
 type CardInfo struct {
 	BackgroundColor string `json:"bg_color"`     // 0xffffff
 	BorderColor     string `json:"border_color"` // 0xffcc00
-	CardGrade       string `json:"card_grade"`   // level 4
+	CardGrade       string `json:"grade"`        // level 4 start
+	Tier            string `json:"tier"`         // bronze, silver, gold, platinum ....
 }
 
 // content info

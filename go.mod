@@ -3,6 +3,8 @@ module github.com/ONBUFF-IP-TOKEN/ipblock-server
 go 1.16
 
 require (
+	github.com/Azure/azure-pipeline-go v0.2.2
+	github.com/Azure/azure-storage-blob-go v0.7.0
 	github.com/ONBUFF-IP-TOKEN/baseEthereum v1.0.5
 	github.com/ONBUFF-IP-TOKEN/baseapp v1.0.9
 	github.com/ONBUFF-IP-TOKEN/basedb v1.0.4

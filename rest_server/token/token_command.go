@@ -2,8 +2,10 @@ package token
 
 import (
 	"encoding/hex"
+	"encoding/json"
 	"fmt"
 	"math/big"
+	"strconv"
 	"strings"
 	"time"
 
@@ -11,6 +13,7 @@ import (
 	"github.com/ONBUFF-IP-TOKEN/baseapp/base"
 	"github.com/ONBUFF-IP-TOKEN/basenet"
 	"github.com/ONBUFF-IP-TOKEN/baseutil/log"
+	"github.com/ONBUFF-IP-TOKEN/ipblock-server/cdn/azure"
 	"github.com/ONBUFF-IP-TOKEN/ipblock-server/rest_server/config"
 	"github.com/ONBUFF-IP-TOKEN/ipblock-server/rest_server/controllers/context"
 	"github.com/ONBUFF-IP-TOKEN/ipblock-server/rest_server/controllers/context/context_auc"
@@ -30,13 +33,15 @@ const (
 type TokenCmd struct {
 	itoken  *IToken
 	conf    *config.TokenInfo
+	confCdn *config.Cdn
 	command chan *basenet.CommandData
 }
 
-func NewTokenCmd(itoken *IToken, conf *config.TokenInfo) *TokenCmd {
+func NewTokenCmd(itoken *IToken, conf *config.TokenInfo, confCdn *config.Cdn) *TokenCmd {
 	tokenCmd := new(TokenCmd)
 	tokenCmd.itoken = itoken
 	tokenCmd.conf = conf
+	tokenCmd.confCdn = confCdn
 	tokenCmd.command = make(chan *basenet.CommandData)
 	return tokenCmd
 }
@@ -117,7 +122,7 @@ func (o *TokenCmd) CreateNftbyAut(data interface{}, cb chan interface{}) {
 
 	var err error
 
-	product.NftUri = GetNftUri(o.conf.NftUriDomainAut, product.Id, 0)
+	product.NftUri = GetNftUri(o.confCdn.Azure.Domain+o.confCdn.Azure.ContainerNft, product.Id, 0)
 	product.NftContract = o.conf.TokenAddrs[Token_nft]
 	if product.NftCreateTxHash, err = o.itoken.Tokens[Token_nft].Nft_CreateERC721(o.conf.ServerWalletAddr, product.NftUri); err != nil {
 		log.Error("Nft_CreateERC721 error :", err)
@@ -128,6 +133,18 @@ func (o *TokenCmd) CreateNftbyAut(data interface{}, cb chan interface{}) {
 			log.Error("UpdateAucProductNft fail : ", err, " product_id:", product.Id, " txhash:", product.NftCreateTxHash)
 			cb <- base.MakeBaseResponse(resultcode.Result_DBError)
 		} else {
+			go func() {
+				// nft 링크용 json 파일 cdn 업로드
+				data := &NftUri_AuctionProduct{
+					Media:    product.Media,
+					CardInfo: product.Content.CardInfo,
+				}
+
+				nftData, _ := json.Marshal(data)
+				productId := strconv.FormatInt(product.Id, 10)
+				azure.GetAzure().UploadNftInfoBuffer(nftData, productId+"/"+productId+".json")
+			}()
+
 			// product list cache 전체 삭제
 			model.GetDB().DeleteProductList()
 			model.GetDB().DeleteAuctionList()

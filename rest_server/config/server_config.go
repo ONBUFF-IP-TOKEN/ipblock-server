@@ -20,7 +20,6 @@ type TokenInfo struct {
 	ServerPrivateKey string   `yaml:"server_private_key"`
 	TokenAddrs       []string `yaml:"token_address"`
 	NftUriDomain     string   `yaml:"nft_uri_domain"`
-	NftUriDomainAut  string   `yaml:"nft_uri_domain_aution"`
 }
 
 type ApiAuth struct {
@@ -34,6 +33,18 @@ type ApiAuth struct {
 	ApiAuthVerify     string `json:"api_auth_verify" yaml:"api_auth_verify"`
 }
 
+type Cdn struct {
+	Azure Azure `yaml:"azure"`
+}
+
+type Azure struct {
+	AzureStorageAccount   string `yaml:"azure_storage_account"`
+	AzureStorageAccessKey string `yaml:"azure_storage_access_key"`
+	Domain                string `yaml:"azure_storage_domain"`
+	ContainerNft          string `yaml:"azure_container_nft_folder"`
+	ContainerProduct      string `yaml:"azure_container_product_folder"`
+}
+
 type ServerConfig struct {
 	baseconf.Config `yaml:",inline"`
 
@@ -41,6 +52,7 @@ type ServerConfig struct {
 	MysqlDBAuth baseconf.DBAuth `yaml:"mysql_db_auth"`
 	Token       TokenInfo       `yaml:"token_info"`
 	Auth        ApiAuth         `yaml:"api_auth"`
+	Cdn         Cdn             `yaml:"cdn"`
 }
 
 func GetInstance(filepath ...string) *ServerConfig {

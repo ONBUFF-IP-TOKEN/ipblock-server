@@ -6,17 +6,19 @@ import (
 )
 
 type IToken struct {
-	conf *config.TokenInfo
+	conf    *config.TokenInfo
+	confCdn *config.Cdn
 
 	Tokens map[int]*Token
 
 	tokenCmd *TokenCmd
 }
 
-func NewTokenManager(conf *config.TokenInfo) *IToken {
+func NewTokenManager(conf *config.TokenInfo, confCdn *config.Cdn) *IToken {
 	gToken = new(IToken)
 	gToken.conf = conf
-	gToken.tokenCmd = NewTokenCmd(gToken, conf)
+	gToken.confCdn = confCdn
+	gToken.tokenCmd = NewTokenCmd(gToken, conf, confCdn)
 	return gToken
 }
 

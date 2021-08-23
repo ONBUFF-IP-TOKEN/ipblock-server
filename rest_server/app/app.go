@@ -8,6 +8,7 @@ import (
 	baseconf "github.com/ONBUFF-IP-TOKEN/baseapp/config"
 	"github.com/ONBUFF-IP-TOKEN/basedb"
 	"github.com/ONBUFF-IP-TOKEN/baseutil/log"
+	"github.com/ONBUFF-IP-TOKEN/ipblock-server/cdn/azure"
 	"github.com/ONBUFF-IP-TOKEN/ipblock-server/rest_server/config"
 	"github.com/ONBUFF-IP-TOKEN/ipblock-server/rest_server/controllers/auth"
 	"github.com/ONBUFF-IP-TOKEN/ipblock-server/rest_server/controllers/context"
@@ -25,6 +26,7 @@ type ServerApp struct {
 
 	token *token.IToken
 	auth  *auth.IAuth
+	azure *azure.Azure
 }
 
 func (o *ServerApp) Init(configFile string) (err error) {
@@ -42,6 +44,10 @@ func (o *ServerApp) Init(configFile string) (err error) {
 		return err
 	} else {
 		o.auth = auth
+	}
+	// cdn init
+	if err := o.InitCdn(); err != nil {
+		return err
 	}
 
 	return err
@@ -93,10 +99,26 @@ func (o *ServerApp) NewDB(conf *config.ServerConfig) error {
 }
 
 func (o *ServerApp) InitToken() error {
-	o.token = token.NewTokenManager(&o.conf.Token)
+	o.token = token.NewTokenManager(&o.conf.Token, &o.conf.Cdn)
 
 	if err := o.token.Init(); err != nil {
 		return err
 	}
+	return nil
+}
+
+func (o *ServerApp) InitCdn() error {
+	if azure, err := azure.InitAzure(
+		o.conf.Cdn.Azure.AzureStorageAccount,
+		o.conf.Cdn.Azure.AzureStorageAccessKey,
+		o.conf.Cdn.Azure.Domain,
+		o.conf.Cdn.Azure.ContainerNft,
+		o.conf.Cdn.Azure.ContainerProduct,
+	); err != nil {
+		return err
+	} else {
+		o.azure = azure
+	}
+
 	return nil
 }

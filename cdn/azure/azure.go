@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"net/url"
+	"os"
 
 	"github.com/Azure/azure-pipeline-go/pipeline"
 	"github.com/Azure/azure-storage-blob-go/azblob"
@@ -70,18 +71,41 @@ func (o *Azure) MakeProductContainerUrl(containerName string) {
 	gAzure.containerProductUrl = azblob.NewContainerURL(*url, o.pipeline)
 }
 
+// cdn byte 버퍼로 업로드
+// remotefileName에 경로를 포함하면 azure cdn에 가상 폴더를 자동으로 생성해준다.
 func (o *Azure) UploadNftInfoBuffer(b []byte, remoteFileName string) error {
-	ctx := context.Background()
-
 	blobURL := o.containerNftUrl.NewBlockBlobURL(remoteFileName)
 	options := azblob.UploadToBlockBlobOptions{
 		BlockSize:   4 * 1024 * 1024,
 		Parallelism: 16}
-	_, err := azblob.UploadBufferToBlockBlob(ctx, b, blobURL, options)
+	_, err := azblob.UploadBufferToBlockBlob(context.Background(), b, blobURL, options)
 
 	return err
 }
 
-func (o *Azure) UploadFile() {
+// cdn file로 업로드
+// remotefileName에 경로를 포함하면 azure cdn에 가상 폴더를 자동으로 생성해준다.
+func (o *Azure) UploadNftFile(file *os.File, remoteFileName string) error {
+	blobURL := o.containerNftUrl.NewBlockBlobURL(remoteFileName)
+	options := azblob.UploadToBlockBlobOptions{
+		BlockSize:   4 * 1024 * 1024,
+		Parallelism: 16}
+	_, err := azblob.UploadFileToBlockBlob(context.Background(), file, blobURL, options)
+	return err
+}
 
+// nft 컨테이너 삭제
+func (o *Azure) DeleteNftContainer() {
+	o.containerNftUrl.Delete(context.Background(), azblob.ContainerAccessConditions{})
+}
+
+// product 컨테이너 삭제
+func (o *Azure) DeleteProductContainer() {
+	o.containerProductUrl.Delete(context.Background(), azblob.ContainerAccessConditions{})
+}
+
+// cdn 파일 삭제
+func (o *Azure) DeleteNftFile(remoteFileName string) {
+	blobURL := o.containerNftUrl.NewBlockBlobURL(remoteFileName)
+	blobURL.Delete(context.Background(), azblob.DeleteSnapshotsOptionNone, azblob.BlobAccessConditions{})
 }

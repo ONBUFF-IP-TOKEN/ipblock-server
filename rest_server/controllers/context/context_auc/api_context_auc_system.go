@@ -6,6 +6,7 @@ type SystemRedisRemove struct {
 	AuctionList string `query:"auction_list"`
 	ProductList string `query:"product_list"`
 	BidList     string `query:"bid_list"`
+	AuctionId   string `query:"auc_id"`
 }
 
 func NewSystemRedisRemove() *SystemRedisRemove {

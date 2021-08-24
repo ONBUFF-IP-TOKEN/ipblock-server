@@ -39,7 +39,7 @@ func PostAucBidDeposit(bidDeposit *context_auc.BidDeposit, ctx *context.IPBlockS
 	resp.Success()
 
 	// auc_auctions 테이블에서 경매 정보 불러오기
-	auction, err := model.GetDB().GetAucAuction(bidDeposit.AucId)
+	auction, _, err := model.GetDB().GetAucAuction(bidDeposit.AucId)
 	if err != nil {
 		log.Error("GetAucAuction :", err)
 		resp.SetReturn(resultcode.Result_DBError)
@@ -289,7 +289,7 @@ func NewBidSuccessGiveup(bid *context_auc.BidWinnerGiveup, ctx *context.IPBlockS
 // 경매 기간중인지 확인
 func IsAuctionPeriod(auction *context_auc.AucAuction, aucId int64) bool {
 	if auction == nil {
-		auc, err := model.GetDB().GetAucAuction(aucId)
+		auc, _, err := model.GetDB().GetAucAuction(aucId)
 		if err != nil || auc == nil {
 			return false
 		}
@@ -308,7 +308,7 @@ func IsAuctionPeriod(auction *context_auc.AucAuction, aucId int64) bool {
 // 경매 종료되었는지 확인
 func IsAuctionEnd(auction *context_auc.AucAuction, aucId int64) bool {
 	if auction == nil {
-		auc, err := model.GetDB().GetAucAuction(aucId)
+		auc, _, err := model.GetDB().GetAucAuction(aucId)
 		if err != nil || auc == nil {
 			return false
 		}

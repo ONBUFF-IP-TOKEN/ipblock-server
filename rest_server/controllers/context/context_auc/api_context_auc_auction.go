@@ -128,10 +128,26 @@ func NewRemoveAuction() *RemoveAuction {
 }
 
 func (o *RemoveAuction) CheckValidate() *base.BaseResponse {
-	if o.Id == 0 {
+	if o.Id < 0 {
 		return base.MakeBaseResponse(resultcode.Result_Auc_Auction_RequireAucId)
 	}
 	return nil
 }
 
 ////////////////////////////////////////////////
+
+// 단일 경매 정보 요청
+type GetAuction struct {
+	Id int64 `query:"auc_id"`
+}
+
+func NewGetAuction() *GetAuction {
+	return new(GetAuction)
+}
+
+func (o *GetAuction) CheckValidate() *base.BaseResponse {
+	if o.Id < 0 {
+		return base.MakeBaseResponse(resultcode.Result_Auc_Auction_RequireAucId)
+	}
+	return nil
+}

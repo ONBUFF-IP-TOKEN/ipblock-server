@@ -42,6 +42,8 @@ func PostAucAuctionUpdate(auction *context_auc.AucAuctionUpdate, ctx *context.IP
 	} else {
 		auction.Id = id
 		resp.Value = auction
+		// redis 삭제
+		model.GetDB().DeleteAuctionCache(auction.Id)
 	}
 	return ctx.EchoContext.JSON(http.StatusOK, resp)
 }
@@ -88,18 +90,48 @@ func GetAucAuctionList(auctionList *context_auc.AuctionList, c echo.Context) err
 }
 
 // 경매 삭제
-func DeleteAucAuctiontRemove(product *context_auc.RemoveAuction, ctx *context.IPBlockServerContext) error {
+func DeleteAucAuctiontRemove(auction *context_auc.RemoveAuction, ctx *context.IPBlockServerContext) error {
 	resp := new(base.BaseResponse)
 	resp.Success()
 
 	//1. auc_products table 에서 삭제
-	if ret, err := model.GetDB().DeleteAucAuction(product.Id); err != nil {
+	if ret, err := model.GetDB().DeleteAucAuction(auction.Id); err != nil {
 		log.Error("DeleteAucAuctiontRemove :", err)
 		resp.SetReturn(resultcode.Result_DBError)
 	} else {
 		if !ret {
 			resp.SetReturn(resultcode.Result_DBNotExistProduct)
+		} else {
+			// redis 삭제
+			model.GetDB().DeleteAuctionCache(auction.Id)
 		}
 	}
 	return ctx.EchoContext.JSON(http.StatusOK, resp)
+}
+
+// 단일 경매 정보 요청
+func GetAucAuction(auction *context_auc.GetAuction, c echo.Context) error {
+	resp := new(base.BaseResponse)
+
+	//redis exist check
+	if auc, err := model.GetDB().GetAuctionCache(auction.Id); err == nil {
+		resp.Success()
+		resp.Value = auc
+		return c.JSON(http.StatusOK, resp)
+	}
+
+	auc, count, err := model.GetDB().GetAucAuction(auction.Id)
+	if err != nil {
+		resp.SetReturn(resultcode.Result_DBError)
+	} else if err == nil && count == 0 {
+		// 존재하지 않은 경매
+		resp.SetReturn(resultcode.Result_DBNotExistAuction)
+	} else {
+		resp.Success()
+		resp.Value = auc
+
+		model.GetDB().SetAuctionCache(auc)
+	}
+
+	return c.JSON(http.StatusOK, resp)
 }

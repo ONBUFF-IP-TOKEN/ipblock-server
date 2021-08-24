@@ -115,27 +115,29 @@ func (o *DB) GetAucAuctionList(pageInfo *context_auc.AuctionList) ([]context_auc
 	return auctions, totalCount, err
 }
 
-func (o *DB) GetAucAuction(aucId int64) (*context_auc.AucAuction, error) {
+func (o *DB) GetAucAuction(aucId int64) (*context_auc.AucAuction, int64, error) {
 	var err error
 	sqlQuery := fmt.Sprintf("SELECT * FROM auc_auctions LEFT JOIN auc_products on auc_auctions.product_id = auc_products.product_id WHERE auc_id=%v", aucId)
 	rows, err := o.Mysql.Query(sqlQuery)
 
 	if err != nil {
 		log.Error(err)
-		return nil, err
+		return nil, 0, err
 	}
 
 	defer rows.Close()
 
 	auction := &context_auc.AucAuction{}
+	cnt := int64(0)
 	for rows.Next() {
 		auction, err = o.ScanAuction(rows)
 		if err != nil {
 			continue
+		} else {
+			cnt++
 		}
 	}
-
-	return auction, err
+	return auction, cnt, err
 }
 
 func (o *DB) DeleteAucAuction(auctionId int64) (bool, error) {

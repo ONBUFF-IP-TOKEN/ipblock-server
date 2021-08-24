@@ -32,6 +32,7 @@ const (
 	Result_DBError           = 13000
 	Result_DBNotExistItem    = 13001
 	Result_DBNotExistProduct = 13002
+	Result_DBNotExistAuction = 13003
 
 	Result_TokenError               = 14000
 	Result_TokenERC721CreateError   = 14001
@@ -116,6 +117,7 @@ var ResultCodeText = map[int]string{
 	Result_DBError:           "Internal DB error",
 	Result_DBNotExistItem:    "Not exist item",
 	Result_DBNotExistProduct: "Not exist Product",
+	Result_DBNotExistAuction: "Not exist Auction",
 
 	Result_TokenError:               "Internal Token error",
 	Result_TokenERC721CreateError:   "ERC721 create error",

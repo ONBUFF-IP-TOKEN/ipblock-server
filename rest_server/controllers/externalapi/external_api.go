@@ -202,24 +202,6 @@ func (o *ExternalAPI) GetMyOrderList(c echo.Context) error {
 	return commonapi.GetMyOrderList(params, ctx)
 }
 
-// 경매 리스트 요청
-func (o *ExternalAPI) GetAucAuctionList(c echo.Context) error {
-	//ctx := base.GetContext(c).(*context.IPBlockServerContext)
-
-	params := context_auc.NewAuctionList()
-	if err := c.Bind(params); err != nil {
-		log.Error(err)
-		return base.BaseJSONInternalServerError(c, err)
-	}
-
-	if err := params.CheckValidate(); err != nil {
-		return c.JSON(http.StatusOK, err)
-	}
-
-	params.ActiveState = context_auc.Auction_active_state_active
-	return commonapi_auc.GetAucAuctionList(params, c)
-}
-
 // 경매 입찰 보증금 확인
 func (o *ExternalAPI) GetAucBidDeposit(c echo.Context) error {
 	ctx := base.GetContext(c).(*context.IPBlockServerContext)

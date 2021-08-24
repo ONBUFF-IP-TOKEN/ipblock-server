@@ -62,6 +62,22 @@ func (o *InternalAPI) GetAucAuctionList(c echo.Context) error {
 	return commonapi_auc.GetAucAuctionList(params, c)
 }
 
+func (o *InternalAPI) GetAucAuctionListByAucState(c echo.Context) error {
+	ctx := base.GetContext(c).(*context.IPBlockServerContext)
+
+	params := context_auc.NewAuctionListByAucState()
+	if err := ctx.EchoContext.Bind(params); err != nil {
+		log.Error(err)
+		return base.BaseJSONInternalServerError(c, err)
+	}
+
+	if err := params.CheckValidate(); err != nil {
+		return c.JSON(http.StatusOK, err)
+	}
+
+	return commonapi_auc.GetAucAuctionListByAucState(params, c)
+}
+
 // 경매 삭제
 func (o *InternalAPI) DeleteAucAuctiontRemove(c echo.Context) error {
 	ctx := base.GetContext(c).(*context.IPBlockServerContext)

@@ -118,6 +118,33 @@ type AuctionListResponse struct {
 
 ////////////////////////////////////////////////
 
+// auction list by auc_state request
+type AuctionListByAucState struct {
+	PageInfo
+	AucState int64 `query:"auc_state"`
+}
+
+func NewAuctionListByAucState() *AuctionListByAucState {
+	return new(AuctionListByAucState)
+}
+
+func (o *AuctionListByAucState) CheckValidate() *base.BaseResponse {
+	if o.PageOffset < 0 {
+		return base.MakeBaseResponse(resultcode.Result_RequireValidPageOffset)
+	}
+	if o.PageSize <= 0 {
+		return base.MakeBaseResponse(resultcode.Result_RequireValidPageSize)
+	}
+	return nil
+}
+
+type AuctionListByAucStateResponse struct {
+	PageInfo    PageInfoResponse `json:"page_info"`
+	AucAuctions []AucAuction     `json:"auctions"`
+}
+
+////////////////////////////////////////////////
+
 // 경매 삭제
 type RemoveAuction struct {
 	Id int64 `query:"auc_id"`

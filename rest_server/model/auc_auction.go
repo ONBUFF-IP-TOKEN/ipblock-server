@@ -115,6 +115,34 @@ func (o *DB) GetAucAuctionList(pageInfo *context_auc.AuctionList) ([]context_auc
 	return auctions, totalCount, err
 }
 
+func (o *DB) GetAucAuctionListByAucState(pageInfo *context_auc.AuctionListByAucState) ([]context_auc.AucAuction, int64, error) {
+	sqlQuery := fmt.Sprintf("SELECT * FROM auc_auctions LEFT JOIN auc_products on auc_auctions.product_id = auc_products.product_id "+
+		"WHERE auc_state = %v ORDER BY auc_id DESC LIMIT %v,%v", pageInfo.AucState, pageInfo.PageSize*pageInfo.PageOffset, pageInfo.PageSize)
+
+	rows, err := o.Mysql.Query(sqlQuery)
+
+	if err != nil {
+		log.Error(err)
+		return nil, 0, err
+	}
+
+	defer rows.Close()
+
+	auctions := make([]context_auc.AucAuction, 0)
+	for rows.Next() {
+		auction, err := o.ScanAuction(rows)
+		if err != nil {
+			log.Error(err)
+			continue
+		}
+		auctions = append(auctions, *auction)
+	}
+
+	totalCount, err := o.GetTotalAucAuctionSizeByAucState(pageInfo)
+
+	return auctions, totalCount, err
+}
+
 func (o *DB) GetAucAuction(aucId int64) (*context_auc.AucAuction, int64, error) {
 	var err error
 	sqlQuery := fmt.Sprintf("SELECT * FROM auc_auctions LEFT JOIN auc_products on auc_auctions.product_id = auc_products.product_id WHERE auc_id=%v", aucId)
@@ -168,6 +196,19 @@ func (o *DB) GetTotalAucAuctionSize(pageInfo *context_auc.AuctionList) (int64, e
 	} else {
 		query = fmt.Sprintf("SELECT COUNT(*) as count FROM auc_auctions WHERE active_state = %v", pageInfo.ActiveState)
 	}
+	err := o.Mysql.QueryRow(query, &count)
+
+	if err != nil {
+		log.Error(err)
+		return count, err
+	}
+
+	return count, nil
+}
+
+func (o *DB) GetTotalAucAuctionSizeByAucState(pageInfo *context_auc.AuctionListByAucState) (int64, error) {
+	var count int64
+	query := fmt.Sprintf("SELECT COUNT(*) as count FROM auc_auctions WHERE auc_state = %v", pageInfo.AucState)
 	err := o.Mysql.QueryRow(query, &count)
 
 	if err != nil {

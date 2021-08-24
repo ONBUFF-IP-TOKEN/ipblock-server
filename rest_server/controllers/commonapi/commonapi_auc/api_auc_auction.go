@@ -89,6 +89,29 @@ func GetAucAuctionList(auctionList *context_auc.AuctionList, c echo.Context) err
 	return c.JSON(http.StatusOK, resp)
 }
 
+// 경매 정보 리스트 요청
+func GetAucAuctionListByAucState(auctionList *context_auc.AuctionListByAucState, c echo.Context) error {
+	resp := new(base.BaseResponse)
+
+	auctions, totalCount, err := model.GetDB().GetAucAuctionListByAucState(auctionList)
+	if err != nil {
+		resp.SetReturn(resultcode.Result_DBError)
+	} else {
+		resp.Success()
+		pageInfo := context_auc.PageInfoResponse{
+			PageOffset: auctionList.PageOffset,
+			PageSize:   int64(len(auctions)),
+			TotalSize:  totalCount,
+		}
+		resp.Value = context_auc.AuctionListResponse{
+			PageInfo:    pageInfo,
+			AucAuctions: auctions,
+		}
+	}
+
+	return c.JSON(http.StatusOK, resp)
+}
+
 // 경매 삭제
 func DeleteAucAuctiontRemove(auction *context_auc.RemoveAuction, ctx *context.IPBlockServerContext) error {
 	resp := new(base.BaseResponse)

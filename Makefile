@@ -10,7 +10,7 @@ server_ext_api=external_api.yml
 
 # set variables for build
 output=bin
-app=ipblock-server
+app=ipblock-server-$(env)
 src=cmd/$(app)
 
 ifeq ("$(env)", "")

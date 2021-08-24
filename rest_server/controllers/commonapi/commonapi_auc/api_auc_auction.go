@@ -89,9 +89,22 @@ func GetAucAuctionList(auctionList *context_auc.AuctionList, c echo.Context) err
 	return c.JSON(http.StatusOK, resp)
 }
 
-// 경매 정보 리스트 요청
+// 경매 정보 리스트 요청 (경매 상태)
 func GetAucAuctionListByAucState(auctionList *context_auc.AuctionListByAucState, c echo.Context) error {
 	resp := new(base.BaseResponse)
+
+	// active 경매 정보만 redis에서 가져온다.
+	if auctionList.ActiveState == context_auc.Auction_active_state_active {
+		//redis exist check
+		if pageInfo, auctions, err := model.GetDB().GetAuctionListByAucStateCache(&auctionList.PageInfo, auctionList.AucState); err == nil {
+			resp.Success()
+			resp.Value = context_auc.AuctionListByAucStateResponse{
+				PageInfo:    *pageInfo,
+				AucAuctions: *auctions,
+			}
+			return c.JSON(http.StatusOK, resp)
+		}
+	}
 
 	auctions, totalCount, err := model.GetDB().GetAucAuctionListByAucState(auctionList)
 	if err != nil {
@@ -103,9 +116,55 @@ func GetAucAuctionListByAucState(auctionList *context_auc.AuctionListByAucState,
 			PageSize:   int64(len(auctions)),
 			TotalSize:  totalCount,
 		}
-		resp.Value = context_auc.AuctionListResponse{
+		resp.Value = context_auc.AuctionListByAucStateResponse{
 			PageInfo:    pageInfo,
 			AucAuctions: auctions,
+		}
+
+		// active 경매 정보만 redis에 남긴다.
+		if auctionList.ActiveState == context_auc.Auction_active_state_active {
+			model.GetDB().SetAuctionListByAucStateCache(&auctionList.PageInfo, &pageInfo, &auctions, auctionList.AucState)
+		}
+	}
+
+	return c.JSON(http.StatusOK, resp)
+}
+
+// 경매 정보 리스트 요청 (추천 경매)
+func GetAucAuctionListByRecommand(auctionList *context_auc.AuctionListByRecommand, c echo.Context) error {
+	resp := new(base.BaseResponse)
+
+	// active 경매 정보만 redis에서 가져온다.
+	if auctionList.ActiveState == context_auc.Auction_active_state_active {
+		//redis exist check
+		if pageInfo, auctions, err := model.GetDB().GetAuctionListByRecommandCache(&auctionList.PageInfo); err == nil {
+			resp.Success()
+			resp.Value = context_auc.AuctionListRecommandResponse{
+				PageInfo:    *pageInfo,
+				AucAuctions: *auctions,
+			}
+			return c.JSON(http.StatusOK, resp)
+		}
+	}
+
+	auctions, totalCount, err := model.GetDB().GetAucAuctionListByRecommand(auctionList)
+	if err != nil {
+		resp.SetReturn(resultcode.Result_DBError)
+	} else {
+		resp.Success()
+		pageInfo := context_auc.PageInfoResponse{
+			PageOffset: auctionList.PageOffset,
+			PageSize:   int64(len(auctions)),
+			TotalSize:  totalCount,
+		}
+		resp.Value = context_auc.AuctionListRecommandResponse{
+			PageInfo:    pageInfo,
+			AucAuctions: auctions,
+		}
+
+		// active 경매 정보만 redis에 남긴다.
+		if auctionList.ActiveState == context_auc.Auction_active_state_active {
+			model.GetDB().SetAuctionListByRecommandCache(&auctionList.PageInfo, &pageInfo, &auctions)
 		}
 	}
 

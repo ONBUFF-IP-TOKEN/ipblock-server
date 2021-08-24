@@ -62,6 +62,7 @@ func (o *InternalAPI) GetAucAuctionList(c echo.Context) error {
 	return commonapi_auc.GetAucAuctionList(params, c)
 }
 
+// 경매 리스트 요청 (경매 상태에 따른)
 func (o *InternalAPI) GetAucAuctionListByAucState(c echo.Context) error {
 	ctx := base.GetContext(c).(*context.IPBlockServerContext)
 
@@ -74,7 +75,7 @@ func (o *InternalAPI) GetAucAuctionListByAucState(c echo.Context) error {
 	if err := params.CheckValidate(); err != nil {
 		return c.JSON(http.StatusOK, err)
 	}
-
+	params.ActiveState = context_auc.Auction_active_state_all
 	return commonapi_auc.GetAucAuctionListByAucState(params, c)
 }
 

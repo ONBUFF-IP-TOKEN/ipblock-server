@@ -83,6 +83,40 @@ func (o *DB) SetAuctionListCache(reqPageInfo *context_auc.PageInfo, pageInfo *co
 	return o.Cache.HSet(cKey, field, auctionListCache)
 }
 
+// 경매 리스트 set (경매 상태)
+func (o *DB) SetAuctionListByAucStateCache(reqPageInfo *context_auc.PageInfo, pageInfo *context_auc.PageInfoResponse, data *[]context_auc.AucAuction, aucState int64) error {
+	if !o.Cache.Enable() {
+		log.Warnf("redis disable")
+	}
+
+	auctionListCache := &AuctionListCache{
+		PageInfo:    pageInfo,
+		AuctionList: data,
+	}
+
+	cKey := genCacheKeyByAucProduct(auction_list_key)
+	field := fmt.Sprintf("%v-%v-%v", aucState, reqPageInfo.PageSize, reqPageInfo.PageOffset)
+	log.Info("SetAuctionListCache ", field)
+	return o.Cache.HSet(cKey, field, auctionListCache)
+}
+
+// 경매 리스트 set (추천 경매)
+func (o *DB) SetAuctionListByRecommandCache(reqPageInfo *context_auc.PageInfo, pageInfo *context_auc.PageInfoResponse, data *[]context_auc.AucAuction) error {
+	if !o.Cache.Enable() {
+		log.Warnf("redis disable")
+	}
+
+	auctionListCache := &AuctionListCache{
+		PageInfo:    pageInfo,
+		AuctionList: data,
+	}
+
+	cKey := genCacheKeyByAucProduct(auction_list_key)
+	field := fmt.Sprintf("%v-%v-%v", "r", reqPageInfo.PageSize, reqPageInfo.PageOffset)
+	log.Info("SetAuctionListCache ", field)
+	return o.Cache.HSet(cKey, field, auctionListCache)
+}
+
 // 경매 리스트 get
 func (o *DB) GetAuctionListCache(pageInfo *context_auc.PageInfo) (*context_auc.PageInfoResponse, *[]context_auc.AucAuction, error) {
 	if !o.Cache.Enable() {
@@ -91,6 +125,34 @@ func (o *DB) GetAuctionListCache(pageInfo *context_auc.PageInfo) (*context_auc.P
 	auctionListCache := &AuctionListCache{}
 	cKey := genCacheKeyByAucProduct(auction_list_key)
 	field := fmt.Sprintf("%v-%v", pageInfo.PageSize, pageInfo.PageOffset)
+
+	err := o.Cache.HGet(cKey, field, auctionListCache)
+
+	return auctionListCache.PageInfo, auctionListCache.AuctionList, err
+}
+
+// 경매 리스트 get (경매 상태)
+func (o *DB) GetAuctionListByAucStateCache(pageInfo *context_auc.PageInfo, aucState int64) (*context_auc.PageInfoResponse, *[]context_auc.AucAuction, error) {
+	if !o.Cache.Enable() {
+		log.Warnf("redis disable")
+	}
+	auctionListCache := &AuctionListCache{}
+	cKey := genCacheKeyByAucProduct(auction_list_key)
+	field := fmt.Sprintf("%v-%v-%v", aucState, pageInfo.PageSize, pageInfo.PageOffset)
+
+	err := o.Cache.HGet(cKey, field, auctionListCache)
+
+	return auctionListCache.PageInfo, auctionListCache.AuctionList, err
+}
+
+// 경매 리스트 get (추천 경매)
+func (o *DB) GetAuctionListByRecommandCache(pageInfo *context_auc.PageInfo) (*context_auc.PageInfoResponse, *[]context_auc.AucAuction, error) {
+	if !o.Cache.Enable() {
+		log.Warnf("redis disable")
+	}
+	auctionListCache := &AuctionListCache{}
+	cKey := genCacheKeyByAucProduct(auction_list_key)
+	field := fmt.Sprintf("%v-%v-%v", "r", pageInfo.PageSize, pageInfo.PageOffset)
 
 	err := o.Cache.HGet(cKey, field, auctionListCache)
 

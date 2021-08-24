@@ -121,7 +121,8 @@ type AuctionListResponse struct {
 // auction list by auc_state request
 type AuctionListByAucState struct {
 	PageInfo
-	AucState int64 `query:"auc_state"`
+	AucState    int64 `query:"auc_state"`
+	ActiveState int64 // Auction_active_state_all, Auction_active_state_inactive, Auction_active_state_active
 }
 
 func NewAuctionListByAucState() *AuctionListByAucState {
@@ -139,6 +140,33 @@ func (o *AuctionListByAucState) CheckValidate() *base.BaseResponse {
 }
 
 type AuctionListByAucStateResponse struct {
+	PageInfo    PageInfoResponse `json:"page_info"`
+	AucAuctions []AucAuction     `json:"auctions"`
+}
+
+////////////////////////////////////////////////
+
+// auction list by recommand request
+type AuctionListByRecommand struct {
+	PageInfo
+	ActiveState int64 // Auction_active_state_all, Auction_active_state_inactive, Auction_active_state_active
+}
+
+func NewAuctionListRecommand() *AuctionListByRecommand {
+	return new(AuctionListByRecommand)
+}
+
+func (o *AuctionListByRecommand) CheckValidate() *base.BaseResponse {
+	if o.PageOffset < 0 {
+		return base.MakeBaseResponse(resultcode.Result_RequireValidPageOffset)
+	}
+	if o.PageSize <= 0 {
+		return base.MakeBaseResponse(resultcode.Result_RequireValidPageSize)
+	}
+	return nil
+}
+
+type AuctionListRecommandResponse struct {
 	PageInfo    PageInfoResponse `json:"page_info"`
 	AucAuctions []AucAuction     `json:"auctions"`
 }

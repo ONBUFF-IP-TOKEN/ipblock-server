@@ -26,6 +26,36 @@ func (o *ExternalAPI) GetAucAuctionList(c echo.Context) error {
 	return commonapi_auc.GetAucAuctionList(params, c)
 }
 
+// 경매 리스트 요청 (경매 상태에 따른)
+func (o *ExternalAPI) GetAucAuctionListByAucState(c echo.Context) error {
+	params := context_auc.NewAuctionListByAucState()
+	if err := c.Bind(params); err != nil {
+		log.Error(err)
+		return base.BaseJSONInternalServerError(c, err)
+	}
+
+	if err := params.CheckValidate(); err != nil {
+		return c.JSON(http.StatusOK, err)
+	}
+	params.ActiveState = context_auc.Auction_active_state_active
+	return commonapi_auc.GetAucAuctionListByAucState(params, c)
+}
+
+// 경매 리스트 요청 (경매 상태에 따른)
+func (o *ExternalAPI) GetAucAuctionListByRecommand(c echo.Context) error {
+	params := context_auc.NewAuctionListRecommand()
+	if err := c.Bind(params); err != nil {
+		log.Error(err)
+		return base.BaseJSONInternalServerError(c, err)
+	}
+
+	if err := params.CheckValidate(); err != nil {
+		return c.JSON(http.StatusOK, err)
+	}
+	params.ActiveState = context_auc.Auction_active_state_active
+	return commonapi_auc.GetAucAuctionListByRecommand(params, c)
+}
+
 // 경매 정보 요청
 func (o *ExternalAPI) GetAucAuction(c echo.Context) error {
 	params := context_auc.NewGetAuction()

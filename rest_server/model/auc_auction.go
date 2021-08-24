@@ -116,8 +116,15 @@ func (o *DB) GetAucAuctionList(pageInfo *context_auc.AuctionList) ([]context_auc
 }
 
 func (o *DB) GetAucAuctionListByAucState(pageInfo *context_auc.AuctionListByAucState) ([]context_auc.AucAuction, int64, error) {
-	sqlQuery := fmt.Sprintf("SELECT * FROM auc_auctions LEFT JOIN auc_products on auc_auctions.product_id = auc_products.product_id "+
-		"WHERE auc_state = %v ORDER BY auc_id DESC LIMIT %v,%v", pageInfo.AucState, pageInfo.PageSize*pageInfo.PageOffset, pageInfo.PageSize)
+	var sqlQuery string
+	if pageInfo.ActiveState == context_auc.Auction_active_state_all {
+		//전체 리스트
+		sqlQuery = fmt.Sprintf("SELECT * FROM auc_auctions LEFT JOIN auc_products on auc_auctions.product_id = auc_products.product_id "+
+			"WHERE auc_state = %v ORDER BY auc_id DESC LIMIT %v,%v", pageInfo.AucState, pageInfo.PageSize*pageInfo.PageOffset, pageInfo.PageSize)
+	} else {
+		sqlQuery = fmt.Sprintf("SELECT * FROM auc_auctions LEFT JOIN auc_products on auc_auctions.product_id = auc_products.product_id "+
+			"WHERE auc_state = %v AND active_state = %v ORDER BY auc_id DESC LIMIT %v,%v", pageInfo.AucState, pageInfo.ActiveState, pageInfo.PageSize*pageInfo.PageOffset, pageInfo.PageSize)
+	}
 
 	rows, err := o.Mysql.Query(sqlQuery)
 
@@ -139,6 +146,41 @@ func (o *DB) GetAucAuctionListByAucState(pageInfo *context_auc.AuctionListByAucS
 	}
 
 	totalCount, err := o.GetTotalAucAuctionSizeByAucState(pageInfo)
+
+	return auctions, totalCount, err
+}
+
+func (o *DB) GetAucAuctionListByRecommand(pageInfo *context_auc.AuctionListByRecommand) ([]context_auc.AucAuction, int64, error) {
+	var sqlQuery string
+	if pageInfo.ActiveState == context_auc.Auction_active_state_all {
+		//전체 리스트
+		sqlQuery = fmt.Sprintf("SELECT * FROM auc_auctions LEFT JOIN auc_products on auc_auctions.product_id = auc_products.product_id "+
+			"WHERE recommand = 1 ORDER BY auc_id DESC LIMIT %v,%v", pageInfo.PageSize*pageInfo.PageOffset, pageInfo.PageSize)
+	} else {
+		sqlQuery = fmt.Sprintf("SELECT * FROM auc_auctions LEFT JOIN auc_products on auc_auctions.product_id = auc_products.product_id "+
+			"WHERE recommand = 1 AND active_state = %v ORDER BY auc_id DESC LIMIT %v,%v", pageInfo.ActiveState, pageInfo.PageSize*pageInfo.PageOffset, pageInfo.PageSize)
+	}
+
+	rows, err := o.Mysql.Query(sqlQuery)
+
+	if err != nil {
+		log.Error(err)
+		return nil, 0, err
+	}
+
+	defer rows.Close()
+
+	auctions := make([]context_auc.AucAuction, 0)
+	for rows.Next() {
+		auction, err := o.ScanAuction(rows)
+		if err != nil {
+			log.Error(err)
+			continue
+		}
+		auctions = append(auctions, *auction)
+	}
+
+	totalCount, err := o.GetTotalAucAuctionSizeByRecommand(pageInfo)
 
 	return auctions, totalCount, err
 }
@@ -208,7 +250,30 @@ func (o *DB) GetTotalAucAuctionSize(pageInfo *context_auc.AuctionList) (int64, e
 
 func (o *DB) GetTotalAucAuctionSizeByAucState(pageInfo *context_auc.AuctionListByAucState) (int64, error) {
 	var count int64
-	query := fmt.Sprintf("SELECT COUNT(*) as count FROM auc_auctions WHERE auc_state = %v", pageInfo.AucState)
+	var query string
+	if pageInfo.ActiveState == context_auc.Auction_active_state_all {
+		query = fmt.Sprintf("SELECT COUNT(*) as count FROM auc_auctions WHERE auc_state = %v", pageInfo.AucState)
+	} else if pageInfo.ActiveState == context_auc.Auction_active_state_active {
+		query = fmt.Sprintf("SELECT COUNT(*) as count FROM auc_auctions WHERE auc_state = %v AND active_state = %v", pageInfo.AucState, pageInfo.ActiveState)
+	}
+	err := o.Mysql.QueryRow(query, &count)
+
+	if err != nil {
+		log.Error(err)
+		return count, err
+	}
+
+	return count, nil
+}
+
+func (o *DB) GetTotalAucAuctionSizeByRecommand(pageInfo *context_auc.AuctionListByRecommand) (int64, error) {
+	var count int64
+	var query string
+	if pageInfo.ActiveState == context_auc.Auction_active_state_all {
+		query = fmt.Sprintf("SELECT COUNT(*) as count FROM auc_auctions WHERE recommand = 1")
+	} else if pageInfo.ActiveState == context_auc.Auction_active_state_active {
+		query = fmt.Sprintf("SELECT COUNT(*) as count FROM auc_auctions WHERE recommand = 1 AND active_state = %v", pageInfo.ActiveState)
+	}
 	err := o.Mysql.QueryRow(query, &count)
 
 	if err != nil {

@@ -12,10 +12,14 @@ type CardInfo struct {
 	Tier            string `json:"tier"`         // bronze, silver, gold, platinum ....
 }
 
+type Company struct {
+	IpOwnerShip        string `json:"ip_ownership"`
+	IpOwnerShipLogoUrl string `json:"ip_ownership_logo_url"`
+	IpCategory         string `json:"ip_category"`
+}
+
 // content info
 type Content struct {
-	CardInfo CardInfo `json:"card_info"`
-
 	BackgroundColor string `json:"bg_color"` // 0xffffff
 }
 
@@ -60,8 +64,9 @@ type ProductInfo struct {
 
 	Prices []ProductPrice `json:"product_prices"`
 
-	Content     Content `json:"content"`
-	IpOwnerShip string  `json:"ip_ownership"`
+	Content  Content  `json:"content"`
+	CardInfo CardInfo `json:"card_info"`
+	Company  Company  `json:"company"`
 
 	Media MediaInfo `json:"media"`
 }
@@ -86,7 +91,7 @@ func (o *ProductInfo) CheckValidate() *base.BaseResponse {
 	if len(o.Prices) == 0 {
 		return base.MakeBaseResponse(resultcode.Result_Auc_Product_RequirePriceInfo)
 	}
-	if len(o.IpOwnerShip) == 0 {
+	if len(o.Company.IpOwnerShip) == 0 {
 		return base.MakeBaseResponse(resultcode.Result_Auc_Product_RequireIPOwnerShip)
 	}
 	return nil

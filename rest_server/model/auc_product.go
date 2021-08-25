@@ -12,7 +12,10 @@ import (
 func (o *DB) InsertAucProduct(product *context_auc.ProductInfo) (int64, error) {
 	sqlQuery := fmt.Sprintf("INSERT INTO auc_products (title, create_ts, description, " +
 		"owner_nickname, owner_wallet_address, creator_nickname, creator_wallet_address," +
-		"prices, content, ip_ownership, media ) VALUES (?,?,?,?,?,?,?,?,?,?,?)")
+		"prices, content, " +
+		"card_bg_color, card_border_color, card_grade, card_tier, " +
+		"ip_ownership, ip_ownership_log_url, ip_category, " +
+		"media ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)")
 
 	title, _ := json.Marshal(product.Title)
 	desc, _ := json.Marshal(product.Desc)
@@ -22,7 +25,10 @@ func (o *DB) InsertAucProduct(product *context_auc.ProductInfo) (int64, error) {
 
 	result, err := o.Mysql.PrepareAndExec(sqlQuery, string(title), product.CreateTs, string(desc),
 		product.OwnerNickName, product.OwnerWalletAddr, product.CreatorNickName, product.CreatorWalletAddr,
-		string(prices), content, product.IpOwnerShip, media)
+		string(prices), content,
+		product.CardInfo.BackgroundColor, product.CardInfo.BorderColor, product.CardInfo.CardGrade, product.CardInfo.Tier,
+		product.Company.IpOwnerShip, product.Company.IpOwnerShipLogoUrl, product.Company.IpCategory,
+		media)
 
 	if err != nil {
 		log.Error(err)
@@ -42,7 +48,10 @@ func (o *DB) InsertAucProduct(product *context_auc.ProductInfo) (int64, error) {
 func (o *DB) UpdateAucProduct(product *context_auc.ProductInfo) (int64, error) {
 	sqlQuery := fmt.Sprintf("UPDATE auc_products set title=?, description=?, " +
 		"owner_nickname=?, owner_wallet_address=?, creator_nickname=?, creator_wallet_address=?, " +
-		"prices=?, content=?, ip_ownership=?, media=? WHERE product_id=?")
+		"prices=?, content=?, " +
+		"card_bg_color=?, card_border_color=?, card_grade=?, card_tier=?, " +
+		"ip_ownership=?, ip_ownership_log_url=?, ip_category=?, " +
+		"media=? WHERE product_id=?")
 
 	title, _ := json.Marshal(product.Title)
 	desc, _ := json.Marshal(product.Desc)
@@ -52,7 +61,10 @@ func (o *DB) UpdateAucProduct(product *context_auc.ProductInfo) (int64, error) {
 
 	result, err := o.Mysql.PrepareAndExec(sqlQuery, string(title), string(desc),
 		product.OwnerNickName, product.OwnerWalletAddr, product.CreatorNickName, product.CreatorWalletAddr,
-		string(prices), content, product.IpOwnerShip, media, product.Id)
+		string(prices), content,
+		product.CardInfo.BackgroundColor, product.CardInfo.BorderColor, product.CardInfo.CardGrade, product.CardInfo.Tier,
+		product.Company.IpOwnerShip, product.Company.IpOwnerShipLogoUrl, product.Company.IpCategory,
+		media, product.Id)
 
 	if err != nil {
 		log.Error(err)
@@ -226,7 +238,10 @@ func (o *DB) ScanProduct(rows *sql.Rows) (*context_auc.ProductInfo, error) {
 	if err := rows.Scan(&product.Id, &title, &product.CreateTs, &desc,
 		&product.OwnerNickName, &product.OwnerWalletAddr, &product.CreatorNickName, &product.CreatorWalletAddr,
 		&nftContract, &nftId, &nftCreateHash, &nftUri, &product.NftState,
-		&prices, &content, &product.IpOwnerShip, &media); err != nil {
+		&prices, &content,
+		&product.CardInfo.BackgroundColor, &product.CardInfo.BorderColor, &product.CardInfo.CardGrade, &product.CardInfo.Tier,
+		&product.Company.IpOwnerShip, &product.Company.IpOwnerShipLogoUrl, &product.Company.IpCategory,
+		&media); err != nil {
 		log.Error("ScanProduct error: ", err)
 		return nil, err
 	}

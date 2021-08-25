@@ -65,7 +65,7 @@
           method: "get"
           uri: "/:apiver/auc/product/list"
           precheck: true
-        -
+        - # 경매 관련
           handler: "PostAucAuctionRegister" # 경매 등록
           method: "post"
           uri: "/:apiver/auc/auction/register"
@@ -89,6 +89,11 @@
           handler: "DeleteAucAuctiontRemove" # 경매 삭제
           method: "delete"
           uri: "/:apiver/auc/auction/remove"
+          precheck: true
+        - 
+          handler: "PostAucAuctionFinish" # 경매 종료
+          method: "post"
+          uri: "/:apiver/auc/auction/finish"
           precheck: true
         -
           handler: "DeleteAucBidRemove" # 입찰 삭제

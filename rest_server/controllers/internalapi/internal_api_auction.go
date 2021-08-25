@@ -95,3 +95,20 @@ func (o *InternalAPI) DeleteAucAuctiontRemove(c echo.Context) error {
 
 	return commonapi_auc.DeleteAucAuctiontRemove(params, ctx)
 }
+
+// 경매 종료
+func (o *InternalAPI) PostAucAuctionFinish(c echo.Context) error {
+	ctx := base.GetContext(c).(*context.IPBlockServerContext)
+
+	params := context_auc.NewAuctionFinish()
+	if err := ctx.EchoContext.Bind(params); err != nil {
+		log.Error(err)
+		return base.BaseJSONInternalServerError(c, err)
+	}
+
+	if err := params.CheckValidate(); err != nil {
+		return c.JSON(http.StatusOK, err)
+	}
+
+	return commonapi_auc.PostAucAuctionFinish(params, ctx)
+}

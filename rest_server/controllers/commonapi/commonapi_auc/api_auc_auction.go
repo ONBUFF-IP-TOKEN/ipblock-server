@@ -217,3 +217,24 @@ func GetAucAuction(auction *context_auc.GetAuction, c echo.Context) error {
 
 	return c.JSON(http.StatusOK, resp)
 }
+
+func PostAucAuctionFinish(auctionFinish *context_auc.AuctionFinish, ctx *context.IPBlockServerContext) error {
+	resp := new(base.BaseResponse)
+	resp.Success()
+
+	// 1. 경매 테이블 종료 업데이트
+	if affected, err := model.GetDB().UpdateAucAuctionFinish(auctionFinish.Id, context_auc.Auction_auc_state_finish); err != nil {
+		resp.SetReturn(resultcode.Result_DBError)
+	} else if err == nil && affected == 0 {
+		resp.SetReturn(resultcode.Result_DBNotExistAuction)
+	} else {
+		// 2. 입찰자 리스트 낙찰 업데이트
+
+		// 3. 보증금 반환 리스트 반환
+
+		// redis 삭제
+		model.GetDB().DeleteAuctionCache(auctionFinish.Id)
+	}
+
+	return ctx.EchoContext.JSON(http.StatusOK, resp)
+}

@@ -42,7 +42,10 @@ func (o *DB) GetAucBidListMe(pageInfo *context_auc.MeBidList, walletaddr string,
 			&bid.ProductInfo.Id, &title, &bid.ProductInfo.CreateTs, &desc,
 			&bid.ProductInfo.OwnerNickName, &bid.ProductInfo.OwnerWalletAddr, &bid.ProductInfo.CreatorNickName, &bid.ProductInfo.CreatorWalletAddr,
 			&nftContract, &nftId, &nftCreateHash, &nftUri, &bid.ProductInfo.NftState,
-			&prices, &content, &bid.ProductInfo.IpOwnerShip, &media); err != nil {
+			&prices, &content,
+			&bid.ProductInfo.CardInfo.BackgroundColor, &bid.ProductInfo.CardInfo.BorderColor, &bid.ProductInfo.CardInfo.CardGrade, &bid.ProductInfo.CardInfo.Tier,
+			&bid.ProductInfo.Company.IpOwnerShip, &bid.ProductInfo.Company.IpOwnerShipLogoUrl, &bid.ProductInfo.Company.IpCategory,
+			&media); err != nil {
 			log.Error(err)
 		} else {
 			aTitle := context_auc.Localization{}

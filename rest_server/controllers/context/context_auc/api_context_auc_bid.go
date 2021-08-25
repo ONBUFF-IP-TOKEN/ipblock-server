@@ -9,16 +9,26 @@ import (
 	"github.com/ONBUFF-IP-TOKEN/ipblock-server/rest_server/controllers/resultcode"
 )
 
+type Bid_state int64
+
 const (
 	Bid_state_ready   = 0 // 입찰 준비
 	Bid_state_submit  = 1 // 입찰 완료
 	Bid_state_success = 2 // 낙찰 성공
 	Bid_state_fail    = 3 // 입찰 실패
+)
 
+type Deposit_state int64
+
+const (
 	Deposit_state_fail     = 0 // 보증금 확인 안됨
 	Deposit_state_checking = 1 // 보증금 확인중
 	Deposit_state_complete = 2 // 보증금 확인 완료
+)
 
+type Bid_winner_state int64
+
+const (
 	Bid_winner_state_none            = 0 // 낙찰 결재 안됨
 	Bid_winner_state_submit_checking = 1 // 낙찰 결재 확인중
 	Bid_winner_state_submit_complete = 2 // 낙찰 결재 확인 완료

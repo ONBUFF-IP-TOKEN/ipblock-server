@@ -5,6 +5,22 @@ import (
 	"github.com/ONBUFF-IP-TOKEN/ipblock-server/rest_server/controllers/resultcode"
 )
 
+const (
+	Auction_active_state_all      = -1
+	Auction_active_state_inactive = 0
+	Auction_active_state_active   = 1
+)
+
+type Auction_auc_state int64
+
+const (
+	Auction_auc_state_ready  = 0
+	Auction_auc_state_start  = 1
+	Auction_auc_state_paused = 2
+	Auction_auc_state_finish = 3
+	Auction_auc_state_cancel = 4
+)
+
 type AucAuction struct {
 	Id             int64        `json:"auc_id"`
 	BidStartAmount float64      `json:"bid_start_amount"`
@@ -206,3 +222,23 @@ func (o *GetAuction) CheckValidate() *base.BaseResponse {
 	}
 	return nil
 }
+
+////////////////////////////////////////////////
+
+// 경매 종료 처리
+type AuctionFinish struct {
+	Id int64 `json:"auc_id"`
+}
+
+func NewAuctionFinish() *AuctionFinish {
+	return new(AuctionFinish)
+}
+
+func (o *AuctionFinish) CheckValidate() *base.BaseResponse {
+	if o.Id < 0 {
+		return base.MakeBaseResponse(resultcode.Result_Auc_Auction_RequireAucId)
+	}
+	return nil
+}
+
+////////////////////////////////////////////////

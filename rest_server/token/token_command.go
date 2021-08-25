@@ -137,7 +137,7 @@ func (o *TokenCmd) CreateNftbyAut(data interface{}, cb chan interface{}) {
 				// nft 링크용 json 파일 cdn 업로드
 				data := &NftUri_AuctionProduct{
 					Media:    product.Media,
-					CardInfo: product.Content.CardInfo,
+					CardInfo: product.CardInfo,
 				}
 
 				nftData, _ := json.Marshal(data)

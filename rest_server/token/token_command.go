@@ -142,7 +142,7 @@ func (o *TokenCmd) CreateNftbyAut(data interface{}, cb chan interface{}) {
 
 				nftData, _ := json.Marshal(data)
 				productId := strconv.FormatInt(product.Id, 10)
-				azure.GetAzure().UploadNftInfoBuffer(nftData, productId+"/"+productId+".json")
+				azure.GetAzure().UploadNftInfoBuffer(nftData, productId+"/"+productId+"_0.json")
 			}()
 
 			// product list cache 전체 삭제

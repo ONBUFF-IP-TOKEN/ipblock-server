@@ -51,6 +51,11 @@
           uri: "/:apiver/auc/product/register"
           precheck: true
         -
+          handler: "PostAucProductRegisterAuction" # 물건 등록
+          method: "post"
+          uri: "/:apiver/auc/product/register/auction"
+          precheck: true
+        -
           handler: "PostAucProductUpdate" # 물건 정보 업데이트
           method: "post"
           uri: "/:apiver/auc/product/update"

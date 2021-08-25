@@ -28,6 +28,23 @@ func (o *InternalAPI) PostAucProductRegister(c echo.Context) error {
 	return commonapi_auc.PostAucProductRegister(params, ctx)
 }
 
+// auc 물품 등록 및 경매 자동 등록
+func (o *InternalAPI) PostAucProductRegisterAuction(c echo.Context) error {
+	ctx := base.GetContext(c).(*context.IPBlockServerContext)
+
+	params := context_auc.NewAllRegister()
+	if err := ctx.EchoContext.Bind(params); err != nil {
+		log.Error(err)
+		return base.BaseJSONInternalServerError(c, err)
+	}
+
+	if err := params.CheckValidate(); err != nil {
+		return c.JSON(http.StatusOK, err)
+	}
+
+	return commonapi_auc.PostAucProductRegisterAuction(params, ctx)
+}
+
 // auc 물품 업데이트
 func (o *InternalAPI) PostAucProductUpdate(c echo.Context) error {
 	ctx := base.GetContext(c).(*context.IPBlockServerContext)

@@ -99,6 +99,40 @@ func (o *ProductInfo) CheckValidate() *base.BaseResponse {
 
 ////////////////////////////////////////////////
 
+// product 등록 및 경매 자동 등록
+type AllRegister struct {
+	AucAuctionRegister AucAuctionRegister `json:"auction"`
+	ProductInfo        ProductInfo        `json:"product"`
+}
+
+func NewAllRegister() *AllRegister {
+	return new(AllRegister)
+}
+
+func (o *AllRegister) CheckValidate() *base.BaseResponse {
+	if len(o.ProductInfo.Title.En) == 0 || len(o.ProductInfo.Title.Ko) == 0 {
+		return base.MakeBaseResponse(resultcode.Result_Auc_Product_Requiredtitle)
+	}
+	if len(o.ProductInfo.Desc.En) == 0 || len(o.ProductInfo.Desc.Ko) == 0 {
+		return base.MakeBaseResponse(resultcode.Result_Auc_Product_RequireDescription)
+	}
+	if len(o.ProductInfo.OwnerNickName) == 0 || len(o.ProductInfo.OwnerWalletAddr) == 0 {
+		return base.MakeBaseResponse(resultcode.Result_Auc_Product_RequireOwnerInfo)
+	}
+	if len(o.ProductInfo.CreatorNickName) == 0 || len(o.ProductInfo.CreatorWalletAddr) == 0 {
+		return base.MakeBaseResponse(resultcode.Result_Auc_Product_RequireCreatorInfo)
+	}
+	if len(o.ProductInfo.Prices) == 0 {
+		return base.MakeBaseResponse(resultcode.Result_Auc_Product_RequirePriceInfo)
+	}
+	if len(o.ProductInfo.Company.IpOwnerShip) == 0 {
+		return base.MakeBaseResponse(resultcode.Result_Auc_Product_RequireIPOwnerShip)
+	}
+	return nil
+}
+
+////////////////////////////////////////////////
+
 // product 업데이트
 type UpdateProduct struct {
 	ProductInfo

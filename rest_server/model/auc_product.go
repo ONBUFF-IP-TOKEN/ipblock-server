@@ -77,13 +77,15 @@ func (o *DB) UpdateAucProduct(product *context_auc.ProductInfo) (int64, error) {
 	}
 	log.Debug("UpdateAucProduct id:", Id)
 
-	// cache 삭제
-	o.CacheDelProduct(product.Id)
+	if Id != 0 {
+		// cache 삭제
+		o.CacheDelProduct(product.Id)
 
-	// product list cache 전체 삭제
-	o.DeleteProductList()
-	// auction list cache 전체 삭제
-	o.DeleteAuctionList()
+		// product list cache 전체 삭제
+		o.DeleteProductList()
+		// auction list cache 전체 삭제
+		o.DeleteAuctionList()
+	}
 
 	return Id, nil
 }

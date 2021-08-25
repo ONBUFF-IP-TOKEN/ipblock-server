@@ -56,7 +56,7 @@ func (o *DB) UpdateAucAuctionBestBid(auctionId int64, curAmount float64) (int64,
 }
 
 // 경매 종료 정보 업데이트
-func (o *DB) UpdateAucAuctionFinish(auctionId int64, aucState context_auc.Auction_auc_state) (int64, error) {
+func (o *DB) UpdateAucAuctionAucState(auctionId int64, aucState context_auc.Auction_auc_state) (int64, error) {
 	sqlQuery := fmt.Sprintf("UPDATE auc_auctions set auc_state=? WHERE auc_id=?")
 
 	result, err := o.Mysql.PrepareAndExec(sqlQuery, aucState, auctionId)

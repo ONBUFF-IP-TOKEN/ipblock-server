@@ -39,16 +39,54 @@ func PostAucProductRegister(product *context_auc.ProductInfo, ctx *context.IPBlo
 	return ctx.EchoContext.JSON(http.StatusOK, resp)
 }
 
+func PostAucProductRegisterAuction(product *context_auc.AllRegister, ctx *context.IPBlockServerContext) error {
+	resp := new(base.BaseResponse)
+	resp.Success()
+
+	//1. auc_product table에 저장
+	product.ProductInfo.CreateTs = datetime.GetTS2MilliSec()
+	if id, err := model.GetDB().InsertAucProduct(&product.ProductInfo); err != nil {
+		log.Error("InsertProduct :", err)
+		resp.SetReturn(resultcode.Result_DBError)
+	} else {
+		product.ProductInfo.Id = id
+
+		//2. nft 토큰 생성
+		data := &basenet.CommandData{
+			CommandType: token.TokenCmd_CreatNftByAut,
+			Data:        &product.ProductInfo,
+			Callback:    make(chan interface{}),
+		}
+		*resp = commonapi.GetTokenProc(data)
+
+		//3. 경매 등록
+		product.AucAuctionRegister.BidStartAmount = product.ProductInfo.Prices[0].Price
+		product.AucAuctionRegister.BidCurAmount = 0
+		product.AucAuctionRegister.BidDeposit = product.AucAuctionRegister.BidStartAmount / float64(10)
+		product.AucAuctionRegister.AucStartTs = datetime.GetTS2MilliSec()
+		product.AucAuctionRegister.AucEndTs = product.AucAuctionRegister.AucStartTs + 2592000000
+		product.AucAuctionRegister.ProductId = id
+		PostAucAuctionRegister(&product.AucAuctionRegister, ctx)
+
+		resp.Value = product
+	}
+	return ctx.EchoContext.JSON(http.StatusOK, resp)
+}
+
 func PostAucProductUpdate(product *context_auc.ProductInfo, ctx *context.IPBlockServerContext) error {
 	resp := new(base.BaseResponse)
 	resp.Success()
 
 	//1. auc_product table에 업데이트
-	if _, err := model.GetDB().UpdateAucProduct(product); err != nil {
+	if id, err := model.GetDB().UpdateAucProduct(product); err != nil {
 		log.Error("UpdateAucProduct error : ", err)
 		resp.SetReturn(resultcode.Result_DBError)
 	} else {
-		resp.Value = product
+		if id == 0 {
+			resp.SetReturn(resultcode.Result_DBNotExistProduct)
+		} else {
+			resp.Value = product
+		}
 	}
 
 	return ctx.EchoContext.JSON(http.StatusOK, resp)

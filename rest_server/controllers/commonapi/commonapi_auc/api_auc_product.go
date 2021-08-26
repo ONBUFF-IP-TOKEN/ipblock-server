@@ -57,7 +57,7 @@ func PostAucProductRegisterAuction(product *context_auc.AllRegister, ctx *contex
 			Data:        &product.ProductInfo,
 			Callback:    make(chan interface{}),
 		}
-		*resp = commonapi.GetTokenProc(data)
+		commonapi.GetTokenProc(data)
 
 		//3. 경매 등록
 		product.AucAuctionRegister.BidStartAmount = product.ProductInfo.Prices[0].Price

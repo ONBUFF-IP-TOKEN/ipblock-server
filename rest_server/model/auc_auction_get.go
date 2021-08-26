@@ -142,9 +142,9 @@ func (o *DB) GetTotalAucAuctionSize(pageInfo *context_auc.AuctionList) (int64, e
 	var count int64
 	var query string
 	if pageInfo.ActiveState == context_auc.Auction_active_state_all {
-		query = fmt.Sprintf("SELECT COUNT(*) as count FROM auc_auctions")
+		query = fmt.Sprintf("SELECT COUNT(*) as count FROM auc_auctions LEFT JOIN auc_products on auc_auctions.product_id = auc_products.product_id")
 	} else {
-		query = fmt.Sprintf("SELECT COUNT(*) as count FROM auc_auctions WHERE active_state = %v", pageInfo.ActiveState)
+		query = fmt.Sprintf("SELECT COUNT(*) as count FROM auc_auctions LEFT JOIN auc_products on auc_auctions.product_id = auc_products.product_id WHERE active_state = %v", pageInfo.ActiveState)
 	}
 	err := o.Mysql.QueryRow(query, &count)
 
@@ -160,9 +160,13 @@ func (o *DB) GetTotalAucAuctionSizeByAucState(pageInfo *context_auc.AuctionListB
 	var count int64
 	var query string
 	if pageInfo.ActiveState == context_auc.Auction_active_state_all {
-		query = fmt.Sprintf("SELECT COUNT(*) as count FROM auc_auctions WHERE auc_state = %v", pageInfo.AucState)
+		query = fmt.Sprintf("SELECT COUNT(*) as count "+
+			"FROM auc_auctions LEFT JOIN auc_products on auc_auctions.product_id = auc_products.product_id "+
+			"WHERE auc_state = %v", pageInfo.AucState)
 	} else if pageInfo.ActiveState == context_auc.Auction_active_state_active {
-		query = fmt.Sprintf("SELECT COUNT(*) as count FROM auc_auctions WHERE auc_state = %v AND active_state = %v", pageInfo.AucState, pageInfo.ActiveState)
+		query = fmt.Sprintf("SELECT COUNT(*) as count "+
+			"FROM auc_auctions LEFT JOIN auc_products on auc_auctions.product_id = auc_products.product_id "+
+			"WHERE auc_state = %v AND active_state = %v", pageInfo.AucState, pageInfo.ActiveState)
 	}
 	err := o.Mysql.QueryRow(query, &count)
 
@@ -178,9 +182,9 @@ func (o *DB) GetTotalAucAuctionSizeByRecommand(pageInfo *context_auc.AuctionList
 	var count int64
 	var query string
 	if pageInfo.ActiveState == context_auc.Auction_active_state_all {
-		query = fmt.Sprintf("SELECT COUNT(*) as count FROM auc_auctions WHERE recommand = 1")
+		query = fmt.Sprintf("SELECT COUNT(*) as count FROM auc_auctions LEFT JOIN auc_products on auc_auctions.product_id = auc_products.product_id WHERE recommand = 1")
 	} else if pageInfo.ActiveState == context_auc.Auction_active_state_active {
-		query = fmt.Sprintf("SELECT COUNT(*) as count FROM auc_auctions WHERE recommand = 1 AND active_state = %v", pageInfo.ActiveState)
+		query = fmt.Sprintf("SELECT COUNT(*) as count FROM auc_auctions LEFT JOIN auc_products on auc_auctions.product_id = auc_products.product_id WHERE recommand = 1 AND active_state = %v", pageInfo.ActiveState)
 	}
 	err := o.Mysql.QueryRow(query, &count)
 
@@ -194,7 +198,7 @@ func (o *DB) GetTotalAucAuctionSizeByRecommand(pageInfo *context_auc.AuctionList
 
 func (o *DB) ScanAuction(rows *sql.Rows) (*context_auc.AucAuction, error) {
 	var title, desc, prices, content, media sql.NullString
-	var nftId sql.NullInt64
+	var productId, nftId sql.NullInt64
 	var nftContract, nftCreateHash, nftUri sql.NullString
 
 	auction := &context_auc.AucAuction{}
@@ -203,7 +207,7 @@ func (o *DB) ScanAuction(rows *sql.Rows) (*context_auc.AucAuction, error) {
 		&auction.AucStartTs, &auction.AucEndTs, &auction.AucState, &auction.AucRound,
 		&auction.CreateTs, &auction.ActiveState, &auction.ProductId, &auction.Recommand,
 
-		&product.Id, &title, &product.CreateTs, &desc,
+		&productId, &title, &product.CreateTs, &desc,
 		&product.OwnerNickName, &product.OwnerWalletAddr, &product.CreatorNickName, &product.CreatorWalletAddr,
 		&nftContract, &nftId, &nftCreateHash, &nftUri, &product.NftState,
 		&prices, &content,
@@ -222,6 +226,7 @@ func (o *DB) ScanAuction(rows *sql.Rows) (*context_auc.AucAuction, error) {
 	json.Unmarshal([]byte(desc.String), &aDesc)
 	product.Desc = aDesc
 
+	product.Id = productId.Int64
 	product.NftContract = nftContract.String
 	product.NftId = nftId.Int64
 	product.NftCreateTxHash = nftCreateHash.String

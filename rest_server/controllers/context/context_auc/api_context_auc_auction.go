@@ -5,6 +5,8 @@ import (
 	"github.com/ONBUFF-IP-TOKEN/ipblock-server/rest_server/controllers/resultcode"
 )
 
+type Auction_active_state int64
+
 const (
 	Auction_active_state_all      = -1
 	Auction_active_state_inactive = 0
@@ -22,20 +24,20 @@ const (
 )
 
 type AucAuction struct {
-	Id             int64        `json:"auc_id"`
-	BidStartAmount float64      `json:"bid_start_amount"`
-	BidCurAmount   float64      `json:"bid_cur_amount"`
-	BidUnit        float64      `json:"bid_unit"`
-	BidDeposit     float64      `json:"bid_deposit"`
-	AucStartTs     int64        `json:"auc_start_ts"`
-	AucEndTs       int64        `json:"auc_end_ts"`
-	AucState       int64        `json:"auc_state"`
-	AucRound       int64        `json:"auc_round"`
-	CreateTs       int64        `json:"create_ts"`
-	ActiveState    int64        `json:"active_state"`
-	ProductId      int64        `json:"product_id"`
-	Recommand      int64        `json:"recommand"`
-	ProductInfo    *ProductInfo `json:"product,omitempty"`
+	Id             int64                `json:"auc_id"`
+	BidStartAmount float64              `json:"bid_start_amount"`
+	BidCurAmount   float64              `json:"bid_cur_amount"`
+	BidUnit        float64              `json:"bid_unit"`
+	BidDeposit     float64              `json:"bid_deposit"`
+	AucStartTs     int64                `json:"auc_start_ts"`
+	AucEndTs       int64                `json:"auc_end_ts"`
+	AucState       Auction_auc_state    `json:"auc_state"`
+	AucRound       int64                `json:"auc_round"`
+	CreateTs       int64                `json:"create_ts"`
+	ActiveState    Auction_active_state `json:"active_state"`
+	ProductId      int64                `json:"product_id"`
+	Recommand      int64                `json:"recommand"`
+	ProductInfo    *ProductInfo         `json:"product,omitempty"`
 }
 
 // auc 정보 생성

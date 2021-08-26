@@ -27,3 +27,20 @@ func (o *InternalAPI) DeleteAucBidRemove(c echo.Context) error {
 
 	return commonapi_auc.DeleteAucBidRemove(params, ctx)
 }
+
+// 입찰 보증금 반환 리스트
+func (o *InternalAPI) GetAucBidDepositRefund(c echo.Context) error {
+	ctx := base.GetContext(c).(*context.IPBlockServerContext)
+
+	params := context_auc.NewBidDepositRefundList()
+	if err := ctx.EchoContext.Bind(params); err != nil {
+		log.Error(err)
+		return base.BaseJSONInternalServerError(c, err)
+	}
+
+	if err := params.CheckValidate(); err != nil {
+		return c.JSON(http.StatusOK, err)
+	}
+
+	return commonapi_auc.GetAucBidDepositRefund(params, ctx)
+}

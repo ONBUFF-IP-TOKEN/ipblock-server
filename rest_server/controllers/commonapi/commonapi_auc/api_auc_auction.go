@@ -244,13 +244,10 @@ func PostAucAuctionFinish(auctionFinish *context_auc.AuctionFinish, ctx *context
 				log.Error("PostAucBidSubmit :", err)
 				resp.SetReturn(resultcode.Result_DBError)
 			} else {
-				// 4. 보증금 반환 리스트 반환
-
-				// 5. redis 삭제
+				// 4. redis 삭제
 				model.GetDB().DeleteAuctionCache(auctionFinish.Id)
 			}
 		}
-
 	}
 
 	return ctx.EchoContext.JSON(http.StatusOK, resp)

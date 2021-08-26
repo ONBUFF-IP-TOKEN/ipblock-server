@@ -1,7 +1,6 @@
 package model
 
 import (
-	"database/sql"
 	"encoding/json"
 	"fmt"
 
@@ -51,36 +50,4 @@ func (o *DB) DeleteAucBid(bid *context_auc.BidRemove) (bool, error) {
 	o.DeleteBidList(bid.AucId)
 
 	return true, nil
-}
-
-func (o *DB) GetTotalAucBidSize() (int64, error) {
-	var count int64
-	err := o.Mysql.QueryRow("SELECT COUNT(*) as count FROM auc_bids WHERE bid_amount != 0", &count)
-
-	if err != nil {
-		log.Error(err)
-		return count, err
-	}
-
-	return count, nil
-}
-
-func (o *DB) ScanBid(rows *sql.Rows) (*context_auc.Bid, error) {
-	var bidWinnerTxHash, tos sql.NullString
-
-	bid := &context_auc.Bid{}
-	if err := rows.Scan(&bid.Id, &bid.AucId, &bid.ProductId,
-		&bid.BidState, &bid.BidTs, &bid.BidAttendeeWalletAddr, &bid.BidAmount, &bidWinnerTxHash, &bid.BidWinnerState,
-		&bid.DepositAmount, &bid.DepositTxHash, &bid.DepositState, &bid.TokenType, &tos); err != nil {
-		//log.Error("ScanBid error :", err)
-		return nil, err
-	}
-
-	bid.BidWinnerTxHash = bidWinnerTxHash.String
-
-	getTos := context_auc.TermsOfService{}
-	json.Unmarshal([]byte(tos.String), &getTos)
-	bid.TermsOfService = getTos
-
-	return bid, nil
 }

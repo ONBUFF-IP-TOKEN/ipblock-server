@@ -248,3 +248,36 @@ func (o *BidRemove) CheckValidate() *base.BaseResponse {
 
 	return nil
 }
+
+////////////////////////////////////////////////
+
+// 입찰 보증금 반환 리스트
+type BidDepositRefundList struct {
+	PageInfo
+	AucId int64 `query:"auc_id"`
+}
+
+func NewBidDepositRefundList() *BidDepositRefundList {
+	return new(BidDepositRefundList)
+}
+
+func (o *BidDepositRefundList) CheckValidate() *base.BaseResponse {
+	if o.AucId <= 0 {
+		return base.MakeBaseResponse(resultcode.Result_Auc_Bid_RequireAucId)
+	}
+	if o.PageOffset < 0 {
+		return base.MakeBaseResponse(resultcode.Result_RequireValidPageOffset)
+	}
+	if o.PageSize <= 0 {
+		return base.MakeBaseResponse(resultcode.Result_RequireValidPageSize)
+	}
+
+	return nil
+}
+
+type BidDepositRefundListResponse struct {
+	PageInfo PageInfoResponse `json:"page_info"`
+	Bids     []Bid            `json:"bids"`
+}
+
+////////////////////////////////////////////////

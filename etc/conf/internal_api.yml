@@ -100,10 +100,15 @@
           method: "post"
           uri: "/:apiver/auc/auction/finish"
           precheck: true
-        -
+        - # 입찰 관련
           handler: "DeleteAucBidRemove" # 입찰 삭제
           method: "delete"
           uri: "/:apiver/auc/bid/remove"
+          precheck: true
+        -
+          handler: "GetAucBidDepositRefund" # 입찰 보증금 반환 리스트
+          method: "get"
+          uri: "/:apiver/auc/bid/deposit/refund"
           precheck: true
         - # SYSTEM 관련
           handler: "DeleteSystemRedisRemove" # redis 관련 삭제

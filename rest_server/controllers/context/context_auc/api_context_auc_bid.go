@@ -299,8 +299,9 @@ func (o *BidWinnerVerify) CheckValidate() *base.BaseResponse {
 }
 
 type BidWinnerVerifyResponse struct {
-	Bid     Bid     `json:"bid"`
-	Payment float64 `json:"payment"`
+	Bid       Bid     `json:"bid"`
+	TokenType string  `json:"token_type"`
+	Payment   float64 `json:"payment"`
 }
 
 ////////////////////////////////////////////////

@@ -390,8 +390,9 @@ func GetAucBidWinnerVerify(req *context_auc.BidWinnerVerify, ctx *context.IPBloc
 		} else {
 			if successBid != nil && successBid.BidState == context_auc.Bid_state_success {
 				bidResp := &context_auc.BidWinnerVerifyResponse{
-					Bid:     *successBid,
-					Payment: successBid.BidAmount - successBid.DepositAmount, // 입찰 금액에서 입찰 보증금을 빼고 지불할 금액을 전달한다.
+					Bid:       *successBid,
+					TokenType: successBid.TokenType,
+					Payment:   successBid.BidAmount - successBid.DepositAmount, // 입찰 금액에서 입찰 보증금을 빼고 지불할 금액을 전달한다.
 				}
 				resp.Success()
 				resp.Value = bidResp

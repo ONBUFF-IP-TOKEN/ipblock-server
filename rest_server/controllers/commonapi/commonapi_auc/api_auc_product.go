@@ -66,7 +66,15 @@ func PostAucProductRegisterAuction(product *context_auc.AllRegister, ctx *contex
 		product.AucAuctionRegister.AucStartTs = datetime.GetTS2MilliSec()
 		product.AucAuctionRegister.AucEndTs = product.AucAuctionRegister.AucStartTs + 2592000000
 		product.AucAuctionRegister.ProductId = id
-		PostAucAuctionRegister(&product.AucAuctionRegister, ctx)
+
+		//4. auc_product table에 저장
+		product.AucAuctionRegister.CreateTs = datetime.GetTS2MilliSec()
+		if id, err := model.GetDB().InsertAucAuction(&product.AucAuctionRegister); err != nil {
+			log.Error("InsertProduct :", err)
+			resp.SetReturn(resultcode.Result_DBError)
+		} else {
+			product.AucAuctionRegister.Id = id
+		}
 
 		resp.Value = product
 	}

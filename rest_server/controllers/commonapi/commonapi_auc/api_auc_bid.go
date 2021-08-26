@@ -254,7 +254,7 @@ func PostAucBidWinnerSubmit(bid *context_auc.BidWinner, ctx *context.IPBlockServ
 }
 
 // 낙찰 포기
-func NewBidSuccessGiveup(bid *context_auc.BidWinnerGiveup, ctx *context.IPBlockServerContext) error {
+func PostAucBidWinnerGiveUp(bid *context_auc.BidWinnerGiveup, ctx *context.IPBlockServerContext) error {
 	resp := new(base.BaseResponse)
 	resp.Success()
 
@@ -367,6 +367,36 @@ func GetAucBidDepositRefund(req *context_auc.BidDepositRefundList, ctx *context.
 			resp.Value = context_auc.BidDepositRefundListResponse{
 				PageInfo: pageInfo,
 				Bids:     bids,
+			}
+		}
+	}
+
+	return ctx.EchoContext.JSON(http.StatusOK, resp)
+}
+
+// 낙찰 확인
+func GetAucBidWinnerVerify(req *context_auc.BidWinnerVerify, ctx *context.IPBlockServerContext) error {
+	resp := new(base.BaseResponse)
+	resp.Success()
+
+	// 1. 경매 종료되었는지 확인
+	if !IsAuctionEnd(nil, req.AucId) {
+		log.Error("Auction is not over yet")
+		resp.SetReturn(resultcode.Result_Auc_Auction_NotOverYet)
+	} else {
+		// 2. 낙찰자가 맞는지 확인
+		if successBid, err := model.GetDB().GetAucBidAttendee(req.AucId, ctx.WalletAddr()); err != nil {
+			resp.SetReturn(resultcode.Result_DBError)
+		} else {
+			if successBid != nil && successBid.BidState == context_auc.Bid_state_success {
+				bidResp := &context_auc.BidWinnerVerifyResponse{
+					Bid:     *successBid,
+					Payment: successBid.BidAmount - successBid.DepositAmount, // 입찰 금액에서 입찰 보증금을 빼고 지불할 금액을 전달한다.
+				}
+				resp.Success()
+				resp.Value = bidResp
+			} else {
+				resp.SetReturn(resultcode.Result_Auc_Bid_NotWinner)
 			}
 		}
 	}

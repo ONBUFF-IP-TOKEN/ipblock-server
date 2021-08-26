@@ -281,3 +281,26 @@ type BidDepositRefundListResponse struct {
 }
 
 ////////////////////////////////////////////////
+
+// 낙찰 확인
+type BidWinnerVerify struct {
+	AucId int64 `query:"auc_id"`
+}
+
+func NewBidWinnerVerify() *BidWinnerVerify {
+	return new(BidWinnerVerify)
+}
+
+func (o *BidWinnerVerify) CheckValidate() *base.BaseResponse {
+	if o.AucId <= 0 {
+		return base.MakeBaseResponse(resultcode.Result_Auc_Bid_RequireAucId)
+	}
+	return nil
+}
+
+type BidWinnerVerifyResponse struct {
+	Bid     Bid     `json:"bid"`
+	Payment float64 `json:"payment"`
+}
+
+////////////////////////////////////////////////

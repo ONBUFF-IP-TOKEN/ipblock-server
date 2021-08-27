@@ -14,7 +14,7 @@ func GetAucBidListMe(pageInfo *context_auc.MeBidList, ctx *context.IPBlockServer
 	resp := new(base.BaseResponse)
 	resp.Success()
 
-	meBids, totalCount, err := model.GetDB().GetAucBidListMe(pageInfo, ctx.WalletAddr(), false)
+	meBids, totalCount, err := model.GetDB().GetAucBidListMe(pageInfo, pageInfo.WalletAddr, false)
 	if err != nil {
 		resp.SetReturn(resultcode.Result_DBError)
 	} else {
@@ -38,7 +38,7 @@ func GetAucBidWinnerListMe(pageInfo *context_auc.MeBidList, ctx *context.IPBlock
 	resp := new(base.BaseResponse)
 	resp.Success()
 
-	meBids, totalCount, err := model.GetDB().GetAucBidListMe(pageInfo, ctx.WalletAddr(), true)
+	meBids, totalCount, err := model.GetDB().GetAucBidListMe(pageInfo, pageInfo.WalletAddr, true)
 	if err != nil {
 		resp.SetReturn(resultcode.Result_DBError)
 	} else {
@@ -61,7 +61,7 @@ func GetAucNftListMe(pageInfo *context_auc.MeBidList, ctx *context.IPBlockServer
 	resp := new(base.BaseResponse)
 	resp.Success()
 
-	meBids, totalCount, err := model.GetDB().GetAucBidListMe(pageInfo, ctx.WalletAddr(), true)
+	meBids, totalCount, err := model.GetDB().GetAucBidListMe(pageInfo, pageInfo.WalletAddr, true)
 	if err != nil {
 		resp.SetReturn(resultcode.Result_DBError)
 	} else {

@@ -28,18 +28,18 @@ func (o *DB) GetAucBidListMe(pageInfo *context_auc.MeBidList, walletaddr string,
 
 	defer rows.Close()
 
-	var bidWinnerTxHash sql.NullString
+	var bidWinnerTxHash, termOfService sql.NullString
 	var title, desc, prices, content, media sql.NullString
-	var nftId sql.NullInt64
+	var nftId, productId sql.NullInt64
 	var nftContract, nftCreateHash, nftUri sql.NullString
 
 	meBids := make([]context_auc.MeBid, 0)
 	for rows.Next() {
 		bid := context_auc.MeBid{}
 		if err := rows.Scan(&bid.Bid.Id, &bid.Bid.AucId, &bid.Bid.ProductId, &bid.Bid.BidState, &bid.Bid.BidTs, &bid.Bid.BidAttendeeWalletAddr, &bid.Bid.BidAmount, &bidWinnerTxHash, &bid.Bid.BidWinnerState,
-			&bid.Bid.DepositAmount, &bid.Bid.DepositTxHash, &bid.Bid.DepositState, &bid.Bid.TokenType,
+			&bid.Bid.DepositAmount, &bid.Bid.DepositTxHash, &bid.Bid.DepositState, &bid.Bid.TokenType, &termOfService,
 
-			&bid.ProductInfo.Id, &title, &bid.ProductInfo.CreateTs, &desc,
+			&productId, &title, &bid.ProductInfo.CreateTs, &desc,
 			&bid.ProductInfo.OwnerNickName, &bid.ProductInfo.OwnerWalletAddr, &bid.ProductInfo.CreatorNickName, &bid.ProductInfo.CreatorWalletAddr,
 			&nftContract, &nftId, &nftCreateHash, &nftUri, &bid.ProductInfo.NftState,
 			&prices, &content,
@@ -48,6 +48,10 @@ func (o *DB) GetAucBidListMe(pageInfo *context_auc.MeBidList, walletaddr string,
 			&media); err != nil {
 			log.Error(err)
 		} else {
+			aTermOfService := context_auc.TermsOfService{}
+			json.Unmarshal([]byte(termOfService.String), &aTermOfService)
+			bid.Bid.TermsOfService = aTermOfService
+
 			aTitle := context_auc.Localization{}
 			json.Unmarshal([]byte(title.String), &aTitle)
 			bid.ProductInfo.Title = aTitle
@@ -56,6 +60,7 @@ func (o *DB) GetAucBidListMe(pageInfo *context_auc.MeBidList, walletaddr string,
 			json.Unmarshal([]byte(desc.String), &aDesc)
 			bid.ProductInfo.Desc = aDesc
 
+			bid.ProductInfo.Id = productId.Int64
 			bid.ProductInfo.NftContract = nftContract.String
 			bid.ProductInfo.NftId = nftId.Int64
 			bid.ProductInfo.NftCreateTxHash = nftCreateHash.String

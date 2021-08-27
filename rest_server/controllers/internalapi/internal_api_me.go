@@ -1,4 +1,4 @@
-package externalapi
+package internalapi
 
 import (
 	"net/http"
@@ -11,7 +11,7 @@ import (
 	"github.com/labstack/echo"
 )
 
-func (o *ExternalAPI) GetAucBidListMe(c echo.Context) error {
+func (o *InternalAPI) GetAucBidListMe(c echo.Context) error {
 	ctx := base.GetContext(c).(*context.IPBlockServerContext)
 
 	params := context_auc.NewMeBidList()
@@ -27,7 +27,7 @@ func (o *ExternalAPI) GetAucBidListMe(c echo.Context) error {
 	return commonapi_auc.GetAucBidListMe(params, ctx)
 }
 
-func (o *ExternalAPI) GetAucBidWinnerListMe(c echo.Context) error {
+func (o *InternalAPI) GetAucBidWinnerListMe(c echo.Context) error {
 	ctx := base.GetContext(c).(*context.IPBlockServerContext)
 
 	params := context_auc.NewMeBidList()
@@ -43,7 +43,7 @@ func (o *ExternalAPI) GetAucBidWinnerListMe(c echo.Context) error {
 	return commonapi_auc.GetAucBidWinnerListMe(params, ctx)
 }
 
-func (o *ExternalAPI) GetAucNftListMe(c echo.Context) error {
+func (o *InternalAPI) GetAucNftListMe(c echo.Context) error {
 	ctx := base.GetContext(c).(*context.IPBlockServerContext)
 
 	params := context_auc.NewMeBidList()

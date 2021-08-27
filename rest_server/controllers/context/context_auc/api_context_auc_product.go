@@ -31,6 +31,9 @@ type MediaInfo struct {
 	MainImg         string `json:"main_img"`
 	MainImgThumnail string `json:"main_img_thumnail"`
 	MainImgType     string `json:"main_img_type"` // image/gif, image/png
+	MainImgBg       string `json:"main_img_bg"`
+	MainImgPosX     int64  `json:"main_img_pos_x"`
+	MainImgPosY     int64  `json:"main_img_pos_y"`
 
 	SubImg         []string `json:"sub_img"`
 	SubImgThumnail []string `json:"sub_img_thumnail"`

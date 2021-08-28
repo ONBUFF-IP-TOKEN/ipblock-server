@@ -49,6 +49,7 @@ const (
 	Result_Auc_Product_RequirePriceInfo     = 15006
 	Result_Auc_Product_RequireProductId     = 15007
 	Result_Auc_Product_RequireIPOwnerShip   = 15008
+	Result_Auc_Product_RequireSerialNo      = 15009
 
 	Result_Auc_Auction_RequireBidStartAmount = 15101
 	Result_Auc_Auction_RequireBidUnit        = 15102
@@ -133,6 +134,7 @@ var ResultCodeText = map[int]string{
 	Result_Auc_Product_RequireCreatorInfo:   "Require creator info",
 	Result_Auc_Product_RequireProductId:     "Require product id",
 	Result_Auc_Product_RequireIPOwnerShip:   "Require ip ownership",
+	Result_Auc_Product_RequireSerialNo:      "Require serial no",
 
 	Result_Auc_Auction_RequireBidStartAmount: "Require bid start amount",
 	Result_Auc_Auction_RequireBidUnit:        "Require bid unit",

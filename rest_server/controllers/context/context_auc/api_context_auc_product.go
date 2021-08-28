@@ -50,6 +50,7 @@ type MediaInfo struct {
 // product
 type ProductInfo struct {
 	Id       int64        `json:"product_id"`
+	SNo      string       `json:"sno"`
 	Title    Localization `json:"title"`
 	CreateTs int64        `json:"create_ts"`
 	Desc     Localization `json:"desc"`
@@ -79,6 +80,9 @@ func NewProductInfo() *ProductInfo {
 }
 
 func (o *ProductInfo) CheckValidate() *base.BaseResponse {
+	if len(o.SNo) == 0 {
+		return base.MakeBaseResponse(resultcode.Result_Auc_Product_RequireSerialNo)
+	}
 	if len(o.Title.En) == 0 || len(o.Title.Ko) == 0 {
 		return base.MakeBaseResponse(resultcode.Result_Auc_Product_Requiredtitle)
 	}

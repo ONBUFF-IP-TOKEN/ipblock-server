@@ -207,7 +207,7 @@ func (o *DB) ScanAuction(rows *sql.Rows) (*context_auc.AucAuction, error) {
 		&auction.AucStartTs, &auction.AucEndTs, &auction.AucState, &auction.AucRound,
 		&auction.CreateTs, &auction.ActiveState, &auction.ProductId, &auction.Recommand,
 
-		&productId, &title, &product.CreateTs, &desc,
+		&productId, &product.SNo, &title, &product.CreateTs, &desc,
 		&product.OwnerNickName, &product.OwnerWalletAddr, &product.CreatorNickName, &product.CreatorWalletAddr,
 		&nftContract, &nftId, &nftCreateHash, &nftUri, &product.NftState,
 		&prices, &content,

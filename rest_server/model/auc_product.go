@@ -10,12 +10,12 @@ import (
 )
 
 func (o *DB) InsertAucProduct(product *context_auc.ProductInfo) (int64, error) {
-	sqlQuery := fmt.Sprintf("INSERT INTO auc_products (title, create_ts, description, " +
+	sqlQuery := fmt.Sprintf("INSERT INTO auc_products (sno, title, create_ts, description, " +
 		"owner_nickname, owner_wallet_address, creator_nickname, creator_wallet_address," +
 		"prices, content, " +
 		"card_bg_color, card_border_color, card_grade, card_tier, " +
 		"ip_ownership, ip_ownership_log_url, ip_category, " +
-		"media ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)")
+		"media ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)")
 
 	title, _ := json.Marshal(product.Title)
 	desc, _ := json.Marshal(product.Desc)
@@ -23,7 +23,7 @@ func (o *DB) InsertAucProduct(product *context_auc.ProductInfo) (int64, error) {
 	content, _ := json.Marshal(product.Content)
 	media, _ := json.Marshal(product.Media)
 
-	result, err := o.Mysql.PrepareAndExec(sqlQuery, string(title), product.CreateTs, string(desc),
+	result, err := o.Mysql.PrepareAndExec(sqlQuery, product.SNo, string(title), product.CreateTs, string(desc),
 		product.OwnerNickName, product.OwnerWalletAddr, product.CreatorNickName, product.CreatorWalletAddr,
 		string(prices), content,
 		product.CardInfo.BackgroundColor, product.CardInfo.BorderColor, product.CardInfo.CardGrade, product.CardInfo.Tier,
@@ -45,8 +45,9 @@ func (o *DB) InsertAucProduct(product *context_auc.ProductInfo) (int64, error) {
 	return insertId, nil
 }
 
+// 물품 정보 업데이트
 func (o *DB) UpdateAucProduct(product *context_auc.ProductInfo) (int64, error) {
-	sqlQuery := fmt.Sprintf("UPDATE auc_products set title=?, description=?, " +
+	sqlQuery := fmt.Sprintf("UPDATE auc_products set sno=?, title=?, description=?, " +
 		"owner_nickname=?, owner_wallet_address=?, creator_nickname=?, creator_wallet_address=?, " +
 		"prices=?, content=?, " +
 		"card_bg_color=?, card_border_color=?, card_grade=?, card_tier=?, " +
@@ -59,7 +60,7 @@ func (o *DB) UpdateAucProduct(product *context_auc.ProductInfo) (int64, error) {
 	content, _ := json.Marshal(product.Content)
 	media, _ := json.Marshal(product.Media)
 
-	result, err := o.Mysql.PrepareAndExec(sqlQuery, string(title), string(desc),
+	result, err := o.Mysql.PrepareAndExec(sqlQuery, product.SNo, string(title), string(desc),
 		product.OwnerNickName, product.OwnerWalletAddr, product.CreatorNickName, product.CreatorWalletAddr,
 		string(prices), content,
 		product.CardInfo.BackgroundColor, product.CardInfo.BorderColor, product.CardInfo.CardGrade, product.CardInfo.Tier,
@@ -90,6 +91,7 @@ func (o *DB) UpdateAucProduct(product *context_auc.ProductInfo) (int64, error) {
 	return Id, nil
 }
 
+// nft 정보 업데이트
 func (o *DB) UpdateAucProductNft(product *context_auc.ProductInfo) (int64, error) {
 	sqlQuery := "UPDATE auc_products set nft_contract=?, nft_create_txhash=?, nft_uri=? WHERE product_id=?"
 
@@ -110,6 +112,7 @@ func (o *DB) UpdateAucProductNft(product *context_auc.ProductInfo) (int64, error
 	return cnt, nil
 }
 
+// 물품 삭제
 func (o *DB) DeleteAucProduct(productId int64) (bool, error) {
 	sqlQuery := "DELETE FROM auc_products WHERE product_id=?"
 
@@ -134,6 +137,7 @@ func (o *DB) DeleteAucProduct(productId int64) (bool, error) {
 	return true, nil
 }
 
+// nft 생성 후 생성 정보 업데이트
 func (o *DB) UpdateAucProductNftTokenId(createHash string, tokenId int64) (int64, error) {
 	sqlQuery := "UPDATE auc_products set nft_id=?, nft_state=? WHERE nft_create_txhash=?"
 
@@ -180,6 +184,7 @@ func (o *DB) GetAucProductByNftCreatHash(createHash string) (*context_auc.Produc
 	return product, err
 }
 
+// 단일 물품 정보 추출
 func (o *DB) GetAucProductById(productId int64) (*context_auc.ProductInfo, error) {
 	var err error
 	sqlQuery := fmt.Sprintf("SELECT * FROM auc_products WHERE product_id=%v", productId)
@@ -204,6 +209,7 @@ func (o *DB) GetAucProductById(productId int64) (*context_auc.ProductInfo, error
 	return product, err
 }
 
+// 물품 리스트 수집 (페이징)
 func (o *DB) GetAucProductList(pageInfo *context_auc.ProductList) ([]context_auc.ProductInfo, int64, error) {
 	sqlQuery := fmt.Sprintf("SELECT * FROM auc_products ORDER BY product_id DESC LIMIT %v,%v", pageInfo.PageSize*pageInfo.PageOffset, pageInfo.PageSize)
 	rows, err := o.Mysql.Query(sqlQuery)
@@ -237,7 +243,7 @@ func (o *DB) ScanProduct(rows *sql.Rows) (*context_auc.ProductInfo, error) {
 	var nftContract, nftCreateHash, nftUri sql.NullString
 
 	product := &context_auc.ProductInfo{}
-	if err := rows.Scan(&product.Id, &title, &product.CreateTs, &desc,
+	if err := rows.Scan(&product.Id, &product.SNo, &title, &product.CreateTs, &desc,
 		&product.OwnerNickName, &product.OwnerWalletAddr, &product.CreatorNickName, &product.CreatorWalletAddr,
 		&nftContract, &nftId, &nftCreateHash, &nftUri, &product.NftState,
 		&prices, &content,

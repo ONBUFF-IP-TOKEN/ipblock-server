@@ -39,7 +39,7 @@ func (o *DB) GetAucBidListMe(pageInfo *context_auc.MeBidList, walletaddr string,
 		if err := rows.Scan(&bid.Bid.Id, &bid.Bid.AucId, &bid.Bid.ProductId, &bid.Bid.BidState, &bid.Bid.BidTs, &bid.Bid.BidAttendeeWalletAddr, &bid.Bid.BidAmount, &bidWinnerTxHash, &bid.Bid.BidWinnerState,
 			&bid.Bid.DepositAmount, &bid.Bid.DepositTxHash, &bid.Bid.DepositState, &bid.Bid.TokenType, &termOfService,
 
-			&productId, &title, &bid.ProductInfo.CreateTs, &desc,
+			&productId, &bid.ProductInfo.SNo, &title, &bid.ProductInfo.CreateTs, &desc,
 			&bid.ProductInfo.OwnerNickName, &bid.ProductInfo.OwnerWalletAddr, &bid.ProductInfo.CreatorNickName, &bid.ProductInfo.CreatorWalletAddr,
 			&nftContract, &nftId, &nftCreateHash, &nftUri, &bid.ProductInfo.NftState,
 			&prices, &content,

@@ -104,7 +104,7 @@
           handler: "GetAucBidList" # 입찰자 리스트 요청
           method: "get"
           uri: "/:apiver/auc/bid/list"
-          precheck: true
+          precheck: false
         - 
           handler: "GetAucBidWinnerVerify" # 낙찰 확인 (본인)
           method: "get"

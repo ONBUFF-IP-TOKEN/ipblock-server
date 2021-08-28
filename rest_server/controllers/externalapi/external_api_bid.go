@@ -64,19 +64,17 @@ func (o *ExternalAPI) PostAucBidSubmit(c echo.Context) error {
 
 // 경매 입찰 리스트 요청
 func (o *ExternalAPI) GetAucBidList(c echo.Context) error {
-	ctx := base.GetContext(c).(*context.IPBlockServerContext)
-
 	params := context_auc.NewBidAttendeeList()
-	if err := ctx.EchoContext.Bind(params); err != nil {
+	if err := c.Bind(params); err != nil {
 		log.Error(err)
 		return base.BaseJSONInternalServerError(c, err)
 	}
 
-	if err := params.CheckValidate(ctx); err != nil {
+	if err := params.CheckValidate(); err != nil {
 		return c.JSON(http.StatusOK, err)
 	}
 
-	return commonapi_auc.GetAucBidList(params, ctx)
+	return commonapi_auc.GetAucBidList(params, c)
 }
 
 // 낙찰 받기

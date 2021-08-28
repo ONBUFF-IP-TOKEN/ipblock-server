@@ -14,6 +14,7 @@ import (
 	"github.com/ONBUFF-IP-TOKEN/ipblock-server/rest_server/controllers/resultcode"
 	"github.com/ONBUFF-IP-TOKEN/ipblock-server/rest_server/model"
 	"github.com/ONBUFF-IP-TOKEN/ipblock-server/rest_server/token"
+	"github.com/labstack/echo"
 )
 
 // 입찰 보증금 지불 여부 확인
@@ -165,7 +166,7 @@ func PostAucBidSubmit(bidSubmit *context_auc.BidSubmit, ctx *context.IPBlockServ
 }
 
 // 입찰자 리스트
-func GetAucBidList(bidList *context_auc.BidAttendeeList, ctx *context.IPBlockServerContext) error {
+func GetAucBidList(bidList *context_auc.BidAttendeeList, c echo.Context) error {
 	resp := new(base.BaseResponse)
 	resp.Success()
 
@@ -195,7 +196,7 @@ func GetAucBidList(bidList *context_auc.BidAttendeeList, ctx *context.IPBlockSer
 		}
 	}
 
-	return ctx.EchoContext.JSON(http.StatusOK, resp)
+	return c.JSON(http.StatusOK, resp)
 }
 
 // 낙찰 받기

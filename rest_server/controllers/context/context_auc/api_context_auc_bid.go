@@ -155,7 +155,7 @@ func NewBidAttendeeList() *BidAttendeeList {
 	return new(BidAttendeeList)
 }
 
-func (o *BidAttendeeList) CheckValidate(ctx *context.IPBlockServerContext) *base.BaseResponse {
+func (o *BidAttendeeList) CheckValidate() *base.BaseResponse {
 	if o.PageOffset < 0 {
 		return base.MakeBaseResponse(resultcode.Result_RequireValidPageOffset)
 	}

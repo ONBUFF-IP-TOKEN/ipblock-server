@@ -85,7 +85,7 @@ func (o *DB) GetAucBidAttendeeList(pageInfo *context_auc.BidAttendeeList) ([]con
 		bids = append(bids, *bid)
 	}
 
-	totalCount, err := o.GetTotalAucBidSize()
+	totalCount, err := o.GetTotalAucBidSize(pageInfo.AucId)
 
 	return bids, totalCount, err
 }
@@ -147,9 +147,11 @@ func (o *DB) GetAucBidDepositRefund(req *context_auc.BidDepositRefundList) ([]co
 	return bids, totalCount, err
 }
 
-func (o *DB) GetTotalAucBidSize() (int64, error) {
+func (o *DB) GetTotalAucBidSize(aucId int64) (int64, error) {
 	var count int64
-	err := o.Mysql.QueryRow("SELECT COUNT(*) as count FROM auc_bids WHERE bid_amount != 0", &count)
+	query := fmt.Sprintf("SELECT COUNT(*) as count FROM auc_bids WHERE bid_amount != 0 AND auc_id=%v", aucId)
+
+	err := o.Mysql.QueryRow(query, &count)
 
 	if err != nil {
 		log.Error(err)

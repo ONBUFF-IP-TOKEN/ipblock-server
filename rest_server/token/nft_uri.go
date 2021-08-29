@@ -28,6 +28,7 @@ type NftUriInfo struct {
 }
 
 type NftUri_AuctionProduct struct {
+	SNo      string                `json:"sno"`
 	Media    context_auc.MediaInfo `json:"media"`
 	CardInfo context_auc.CardInfo  `json:"card_info"`
 }

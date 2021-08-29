@@ -227,7 +227,7 @@ func (o *TokenCmd) BidWinnerCheckReceipt(data interface{}) {
 					// 구입 액수 check
 					transferEther := ethCtrl.Convert(tx.Value().String(), ethCtrl.Wei, ethCtrl.Ether)
 					var price big.Rat
-					price = *price.SetFloat64(bid.DepositAmount)
+					price = *price.SetFloat64(bid.BidAmount - bid.DepositAmount)
 
 					temp1, _ := transferEther.Float64()
 					temp2, _ := price.Float64()
@@ -266,7 +266,7 @@ func (o *TokenCmd) BidWinnerCheckReceipt(data interface{}) {
 					transferEther := ethCtrl.Convert(value.String(), ethCtrl.Wei, ethCtrl.Ether)
 
 					var price big.Rat
-					price = *price.SetFloat64(bid.BidAmount)
+					price = *price.SetFloat64(bid.BidAmount - bid.DepositAmount)
 
 					temp1, _ := transferEther.Float64()
 					temp2, _ := price.Float64()

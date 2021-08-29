@@ -240,7 +240,7 @@ func PostAucAuctionFinish(auctionFinish *context_auc.AuctionFinish, ctx *context
 			resp.SetReturn(resultcode.Result_DBError)
 		} else {
 			// 3. 입찰자 리스트 낙찰 업데이트
-			if _, err := model.GetDB().UpdateAucBidWinnerState(bid, context_auc.Bid_state_success); err != nil {
+			if _, err := model.GetDB().UpdateAucBidFinish(bid, context_auc.Bid_state_success); err != nil {
 				log.Error("PostAucBidSubmit :", err)
 				resp.SetReturn(resultcode.Result_DBError)
 			} else {

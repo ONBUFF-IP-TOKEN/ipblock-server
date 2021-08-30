@@ -111,5 +111,6 @@ func (o *DB) UpdateAucBidFinish(bid *context_auc.Bid, state context_auc.Bid_stat
 
 	log.Debug("UpdateAucBidWinner id:", id)
 	o.DeleteBidList(bid.AucId)
+	o.DeleteAuctionCache(bid.AucId)
 	return id, nil
 }

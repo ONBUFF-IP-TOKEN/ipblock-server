@@ -45,8 +45,6 @@ func PostAucAuctionUpdate(auction *context_auc.AucAuctionUpdate, ctx *context.IP
 		} else {
 			auction.Id = id
 			resp.Value = auction
-			// redis 삭제
-			model.GetDB().DeleteAuctionCache(auction.Id)
 		}
 
 	}
@@ -188,9 +186,6 @@ func DeleteAucAuctiontRemove(auction *context_auc.RemoveAuction, ctx *context.IP
 	} else {
 		if !ret {
 			resp.SetReturn(resultcode.Result_DBNotExistProduct)
-		} else {
-			// redis 삭제
-			model.GetDB().DeleteAuctionCache(auction.Id)
 		}
 	}
 	return ctx.EchoContext.JSON(http.StatusOK, resp)
@@ -243,9 +238,6 @@ func PostAucAuctionFinish(auctionFinish *context_auc.AuctionFinish, ctx *context
 			if _, err := model.GetDB().UpdateAucBidFinish(bid, context_auc.Bid_state_success); err != nil {
 				log.Error("PostAucBidSubmit :", err)
 				resp.SetReturn(resultcode.Result_DBError)
-			} else {
-				// 4. redis 삭제
-				model.GetDB().DeleteAuctionCache(auctionFinish.Id)
 			}
 		}
 	}

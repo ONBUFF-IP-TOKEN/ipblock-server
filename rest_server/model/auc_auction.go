@@ -48,6 +48,7 @@ func (o *DB) DeleteAucAuction(auctionId int64) (bool, error) {
 
 	// auction list cache 전체 삭제
 	o.DeleteAuctionList()
+	o.DeleteAuctionCache(auctionId)
 
 	return true, nil
 }

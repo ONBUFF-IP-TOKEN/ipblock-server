@@ -30,6 +30,7 @@ func (o *DB) UpdateAucAuction(auction *context_auc.AucAuctionUpdate) (int64, err
 
 	// auction list cache 전체 삭제
 	o.DeleteAuctionList()
+	o.DeleteAuctionCache(auction.Id)
 	return id, nil
 }
 
@@ -52,6 +53,7 @@ func (o *DB) UpdateAucAuctionBestBid(auctionId int64, curAmount float64) (int64,
 
 	// auction list cache 전체 삭제
 	o.DeleteAuctionList()
+	o.DeleteAuctionCache(auctionId)
 	return id, nil
 }
 
@@ -75,5 +77,6 @@ func (o *DB) UpdateAucAuctionAucState(auctionId int64, aucState context_auc.Auct
 
 	// auction list cache 전체 삭제
 	o.DeleteAuctionList()
+	o.DeleteAuctionCache(auctionId)
 	return id, nil
 }

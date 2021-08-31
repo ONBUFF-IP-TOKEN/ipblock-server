@@ -96,7 +96,7 @@ func (o *DB) SetAuctionListByAucStateCache(reqPageInfo *context_auc.PageInfo, pa
 
 	cKey := genCacheKeyByAucAuction(auction_list_key)
 	field := fmt.Sprintf("%v-%v-%v", aucState, reqPageInfo.PageSize, reqPageInfo.PageOffset)
-	log.Info("SetAuctionListCache ", field)
+	log.Info("SetAuctionListByAucStateCache ", field)
 	return o.Cache.HSet(cKey, field, auctionListCache)
 }
 
@@ -113,7 +113,7 @@ func (o *DB) SetAuctionListByRecommandCache(reqPageInfo *context_auc.PageInfo, p
 
 	cKey := genCacheKeyByAucAuction(auction_list_key)
 	field := fmt.Sprintf("%v-%v-%v", "r", reqPageInfo.PageSize, reqPageInfo.PageOffset)
-	log.Info("SetAuctionListCache ", field)
+	log.Info("SetAuctionListByRecommandCache ", field)
 	return o.Cache.HSet(cKey, field, auctionListCache)
 }
 

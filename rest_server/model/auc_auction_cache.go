@@ -31,6 +31,15 @@ func (o *DB) DeleteAuctionCache(aucId int64) error {
 	return o.Cache.HDel(cKey, field)
 }
 
+// 단일 경매 정보 key 전체 삭제
+func (o *DB) DeleteAuctionCacheAll() error {
+	if !o.Cache.Enable() {
+		log.Warnf("redis disable")
+	}
+	cKey := genCacheKeyByAucAuction(auction_item_key)
+	return o.Cache.Del(cKey)
+}
+
 // 단일 경매 정보 set
 func (o *DB) SetAuctionCache(data *context_auc.AucAuction) error {
 	if !o.Cache.Enable() {

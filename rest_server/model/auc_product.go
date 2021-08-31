@@ -81,11 +81,12 @@ func (o *DB) UpdateAucProduct(product *context_auc.ProductInfo) (int64, error) {
 	if Id != 0 {
 		// cache 삭제
 		o.CacheDelProduct(product.Id)
-
 		// product list cache 전체 삭제
 		o.DeleteProductList()
 		// auction list cache 전체 삭제
 		o.DeleteAuctionList()
+		// auction 단일 cache 전체 삭제
+		o.DeleteAuctionCacheAll()
 	}
 
 	return Id, nil
@@ -106,8 +107,14 @@ func (o *DB) UpdateAucProductNft(product *context_auc.ProductInfo) (int64, error
 		return 0, err
 	}
 
-	// cache 삭제
+	// product 단일 cache 삭제
 	o.CacheDelProduct(product.Id)
+	// product list cache 전체 삭제
+	o.DeleteProductList()
+	// auction list cache 전체 삭제
+	o.DeleteAuctionList()
+	// auction 단일 cache 전체 삭제
+	o.DeleteAuctionCacheAll()
 
 	return cnt, nil
 }
@@ -126,13 +133,15 @@ func (o *DB) DeleteAucProduct(productId int64) (bool, error) {
 		log.Error(err)
 		return false, err
 	}
-	// product cache 삭제
-	o.CacheDelProduct(productId)
 
+	// product 단일 cache 삭제
+	o.CacheDelProduct(productId)
 	// product list cache 전체 삭제
 	o.DeleteProductList()
 	// auction list cache 전체 삭제
 	o.DeleteAuctionList()
+	// auction 단일 cache 전체 삭제
+	o.DeleteAuctionCacheAll()
 
 	return true, nil
 }
@@ -153,9 +162,14 @@ func (o *DB) UpdateAucProductNftTokenId(createHash string, tokenId int64) (int64
 	}
 
 	if newProduct, err := o.GetAucProductByNftCreatHash(createHash); err == nil {
-		// product cache 삭제
+		// product 단일 cache 삭제
 		o.CacheDelProduct(newProduct.Id)
+		// product list cache 전체 삭제
 		o.DeleteProductList()
+		// auction list cache 전체 삭제
+		o.DeleteAuctionList()
+		// auction 단일 cache 전체 삭제
+		o.DeleteAuctionCacheAll()
 	}
 
 	return cnt, nil

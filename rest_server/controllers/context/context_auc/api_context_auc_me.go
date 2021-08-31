@@ -14,8 +14,8 @@ type MeBid struct {
 // 내 입찰,낙찰,nft 리스트
 type MeBidList struct {
 	PageInfo
-	AucId      int64 `query:"auc_id"`
-	WalletAddr string
+	AucId      int64  `query:"auc_id"`
+	WalletAddr string `query:"wallet_address"`
 }
 
 func NewMeBidList() *MeBidList {

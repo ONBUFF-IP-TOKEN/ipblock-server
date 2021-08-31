@@ -131,7 +131,7 @@ func (o *TokenCmd) BidDepositCheckReceipt(data interface{}) {
 					}
 				}
 			} else if err.Error() == "not found" {
-				log.Debug("not found retry GetTransactionReceipt : ", bid.DepositTxHash, " bid id:", bid.Id)
+				log.Error("not found retry GetTransactionReceipt : ", bid.DepositTxHash, " bid id:", bid.Id)
 				time.Sleep(time.Second * 1)
 				if errCnt > 3 {
 					model.GetDB().UpdateAucBidDepositState(bid, context_auc.Deposit_state_fail)
@@ -142,7 +142,7 @@ func (o *TokenCmd) BidDepositCheckReceipt(data interface{}) {
 				goto POLLING
 			}
 		} else {
-			log.Debug("GetTransactionByTxHash error : ", err)
+			log.Error("GetTransactionByTxHash error : ", err)
 			if errCnt > 3 {
 				model.GetDB().UpdateAucBidDepositState(bid, context_auc.Deposit_state_fail)
 				log.Error("GetTransactionByTxHash max try : ", bid.DepositTxHash, " bid id:", bid.Id)

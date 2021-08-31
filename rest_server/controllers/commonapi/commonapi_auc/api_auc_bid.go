@@ -75,6 +75,7 @@ func PostAucBidDeposit(bidDeposit *context_auc.BidDeposit, ctx *context.IPBlockS
 		return ctx.EchoContext.JSON(http.StatusOK, resp)
 	} else {
 		if exist {
+			log.Error("PostAucBidDeposit errorCode:", resultcode.Result_Reused_Txhash, " message:", base.ReturnCodeText(resultcode.Result_Reused_Txhash))
 			resp.SetReturn(resultcode.Result_Reused_Txhash)
 			return ctx.EchoContext.JSON(http.StatusOK, resp)
 		}

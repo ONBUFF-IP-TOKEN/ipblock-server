@@ -14,7 +14,8 @@ type MeBid struct {
 // 내 입찰,낙찰,nft 리스트
 type MeBidList struct {
 	PageInfo
-	WalletAddr string `json:"wallet_address"`
+	AucId      int64 `query:"auc_id"`
+	WalletAddr string
 }
 
 func NewMeBidList() *MeBidList {
@@ -22,6 +23,9 @@ func NewMeBidList() *MeBidList {
 }
 
 func (o *MeBidList) CheckValidate(ctx *context.IPBlockServerContext) *base.BaseResponse {
+	if o.AucId < -1 {
+		return base.MakeBaseResponse(resultcode.Result_Auc_Bid_RequireAucId)
+	}
 	if o.PageOffset < 0 {
 		return base.MakeBaseResponse(resultcode.Result_RequireValidPageOffset)
 	}

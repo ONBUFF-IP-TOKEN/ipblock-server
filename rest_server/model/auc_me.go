@@ -12,8 +12,14 @@ import (
 func (o *DB) GetAucBidListMe(pageInfo *context_auc.MeBidList, walletaddr string, winner bool) ([]context_auc.MeBid, int64, error) {
 	var sqlQuery string
 	if !winner {
-		sqlQuery = fmt.Sprintf("SELECT * FROM auc_bids LEFT JOIN auc_products on auc_bids.product_id = auc_products.product_id "+
-			"WHERE bid_attendee_wallet_address='%v' ORDER BY bid_ts DESC LIMIT %v,%v", walletaddr, pageInfo.PageSize*pageInfo.PageOffset, pageInfo.PageSize)
+		if pageInfo.AucId == -1 {
+			sqlQuery = fmt.Sprintf("SELECT * FROM auc_bids LEFT JOIN auc_products on auc_bids.product_id = auc_products.product_id "+
+				"WHERE bid_attendee_wallet_address='%v' ORDER BY bid_ts DESC LIMIT %v,%v", walletaddr, pageInfo.PageSize*pageInfo.PageOffset, pageInfo.PageSize)
+		} else {
+			sqlQuery = fmt.Sprintf("SELECT * FROM auc_bids LEFT JOIN auc_products on auc_bids.product_id = auc_products.product_id "+
+				"WHERE bid_attendee_wallet_address='%v' AND auc_id=%v ORDER BY bid_ts DESC LIMIT %v,%v", walletaddr, pageInfo.AucId, pageInfo.PageSize*pageInfo.PageOffset, pageInfo.PageSize)
+		}
+
 	} else {
 		sqlQuery = fmt.Sprintf("SELECT * FROM auc_bids LEFT JOIN auc_products on auc_bids.product_id = auc_products.product_id "+
 			"WHERE bid_attendee_wallet_address='%v' AND bid_state=%v ORDER BY bid_ts DESC LIMIT %v,%v", walletaddr, context_auc.Bid_state_success, pageInfo.PageSize*pageInfo.PageOffset, pageInfo.PageSize)
@@ -86,16 +92,21 @@ func (o *DB) GetAucBidListMe(pageInfo *context_auc.MeBidList, walletaddr string,
 		}
 	}
 
-	totalCount, err := o.GetTotalAucMeBidSize(walletaddr, winner)
+	totalCount, err := o.GetTotalAucMeBidSize(walletaddr, winner, pageInfo.AucId)
 
 	return meBids, totalCount, err
 }
 
-func (o *DB) GetTotalAucMeBidSize(walletAddr string, winner bool) (int64, error) {
+func (o *DB) GetTotalAucMeBidSize(walletAddr string, winner bool, aucId int64) (int64, error) {
 	var sqlQuery string
 	var dataCount int64
 	if !winner {
-		sqlQuery = fmt.Sprintf("SELECT COUNT(*) as count FROM auc_bids WHERE bid_attendee_wallet_Address = '%v'", walletAddr)
+		if aucId == -1 {
+			sqlQuery = fmt.Sprintf("SELECT COUNT(*) as count FROM auc_bids WHERE bid_attendee_wallet_Address = '%v'", walletAddr)
+		} else {
+			sqlQuery = fmt.Sprintf("SELECT COUNT(*) as count FROM auc_bids WHERE bid_attendee_wallet_Address = '%v' AND auc_id=%v", walletAddr, aucId)
+		}
+
 	} else {
 		sqlQuery = fmt.Sprintf("SELECT COUNT(*) as count FROM auc_bids WHERE bid_attendee_wallet_Address = '%v' AND bid_state=%v",
 			walletAddr, context_auc.Bid_state_success)

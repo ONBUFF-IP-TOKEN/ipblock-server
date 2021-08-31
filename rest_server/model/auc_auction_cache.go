@@ -26,7 +26,7 @@ func (o *DB) DeleteAuctionCache(aucId int64) error {
 	if !o.Cache.Enable() {
 		log.Warnf("redis disable")
 	}
-	cKey := genCacheKeyByAucProduct(auction_item_key)
+	cKey := genCacheKeyByAucAuction(auction_item_key)
 	field := strconv.FormatInt(aucId, 10)
 	return o.Cache.HDel(cKey, field)
 }
@@ -49,7 +49,7 @@ func (o *DB) GetAuctionCache(aucId int64) (*context_auc.AucAuction, error) {
 	}
 
 	auction := &context_auc.AucAuction{}
-	cKey := genCacheKeyByAucProduct(auction_item_key)
+	cKey := genCacheKeyByAucAuction(auction_item_key)
 	field := strconv.FormatInt(aucId, 10)
 
 	err := o.Cache.HGet(cKey, field, auction)
@@ -62,7 +62,7 @@ func (o *DB) DeleteAuctionList() error {
 	if !o.Cache.Enable() {
 		log.Warnf("redis disable")
 	}
-	cKey := genCacheKeyByAucProduct(auction_list_key)
+	cKey := genCacheKeyByAucAuction(auction_list_key)
 	return o.Cache.Del(cKey)
 }
 
@@ -77,7 +77,7 @@ func (o *DB) SetAuctionListCache(reqPageInfo *context_auc.PageInfo, pageInfo *co
 		AuctionList: data,
 	}
 
-	cKey := genCacheKeyByAucProduct(auction_list_key)
+	cKey := genCacheKeyByAucAuction(auction_list_key)
 	field := fmt.Sprintf("%v-%v", reqPageInfo.PageSize, reqPageInfo.PageOffset)
 	log.Info("SetAuctionListCache ", field)
 	return o.Cache.HSet(cKey, field, auctionListCache)
@@ -94,7 +94,7 @@ func (o *DB) SetAuctionListByAucStateCache(reqPageInfo *context_auc.PageInfo, pa
 		AuctionList: data,
 	}
 
-	cKey := genCacheKeyByAucProduct(auction_list_key)
+	cKey := genCacheKeyByAucAuction(auction_list_key)
 	field := fmt.Sprintf("%v-%v-%v", aucState, reqPageInfo.PageSize, reqPageInfo.PageOffset)
 	log.Info("SetAuctionListCache ", field)
 	return o.Cache.HSet(cKey, field, auctionListCache)
@@ -111,7 +111,7 @@ func (o *DB) SetAuctionListByRecommandCache(reqPageInfo *context_auc.PageInfo, p
 		AuctionList: data,
 	}
 
-	cKey := genCacheKeyByAucProduct(auction_list_key)
+	cKey := genCacheKeyByAucAuction(auction_list_key)
 	field := fmt.Sprintf("%v-%v-%v", "r", reqPageInfo.PageSize, reqPageInfo.PageOffset)
 	log.Info("SetAuctionListCache ", field)
 	return o.Cache.HSet(cKey, field, auctionListCache)
@@ -123,7 +123,7 @@ func (o *DB) GetAuctionListCache(pageInfo *context_auc.PageInfo) (*context_auc.P
 		log.Warnf("redis disable")
 	}
 	auctionListCache := &AuctionListCache{}
-	cKey := genCacheKeyByAucProduct(auction_list_key)
+	cKey := genCacheKeyByAucAuction(auction_list_key)
 	field := fmt.Sprintf("%v-%v", pageInfo.PageSize, pageInfo.PageOffset)
 
 	err := o.Cache.HGet(cKey, field, auctionListCache)
@@ -137,7 +137,7 @@ func (o *DB) GetAuctionListByAucStateCache(pageInfo *context_auc.PageInfo, aucSt
 		log.Warnf("redis disable")
 	}
 	auctionListCache := &AuctionListCache{}
-	cKey := genCacheKeyByAucProduct(auction_list_key)
+	cKey := genCacheKeyByAucAuction(auction_list_key)
 	field := fmt.Sprintf("%v-%v-%v", aucState, pageInfo.PageSize, pageInfo.PageOffset)
 
 	err := o.Cache.HGet(cKey, field, auctionListCache)
@@ -151,7 +151,7 @@ func (o *DB) GetAuctionListByRecommandCache(pageInfo *context_auc.PageInfo) (*co
 		log.Warnf("redis disable")
 	}
 	auctionListCache := &AuctionListCache{}
-	cKey := genCacheKeyByAucProduct(auction_list_key)
+	cKey := genCacheKeyByAucAuction(auction_list_key)
 	field := fmt.Sprintf("%v-%v-%v", "r", pageInfo.PageSize, pageInfo.PageOffset)
 
 	err := o.Cache.HGet(cKey, field, auctionListCache)

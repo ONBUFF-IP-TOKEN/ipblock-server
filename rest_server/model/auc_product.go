@@ -153,8 +153,9 @@ func (o *DB) UpdateAucProductNftTokenId(createHash string, tokenId int64) (int64
 	}
 
 	if newProduct, err := o.GetAucProductByNftCreatHash(createHash); err == nil {
-		// product cache 업데이트
+		// product cache 삭제
 		o.CacheDelProduct(newProduct.Id)
+		o.DeleteProductList()
 	}
 
 	return cnt, nil

@@ -37,6 +37,7 @@ type AucAuction struct {
 	ActiveState    Auction_active_state `json:"active_state"`
 	ProductId      int64                `json:"product_id"`
 	Recommand      int64                `json:"recommand"`
+	ProductPrice                        // todo product 구조체와 중복됨
 	ProductInfo    *ProductInfo         `json:"product,omitempty"`
 }
 

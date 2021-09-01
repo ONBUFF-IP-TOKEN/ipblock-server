@@ -11,11 +11,11 @@ import (
 func (o *DB) UpdateAucAuction(auction *context_auc.AucAuctionUpdate) (int64, error) {
 	sqlQuery := fmt.Sprintf("UPDATE auc_auctions set bid_start_amount=?, bid_cur_amount=?, bid_unit=?, bid_deposit=?," +
 		"auc_start_ts=?, auc_end_ts=?, auc_state=?, auc_round=?, " +
-		"create_ts=?, active_state=?, product_id=?, recommand=? WHERE auc_id=?")
+		"create_ts=?, active_state=?, product_id=?, recommand=?, token_type=?, price=? WHERE auc_id=?")
 
 	result, err := o.Mysql.PrepareAndExec(sqlQuery, auction.BidStartAmount, auction.BidCurAmount, auction.BidUnit, auction.BidDeposit,
 		auction.AucStartTs, auction.AucEndTs, auction.AucState, auction.AucRound,
-		auction.CreateTs, auction.ActiveState, auction.ProductId, auction.Recommand, auction.Id)
+		auction.CreateTs, auction.ActiveState, auction.ProductId, auction.Recommand, auction.TokenType, auction.Price, auction.Id)
 
 	if err != nil {
 		log.Error(err)

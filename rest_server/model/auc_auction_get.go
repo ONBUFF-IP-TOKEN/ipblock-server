@@ -86,7 +86,7 @@ func (o *DB) GetAucAuctionListByRecommand(pageInfo *context_auc.AuctionListByRec
 			"WHERE recommand = 1 ORDER BY auc_id DESC LIMIT %v,%v", pageInfo.PageSize*pageInfo.PageOffset, pageInfo.PageSize)
 	} else {
 		sqlQuery = fmt.Sprintf("SELECT * FROM auc_auctions LEFT JOIN auc_products on auc_auctions.product_id = auc_products.product_id "+
-			"WHERE recommand = 1 AND active_state = %v ORDER BY auc_id DESC LIMIT %v,%v", pageInfo.ActiveState, pageInfo.PageSize*pageInfo.PageOffset, pageInfo.PageSize)
+			"WHERE recommand = 1 AND active_state = %v ORDER BY token_type DESC, auc_id DESC LIMIT %v,%v", pageInfo.ActiveState, pageInfo.PageSize*pageInfo.PageOffset, pageInfo.PageSize)
 	}
 
 	rows, err := o.Mysql.Query(sqlQuery)
@@ -206,6 +206,7 @@ func (o *DB) ScanAuction(rows *sql.Rows) (*context_auc.AucAuction, error) {
 	if err := rows.Scan(&auction.Id, &auction.BidStartAmount, &auction.BidCurAmount, &auction.BidUnit, &auction.BidDeposit,
 		&auction.AucStartTs, &auction.AucEndTs, &auction.AucState, &auction.AucRound,
 		&auction.CreateTs, &auction.ActiveState, &auction.ProductId, &auction.Recommand,
+		&auction.TokenType, &auction.Price,
 
 		&productId, &product.SNo, &title, &product.CreateTs, &desc,
 		&product.OwnerNickName, &product.OwnerWalletAddr, &product.CreatorNickName, &product.CreatorWalletAddr,

@@ -41,7 +41,7 @@ func (o *ExternalAPI) GetAucAuctionListByAucState(c echo.Context) error {
 	return commonapi_auc.GetAucAuctionListByAucState(params, c)
 }
 
-// 경매 리스트 요청 (경매 상태에 따른)
+// 추천 리스트 요청
 func (o *ExternalAPI) GetAucAuctionListByRecommand(c echo.Context) error {
 	params := context_auc.NewAuctionListRecommand()
 	if err := c.Bind(params); err != nil {

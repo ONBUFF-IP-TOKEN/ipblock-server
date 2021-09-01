@@ -17,12 +17,28 @@ import (
 	"github.com/labstack/echo"
 )
 
-// 입찰 보증금 지불 여부 확인
-func GetAucBidDeposit(bid *context_auc.BidDepositVerify, ctx *context.IPBlockServerContext) error {
+// 입찰 전송
+func PostAucBidSubmit(bidSubmit *context_auc.BidSubmit, ctx *context.IPBlockServerContext) error {
 	resp := new(base.BaseResponse)
 	resp.Success()
 
-	if bid, err := model.GetDB().GetAucBidAttendee(bid.AucId, bid.BidAttendeeWalletAddr); err != nil {
+	// auc_auctions 테이블에서 경매 정보 불러오기
+	auction, _, err := model.GetDB().GetAucAuction(bidSubmit.AucId)
+	if err != nil {
+		log.Error("GetAucAuction :", err)
+		resp.SetReturn(resultcode.Result_DBError)
+		return ctx.EchoContext.JSON(http.StatusOK, resp)
+	}
+
+	// 경매 진행중인지 확인
+	if !IsAuctionPeriod(auction, bidSubmit.AucId) {
+		log.Error("Not Auction period")
+		resp.SetReturn(resultcode.Result_Auc_Auction_NotPeriod)
+		return ctx.EchoContext.JSON(http.StatusOK, resp)
+	}
+
+	// 보증금 납부 확인
+	if bid, err := model.GetDB().GetAucBidDeposit(bidSubmit.AucId, bidSubmit.BidAttendeeWalletAddr); err != nil {
 		resp.SetReturn(resultcode.Result_DBError)
 	} else {
 		if bid == nil || bid.DepositState == context_auc.Deposit_state_fail {
@@ -31,132 +47,44 @@ func GetAucBidDeposit(bid *context_auc.BidDepositVerify, ctx *context.IPBlockSer
 		}
 	}
 
-	return ctx.EchoContext.JSON(http.StatusOK, resp)
-}
-
-// 입찰 보증금 지불
-func PostAucBidDeposit(bidDeposit *context_auc.BidDeposit, ctx *context.IPBlockServerContext) error {
-	resp := new(base.BaseResponse)
-	resp.Success()
-
-	// auc_auctions 테이블에서 경매 정보 불러오기
-	auction, _, err := model.GetDB().GetAucAuction(bidDeposit.AucId)
-	if err != nil {
-		log.Error("GetAucAuction :", err)
-		resp.SetReturn(resultcode.Result_DBError)
-		return ctx.EchoContext.JSON(http.StatusOK, resp)
-	}
-
-	// 경매 진행중인지 확인
-	if !IsAuctionPeriod(auction, bidDeposit.AucId) {
-		log.Error("Not Auction period")
-		resp.SetReturn(resultcode.Result_Auc_Auction_NotPeriod)
-		return ctx.EchoContext.JSON(http.StatusOK, resp)
-	}
-
-	// 이미 보증금을 지불하였는지 확인
-	if bid, err := model.GetDB().GetAucBidAttendee(bidDeposit.AucId, bidDeposit.BidAttendeeWalletAddr); err != nil {
-		log.Error("GetAucBidAttendee :", err)
-		resp.SetReturn(resultcode.Result_DBError)
-		return ctx.EchoContext.JSON(http.StatusOK, resp)
-	} else {
-		if bid != nil &&
-			strings.EqualFold(bid.BidAttendeeWalletAddr, bidDeposit.BidAttendeeWalletAddr) &&
-			bid.DepositState != context_auc.Deposit_state_fail {
-			log.Error("Alreay deposit submit auc_id:", bid.AucId, " wallet:", bidDeposit.BidAttendeeWalletAddr)
-			resp.SetReturn(resultcode.Result_Auc_Bid_AlreadyDeposit)
-			return ctx.EchoContext.JSON(http.StatusOK, resp)
-		}
-	}
-
-	// 지불 hash가 기존에 지불한적이 있었던 해쉬정보인지 체크
-	if exist, err := model.GetDB().GetAucBidByTxhash(bidDeposit.DepositTxHash); err != nil {
-		resp.SetReturn(resultcode.Result_DBError)
-		return ctx.EchoContext.JSON(http.StatusOK, resp)
-	} else {
-		if exist {
-			log.Error("PostAucBidDeposit errorCode:", resultcode.Result_Reused_Txhash, " message:", base.ReturnCodeText(resultcode.Result_Reused_Txhash))
-			resp.SetReturn(resultcode.Result_Reused_Txhash)
-			return ctx.EchoContext.JSON(http.StatusOK, resp)
-		}
-	}
-
-	bidDeposit.ProductId = auction.ProductId
-	bidDeposit.BidState = context_auc.Bid_state_ready
-	bidDeposit.BidTs = datetime.GetTS2MilliSec()
-	bidDeposit.DepositAmount = float64(auction.BidDeposit)
-	bidDeposit.DepositState = context_auc.Deposit_state_checking
-	bidDeposit.TokenType = auction.ProductInfo.Prices[0].TokenType
-
-	// auc_bids table에 최초 저장
-	if id, err := model.GetDB().InsertAucBid(bidDeposit); err != nil {
-		log.Error("InsertAucBid :", err)
-		resp.SetReturn(resultcode.Result_DBError)
-	} else {
-		bidDeposit.Id = id
-		resp.Value = bidDeposit
-
-		// 영수증 확인 go 채널로 전달
-		data := &basenet.CommandData{
-			CommandType: token.TokenCmd_Bid_Deposit_CheckReceipt,
-			Data:        bidDeposit,
-		}
-		commonapi.GetTokenProc(data)
-	}
-
-	return ctx.EchoContext.JSON(http.StatusOK, resp)
-}
-
-// 입찰 전송
-func PostAucBidSubmit(bidSubmit *context_auc.BidSubmit, ctx *context.IPBlockServerContext) error {
-	resp := new(base.BaseResponse)
-	resp.Success()
-
-	// 경매 진행중인지 확인
-	if !IsAuctionPeriod(nil, bidSubmit.AucId) {
-		log.Error("Not Auction period")
-		resp.SetReturn(resultcode.Result_Auc_Auction_NotPeriod)
-		return ctx.EchoContext.JSON(http.StatusOK, resp)
-	}
-
 	// 1. 기존 최고 입찰자 정보 가져오기
 	bid, err := model.GetDB().GetAucBidBestAttendee(bidSubmit.AucId)
 	if err != nil {
 		log.Error("PostAucBidSubmit :", err)
 		resp.SetReturn(resultcode.Result_DBError)
 	} else {
+
+		bidSubmit.ProductId = auction.ProductId
+		bidSubmit.BidState = context_auc.Bid_state_submit
+		bidSubmit.BidTs = datetime.GetTS2MilliSec()
+		bidSubmit.TokenType = auction.ProductInfo.Prices[0].TokenType
+
 		if bid == nil {
-			log.Error("not exist bids data")
-			resp.SetReturn(resultcode.Result_Auc_Bid_RequireDeposit)
-		} else {
-			if bid.BidAmount == 0 {
-				// 입찰 보증금만 내고 최고 입찰자가 없는경우 바로 입찰 성공 (auc_bids table update)
-				bidSubmit.BidState = context_auc.Bid_state_submit
-				if _, err := model.GetDB().UpdateAucBidSubmit(bidSubmit); err != nil {
-					log.Error("UpdateAucBidSubmit :", err)
-					resp.SetReturn(resultcode.Result_DBError)
-				} else {
-					// 최고가 정보 업데이트
-					model.GetDB().UpdateAucAuctionBestBid(bidSubmit.AucId, bidSubmit.BidAmount)
-				}
+			// 입찰 한 사람이 아무도 없기때문에 바로 insert
+			if _, err := model.GetDB().InsertAucBidSubmit(bidSubmit); err != nil {
+				log.Error("InsertAucBidSubmit :", err)
+				resp.SetReturn(resultcode.Result_DBError)
 			} else {
-				// 2. 이미 내가 최고 입찰자 인지 확인
-				if strings.EqualFold(bid.BidAttendeeWalletAddr, ctx.WalletAddr()) {
-					resp.SetReturn(resultcode.Result_Auc_Bid_AlreadyBestAttendee)
+				// 최고가 정보 업데이트
+				model.GetDB().UpdateAucAuctionBestBid(bidSubmit.AucId, bidSubmit.BidAmount)
+			}
+		} else {
+			// 2. 이미 내가 최고 입찰자 인지 확인
+			if strings.EqualFold(bid.BidAttendeeWalletAddr, ctx.WalletAddr()) {
+				resp.SetReturn(resultcode.Result_Auc_Bid_AlreadyBestAttendee)
+			} else {
+				// 3. 내가 제시한 입찰가가 최고가 인지 확인
+				if bidSubmit.BidAmount <= bid.BidAmount {
+					resp.SetReturn(resultcode.Result_Auc_Bid_NotBestBidAmount)
 				} else {
-					// 3. 내가 제시한 입찰가가 최고가 인지 확인
-					if bidSubmit.BidAmount <= bid.BidAmount {
-						resp.SetReturn(resultcode.Result_Auc_Bid_NotBestBidAmount)
+					// 4. 입찰 성공 (auc_bids table update)
+					bidSubmit.BidState = context_auc.Bid_state_submit
+					if _, err := model.GetDB().InsertAucBidSubmit(bidSubmit); err != nil {
+						log.Error("InsertAucBidSubmit :", err)
+						resp.SetReturn(resultcode.Result_DBError)
 					} else {
-						// 4. 입찰 성공 (auc_bids table update)
-						bidSubmit.BidState = context_auc.Bid_state_submit
-						if _, err := model.GetDB().UpdateAucBidSubmit(bidSubmit); err != nil {
-							log.Error("UpdateAucBidSubmit :", err)
-							resp.SetReturn(resultcode.Result_DBError)
-						} else {
-							// 최고가 정보 업데이트
-							model.GetDB().UpdateAucAuctionBestBid(bidSubmit.AucId, bidSubmit.BidAmount)
-						}
+						// 최고가 정보 업데이트
+						model.GetDB().UpdateAucAuctionBestBid(bidSubmit.AucId, bidSubmit.BidAmount)
 					}
 				}
 			}
@@ -324,7 +252,6 @@ func IsAuctionEnd(auction *context_auc.AucAuction, aucId int64) bool {
 		return false
 	}
 	return true
-	//return auction.AucEndTs < datetime.GetTS2MilliSec()
 }
 
 // 입찰 삭제
@@ -334,7 +261,16 @@ func DeleteAucBidRemove(bid *context_auc.BidRemove, ctx *context.IPBlockServerCo
 
 	//1. auc_products table 에서 삭제
 	if ret, err := model.GetDB().DeleteAucBid(bid); err != nil {
-		log.Error("DeleteAucAuctiontRemove :", err)
+		log.Error("DeleteAucBid :", err)
+		resp.SetReturn(resultcode.Result_DBError)
+	} else {
+		if !ret {
+			resp.SetReturn(resultcode.Result_DBNotExistProduct)
+		}
+	}
+
+	if ret, err := model.GetDB().DeleteAucBidDeposit(bid); err != nil {
+		log.Error("DeleteAucBidDeposit :", err)
 		resp.SetReturn(resultcode.Result_DBError)
 	} else {
 		if !ret {
@@ -381,8 +317,16 @@ func GetAucBidWinnerVerify(req *context_auc.BidWinnerVerify, ctx *context.IPBloc
 	resp := new(base.BaseResponse)
 	resp.Success()
 
+	// auc_auctions 테이블에서 경매 정보 불러오기
+	auction, _, err := model.GetDB().GetAucAuction(req.AucId)
+	if err != nil {
+		log.Error("GetAucAuction :", err)
+		resp.SetReturn(resultcode.Result_DBError)
+		return ctx.EchoContext.JSON(http.StatusOK, resp)
+	}
+
 	// 1. 경매 종료되었는지 확인
-	if !IsAuctionEnd(nil, req.AucId) {
+	if !IsAuctionEnd(auction, req.AucId) {
 		log.Error("Auction is not over yet")
 		resp.SetReturn(resultcode.Result_Auc_Auction_NotOverYet)
 	} else {
@@ -394,7 +338,7 @@ func GetAucBidWinnerVerify(req *context_auc.BidWinnerVerify, ctx *context.IPBloc
 				bidResp := &context_auc.BidWinnerVerifyResponse{
 					Bid:       *successBid,
 					TokenType: successBid.TokenType,
-					Payment:   successBid.BidAmount - successBid.DepositAmount, // 입찰 금액에서 입찰 보증금을 빼고 지불할 금액을 전달한다.
+					Payment:   successBid.BidAmount - auction.BidDeposit, // 입찰 금액에서 입찰 보증금을 빼고 지불할 금액을 전달한다.
 				}
 				resp.Success()
 				resp.Value = bidResp

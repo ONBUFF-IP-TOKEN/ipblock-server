@@ -18,14 +18,6 @@ const (
 	Bid_state_fail    = 3 // 입찰 실패
 )
 
-type Deposit_state int64
-
-const (
-	Deposit_state_fail     = 0 // 보증금 확인 안됨
-	Deposit_state_checking = 1 // 보증금 확인중
-	Deposit_state_complete = 2 // 보증금 확인 완료
-)
-
 type Bid_winner_state int64
 
 const (
@@ -41,25 +33,21 @@ type TermsOfService struct {
 }
 
 type Bid struct {
-	Id                    int64          `json:"id"`
-	AucId                 int64          `query:"auc_id" json:"auc_id"`
-	ProductId             int64          `json:"product_id"`
-	BidState              int64          `json:"bid_state"`
-	BidTs                 int64          `json:"bid_ts"`
-	BidAttendeeWalletAddr string         `query:"bid_attendee_wallet_address" json:"bid_attendee_wallet_address"`
-	BidAmount             float64        `json:"bid_amount"`
-	BidWinnerTxHash       string         `json:"bid_winner_txhash"`
-	BidWinnerState        int64          `json:"bid_winner_state"`
-	DepositAmount         float64        `json:"deposit_amount"`
-	DepositTxHash         string         `json:"deposit_txhash"`
-	DepositState          int64          `json:"deposit_state"`
-	TokenType             string         `json:"token_type"`
-	TermsOfService        TermsOfService `json:"terms_of_service"`
+	Id                    int64   `json:"id"`
+	AucId                 int64   `query:"auc_id" json:"auc_id"`
+	ProductId             int64   `json:"product_id"`
+	BidState              int64   `json:"bid_state"`
+	BidTs                 int64   `json:"bid_ts"`
+	BidAttendeeWalletAddr string  `query:"bid_attendee_wallet_address" json:"bid_attendee_wallet_address"`
+	BidAmount             float64 `json:"bid_amount"`
+	BidWinnerTxHash       string  `json:"bid_winner_txhash"`
+	BidWinnerState        int64   `json:"bid_winner_state"`
+	TokenType             string  `json:"token_type"`
 }
 
 // 입찰 보증금 확인
 type BidDepositVerify struct {
-	Bid
+	BidDeposit
 }
 
 func NewBidDepositVerify() *BidDepositVerify {
@@ -76,40 +64,6 @@ func (o *BidDepositVerify) CheckValidate(ctx *context.IPBlockServerContext) *bas
 	if !strings.EqualFold(o.BidAttendeeWalletAddr, ctx.WalletAddr()) {
 		log.Error("api:", o.BidAttendeeWalletAddr, " auth:", ctx.WalletAddr())
 		return base.MakeBaseResponse(resultcode.Result_Auc_Bid_InvalidWalletAddress)
-	}
-
-	return nil
-}
-
-////////////////////////////////////////////////
-
-// 입찰 보증금 정보 전송
-type BidDeposit struct {
-	Bid
-}
-
-func NewBidDeposit() *BidDeposit {
-	return new(BidDeposit)
-}
-
-func (o *BidDeposit) CheckValidate(ctx *context.IPBlockServerContext) *base.BaseResponse {
-	if o.AucId <= 0 {
-		return base.MakeBaseResponse(resultcode.Result_Auc_Bid_RequireAucId)
-	}
-	if len(o.BidAttendeeWalletAddr) == 0 {
-		return base.MakeBaseResponse(resultcode.Result_Auc_Bid_RequireWalletAddress)
-	}
-	if len(o.DepositTxHash) == 0 {
-		return base.MakeBaseResponse(resultcode.Result_Auc_Bid_RequireDepositTxHash)
-	}
-	if !strings.EqualFold(o.BidAttendeeWalletAddr, ctx.WalletAddr()) {
-		return base.MakeBaseResponse(resultcode.Result_Auc_Bid_InvalidWalletAddress)
-	}
-	if !strings.EqualFold(o.TermsOfService.DepositAgree, "true") {
-		return base.MakeBaseResponse(resultcode.Result_Auc_Bid_RequireDepoistAgree)
-	}
-	if !strings.EqualFold(o.TermsOfService.PrivacyAgree, "true") {
-		return base.MakeBaseResponse(resultcode.Result_Auc_Bid_RequirePrivacyAgree)
 	}
 
 	return nil

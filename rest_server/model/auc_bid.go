@@ -1,37 +1,35 @@
 package model
 
 import (
-	"encoding/json"
 	"fmt"
 
 	"github.com/ONBUFF-IP-TOKEN/baseutil/log"
 	"github.com/ONBUFF-IP-TOKEN/ipblock-server/rest_server/controllers/context/context_auc"
 )
 
-func (o *DB) InsertAucBid(bid *context_auc.BidDeposit) (int64, error) {
-	sqlQuery := fmt.Sprintf("INSERT INTO auc_bids (auc_id, product_id, " +
-		"bid_state, bid_ts, bid_attendee_wallet_address, " +
-		"deposit_amount, deposit_txhash, deposit_state, token_type, terms_of_service ) VALUES (?,?,?,?,?,?,?,?,?,?)")
+// 입찰 하기
+func (o *DB) InsertAucBidSubmit(bidSubmit *context_auc.BidSubmit) (int64, error) {
+	sqlQuery := fmt.Sprintf("INSERT INTO auc_bids (auc_id, product_id, bid_state, bid_ts, bid_attendee_wallet_address, " +
+		"bid_amount, token_type ) VALUES (?,?,?,?,?,?,?)")
 
-	tos, _ := json.Marshal(bid.TermsOfService)
-
-	result, err := o.Mysql.PrepareAndExec(sqlQuery, bid.AucId, bid.ProductId,
-		bid.BidState, bid.BidTs, bid.BidAttendeeWalletAddr, bid.DepositAmount, bid.DepositTxHash, bid.DepositState, bid.TokenType, string(tos))
+	result, err := o.Mysql.PrepareAndExec(sqlQuery, bidSubmit.AucId, bidSubmit.ProductId, bidSubmit.BidState, bidSubmit.BidTs, bidSubmit.BidAttendeeWalletAddr,
+		bidSubmit.BidAmount, bidSubmit.TokenType)
 
 	if err != nil {
 		log.Error(err)
 		return -1, err
 	}
-	insertId, err := result.LastInsertId()
+	id, err := result.RowsAffected()
 	if err != nil {
 		log.Error(err)
 		return -1, err
 	}
-	log.Debug("InsertAucBid id:", insertId)
-	o.DeleteBidList(bid.AucId)
-	return insertId, nil
+	log.Debug("InsertAucBidSubmit id:", id)
+	o.DeleteBidList(bidSubmit.AucId)
+	return id, nil
 }
 
+// 입찰 정보 삭제
 func (o *DB) DeleteAucBid(bid *context_auc.BidRemove) (bool, error) {
 	sqlQuery := "DELETE FROM auc_bids WHERE auc_id=? AND bid_attendee_wallet_address=?"
 

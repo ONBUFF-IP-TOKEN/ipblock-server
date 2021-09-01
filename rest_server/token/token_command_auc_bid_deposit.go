@@ -15,15 +15,15 @@ import (
 
 func (o *TokenCmd) BidDepositCheckReceipt(data interface{}) {
 	go func() {
-		bid := data.(*context_auc.BidDeposit)
+		bidDeposit := data.(*context_auc.BidDepositSubmit)
 		token := o.itoken.Tokens[Token_onit]
 		errCnt := 0
 	POLLING:
 		//transaction이 정상인지 체크
-		tx, isPanding, err := token.eth.GetTransactionByTxHash(bid.DepositTxHash)
+		tx, isPanding, err := token.eth.GetTransactionByTxHash(bidDeposit.DepositTxHash)
 		if err == nil {
 			if isPanding {
-				log.Debug("is panding : ", isPanding, " tx:", bid.DepositTxHash)
+				log.Debug("is panding : ", isPanding, " tx:", bidDeposit.DepositTxHash)
 				time.Sleep(time.Second * 1)
 				errCnt = 0
 				goto POLLING
@@ -59,22 +59,22 @@ func (o *TokenCmd) BidDepositCheckReceipt(data interface{}) {
 
 				// 영수증 유효성 체크
 				if receipt.Status == 0 {
-					model.GetDB().UpdateAucBidDepositState(bid, context_auc.Deposit_state_fail)
+					model.GetDB().UpdateAucBidDepositState(bidDeposit, context_auc.Deposit_state_fail)
 					log.Error("receipt.Status :", receipt.Status)
 					return
 				}
 
-				if bid.TokenType == "ETH" {
+				if bidDeposit.TokenType == "ETH" {
 					// 이더리움 전송인 경우
 					if !strings.EqualFold(receipt.ContractAddress.Hex(), "0x0000000000000000000000000000000000000000") {
-						model.GetDB().UpdateAucBidDepositState(bid, context_auc.Deposit_state_fail)
+						model.GetDB().UpdateAucBidDepositState(bidDeposit, context_auc.Deposit_state_fail)
 						return
 					}
 
 					// 받는 사람 check
 					log.Info("ac list: ", tx.AccessList())
 					if !strings.EqualFold(strings.ToUpper(o.conf.ServerWalletAddr), strings.ToUpper(tx.To().String())) {
-						model.GetDB().UpdateAucBidDepositState(bid, context_auc.Deposit_state_fail)
+						model.GetDB().UpdateAucBidDepositState(bidDeposit, context_auc.Deposit_state_fail)
 						log.Error("Invalid to address :", tx.To().String())
 						return
 					}
@@ -82,12 +82,12 @@ func (o *TokenCmd) BidDepositCheckReceipt(data interface{}) {
 					// 구입 액수 check
 					transferEther := ethCtrl.Convert(tx.Value().String(), ethCtrl.Wei, ethCtrl.Ether)
 					var price big.Rat
-					price = *price.SetFloat64(bid.DepositAmount)
+					price = *price.SetFloat64(bidDeposit.DepositAmount)
 
 					temp1, _ := transferEther.Float64()
 					temp2, _ := price.Float64()
 					if temp1 != temp2 {
-						model.GetDB().UpdateAucBidDepositState(bid, context_auc.Deposit_state_fail)
+						model.GetDB().UpdateAucBidDepositState(bidDeposit, context_auc.Deposit_state_fail)
 						log.Error("Invalid purchase receipt price :", temp1, " real price :", temp2)
 						return
 					}
@@ -95,20 +95,20 @@ func (o *TokenCmd) BidDepositCheckReceipt(data interface{}) {
 					//token contract address check
 					log.Info("token address : ", receipt.Logs[0].Address.Hex())
 					if !strings.EqualFold(strings.ToUpper(o.conf.TokenAddrs[Token_onit]), strings.ToUpper(receipt.Logs[0].Address.Hex())) {
-						model.GetDB().UpdateAucBidDepositState(bid, context_auc.Deposit_state_fail)
+						model.GetDB().UpdateAucBidDepositState(bidDeposit, context_auc.Deposit_state_fail)
 						log.Error("Invalid token address :", receipt.Logs[0].Address.Hex())
 						return
 					}
 					//받는 사람 보내는 사람 check
 					fromAddr := strings.Replace(receipt.Logs[0].Topics[1].Hex(), "000000000000000000000000", "", -1)
 					toAddr := strings.Replace(receipt.Logs[0].Topics[2].Hex(), "000000000000000000000000", "", -1)
-					if !strings.EqualFold(strings.ToUpper(bid.BidAttendeeWalletAddr), strings.ToUpper(fromAddr)) {
-						model.GetDB().UpdateAucBidDepositState(bid, context_auc.Deposit_state_fail)
+					if !strings.EqualFold(strings.ToUpper(bidDeposit.BidAttendeeWalletAddr), strings.ToUpper(fromAddr)) {
+						model.GetDB().UpdateAucBidDepositState(bidDeposit, context_auc.Deposit_state_fail)
 						log.Error("Invalid from address :", fromAddr)
 						return
 					}
 					if !strings.EqualFold(strings.ToUpper(o.conf.ServerWalletAddr), strings.ToUpper(toAddr)) {
-						model.GetDB().UpdateAucBidDepositState(bid, context_auc.Deposit_state_fail)
+						model.GetDB().UpdateAucBidDepositState(bidDeposit, context_auc.Deposit_state_fail)
 						log.Error("Invalid to address :", toAddr)
 						return
 					}
@@ -120,22 +120,22 @@ func (o *TokenCmd) BidDepositCheckReceipt(data interface{}) {
 					transferEther := ethCtrl.Convert(value.String(), ethCtrl.Wei, ethCtrl.Ether)
 
 					var price big.Rat
-					price = *price.SetFloat64(bid.DepositAmount)
+					price = *price.SetFloat64(bidDeposit.DepositAmount)
 
 					temp1, _ := transferEther.Float64()
 					temp2, _ := price.Float64()
 					if temp1 != temp2 {
-						model.GetDB().UpdateAucBidDepositState(bid, context_auc.Deposit_state_fail)
+						model.GetDB().UpdateAucBidDepositState(bidDeposit, context_auc.Deposit_state_fail)
 						log.Error("Invalid purchase receipt price :", temp1, " real price :", temp2)
 						return
 					}
 				}
 			} else if err.Error() == "not found" {
-				log.Error("not found retry GetTransactionReceipt : ", bid.DepositTxHash, " bid id:", bid.Id)
+				log.Error("not found retry GetTransactionReceipt : ", bidDeposit.DepositTxHash, " bid id:", bidDeposit.Id)
 				time.Sleep(time.Second * 1)
 				if errCnt > 3 {
-					model.GetDB().UpdateAucBidDepositState(bid, context_auc.Deposit_state_fail)
-					log.Error("GetTransactionReceipt max try from hash : ", bid.DepositTxHash, " bid id:", bid.Id)
+					model.GetDB().UpdateAucBidDepositState(bidDeposit, context_auc.Deposit_state_fail)
+					log.Error("GetTransactionReceipt max try from hash : ", bidDeposit.DepositTxHash, " bid id:", bidDeposit.Id)
 					return
 				}
 				errCnt++
@@ -144,8 +144,8 @@ func (o *TokenCmd) BidDepositCheckReceipt(data interface{}) {
 		} else {
 			log.Error("GetTransactionByTxHash error : ", err)
 			if errCnt > 3 {
-				model.GetDB().UpdateAucBidDepositState(bid, context_auc.Deposit_state_fail)
-				log.Error("GetTransactionByTxHash max try : ", bid.DepositTxHash, " bid id:", bid.Id)
+				model.GetDB().UpdateAucBidDepositState(bidDeposit, context_auc.Deposit_state_fail)
+				log.Error("GetTransactionByTxHash max try : ", bidDeposit.DepositTxHash, " bidDeposit id:", bidDeposit.Id)
 				return
 			}
 			errCnt++
@@ -153,7 +153,7 @@ func (o *TokenCmd) BidDepositCheckReceipt(data interface{}) {
 		}
 
 		// 정상 처리 되었으면 입찰자 정보 업데이트
-		_, _ = model.GetDB().UpdateAucBidDepositState(bid, context_auc.Deposit_state_complete)
+		_, _ = model.GetDB().UpdateAucBidDepositState(bidDeposit, context_auc.Deposit_state_complete)
 	}()
 }
 
@@ -162,12 +162,21 @@ func (o *TokenCmd) BidWinnerCheckReceipt(data interface{}) {
 		bid := data.(*context_auc.BidWinner)
 		token := o.itoken.Tokens[Token_onit]
 		errCnt := 0
+
+		// auc_auctions 테이블에서 경매 정보 불러오기
+		auction, _, err := model.GetDB().GetAucAuction(bid.Bid.AucId)
+		if err != nil {
+			log.Error("GetAucAuction :", err)
+			model.GetDB().UpdateAucBidWinnerState(&bid.Bid, context_auc.Bid_winner_state_none)
+			return
+		}
+
 	POLLING:
 		//transaction이 정상인지 체크
 		tx, isPanding, err := token.eth.GetTransactionByTxHash(bid.BidWinnerTxHash)
 		if err == nil {
 			if isPanding {
-				log.Debug("is panding : ", isPanding, " tx:", bid.DepositTxHash)
+				log.Debug("is panding : ", isPanding, " tx:", bid.BidWinnerTxHash)
 				time.Sleep(time.Second * 1)
 				errCnt = 0
 				goto POLLING
@@ -227,7 +236,7 @@ func (o *TokenCmd) BidWinnerCheckReceipt(data interface{}) {
 					// 구입 액수 check
 					transferEther := ethCtrl.Convert(tx.Value().String(), ethCtrl.Wei, ethCtrl.Ether)
 					var price big.Rat
-					price = *price.SetFloat64(bid.BidAmount - bid.DepositAmount)
+					price = *price.SetFloat64(bid.BidAmount - auction.BidDeposit)
 
 					temp1, _ := transferEther.Float64()
 					temp2, _ := price.Float64()
@@ -266,7 +275,7 @@ func (o *TokenCmd) BidWinnerCheckReceipt(data interface{}) {
 					transferEther := ethCtrl.Convert(value.String(), ethCtrl.Wei, ethCtrl.Ether)
 
 					var price big.Rat
-					price = *price.SetFloat64(bid.BidAmount - bid.DepositAmount)
+					price = *price.SetFloat64(bid.BidAmount - auction.BidDeposit)
 
 					temp1, _ := transferEther.Float64()
 					temp2, _ := price.Float64()
@@ -277,11 +286,11 @@ func (o *TokenCmd) BidWinnerCheckReceipt(data interface{}) {
 					}
 				}
 			} else if err.Error() == "not found" {
-				log.Debug("not found retry GetTransactionReceipt : ", bid.DepositTxHash, " bid id:", bid.Id)
+				log.Debug("not found retry GetTransactionReceipt : ", bid.BidWinnerTxHash, " bid id:", bid.Id)
 				time.Sleep(time.Second * 1)
 				if errCnt > 3 {
 					model.GetDB().UpdateAucBidWinnerState(&bid.Bid, context_auc.Bid_winner_state_none)
-					log.Error("GetTransactionReceipt max try from hash : ", bid.DepositTxHash, " bid id:", bid.Id)
+					log.Error("GetTransactionReceipt max try from hash : ", bid.BidWinnerTxHash, " bid id:", bid.Id)
 					return
 				}
 				errCnt++
@@ -291,7 +300,7 @@ func (o *TokenCmd) BidWinnerCheckReceipt(data interface{}) {
 			log.Debug("GetTransactionByTxHash error : ", err)
 			if errCnt > 3 {
 				model.GetDB().UpdateAucBidWinnerState(&bid.Bid, context_auc.Bid_winner_state_none)
-				log.Error("GetTransactionByTxHash max try : ", bid.DepositTxHash, " bid id:", bid.Id)
+				log.Error("GetTransactionByTxHash max try : ", bid.BidWinnerTxHash, " bid id:", bid.Id)
 				return
 			}
 			errCnt++

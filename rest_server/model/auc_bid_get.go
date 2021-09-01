@@ -2,7 +2,6 @@ package model
 
 import (
 	"database/sql"
-	"encoding/json"
 	"fmt"
 
 	"github.com/ONBUFF-IP-TOKEN/baseutil/log"
@@ -92,30 +91,61 @@ func (o *DB) GetAucBidAttendeeList(pageInfo *context_auc.BidAttendeeList) ([]con
 
 // tx hash 사용 여부 확인용
 func (o *DB) GetAucBidByTxhash(txHash string) (bool, error) {
-	sqlQuery := fmt.Sprintf("SELECT * FROM auc_bids WHERE deposit_txhash = '%v' OR bid_winner_txhash = '%v'", txHash, txHash)
-	rows, err := o.Mysql.Query(sqlQuery)
+	// 경매 입찰 테이블에서 검색
+	{
+		sqlQuery := fmt.Sprintf("SELECT * FROM auc_bids WHERE bid_winner_txhash = '%v'", txHash)
+		rows, err := o.Mysql.Query(sqlQuery)
 
-	if err != nil {
-		log.Error(err)
-		return false, err
-	}
-
-	defer rows.Close()
-
-	cnt := 0
-	for rows.Next() {
-		_, err := o.ScanBid(rows)
 		if err != nil {
-			log.Error("GetAucBidByTxhash::ScanBid error : ", err)
-			continue
+			log.Error(err)
+			return true, err
 		}
-		cnt++
+
+		defer rows.Close()
+
+		cnt := 0
+		for rows.Next() {
+			_, err := o.ScanBid(rows)
+			if err != nil {
+				log.Error("GetAucBidByTxhash::ScanBid error : ", err)
+				continue
+			}
+			cnt++
+		}
+
+		if cnt == 1 {
+			return true, nil
+		}
 	}
 
-	if cnt == 0 {
-		return false, nil
+	// 입찰 보증금 테이블에서 검색
+	{
+		sqlQuery := fmt.Sprintf("SELECT * FROM auc_bids_deposit WHERE deposit_txhash = '%v'", txHash)
+		rows, err := o.Mysql.Query(sqlQuery)
+
+		if err != nil {
+			log.Error(err)
+			return true, err
+		}
+
+		defer rows.Close()
+
+		cnt := 0
+		for rows.Next() {
+			_, err := o.ScanBidDeposit(rows)
+			if err != nil {
+				log.Error("GetAucBidByTxhash::ScanBid error : ", err)
+				continue
+			}
+			cnt++
+		}
+
+		if cnt == 1 {
+			return true, nil
+		}
 	}
-	return true, nil
+
+	return false, nil
 }
 
 // 입찰 보증금 반환 리스트
@@ -177,21 +207,17 @@ func (o *DB) GetTotalAucBidDepositRefund(req *context_auc.BidDepositRefundList) 
 }
 
 func (o *DB) ScanBid(rows *sql.Rows) (*context_auc.Bid, error) {
-	var bidWinnerTxHash, tos sql.NullString
+	var bidWinnerTxHash sql.NullString
 
 	bid := &context_auc.Bid{}
 	if err := rows.Scan(&bid.Id, &bid.AucId, &bid.ProductId,
 		&bid.BidState, &bid.BidTs, &bid.BidAttendeeWalletAddr, &bid.BidAmount, &bidWinnerTxHash, &bid.BidWinnerState,
-		&bid.DepositAmount, &bid.DepositTxHash, &bid.DepositState, &bid.TokenType, &tos); err != nil {
+		&bid.TokenType); err != nil {
 		//log.Error("ScanBid error :", err)
 		return nil, err
 	}
 
 	bid.BidWinnerTxHash = bidWinnerTxHash.String
-
-	getTos := context_auc.TermsOfService{}
-	json.Unmarshal([]byte(tos.String), &getTos)
-	bid.TermsOfService = getTos
 
 	return bid, nil
 }

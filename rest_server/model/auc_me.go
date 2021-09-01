@@ -34,7 +34,7 @@ func (o *DB) GetAucBidListMe(pageInfo *context_auc.MeBidList, walletaddr string,
 
 	defer rows.Close()
 
-	var bidWinnerTxHash, termOfService sql.NullString
+	var bidWinnerTxHash sql.NullString
 	var title, desc, prices, content, media sql.NullString
 	var nftId, productId sql.NullInt64
 	var nftContract, nftCreateHash, nftUri sql.NullString
@@ -43,7 +43,7 @@ func (o *DB) GetAucBidListMe(pageInfo *context_auc.MeBidList, walletaddr string,
 	for rows.Next() {
 		bid := context_auc.MeBid{}
 		if err := rows.Scan(&bid.Bid.Id, &bid.Bid.AucId, &bid.Bid.ProductId, &bid.Bid.BidState, &bid.Bid.BidTs, &bid.Bid.BidAttendeeWalletAddr, &bid.Bid.BidAmount, &bidWinnerTxHash, &bid.Bid.BidWinnerState,
-			&bid.Bid.DepositAmount, &bid.Bid.DepositTxHash, &bid.Bid.DepositState, &bid.Bid.TokenType, &termOfService,
+			&bid.Bid.TokenType,
 
 			&productId, &bid.ProductInfo.SNo, &title, &bid.ProductInfo.CreateTs, &desc,
 			&bid.ProductInfo.OwnerNickName, &bid.ProductInfo.OwnerWalletAddr, &bid.ProductInfo.CreatorNickName, &bid.ProductInfo.CreatorWalletAddr,
@@ -54,9 +54,6 @@ func (o *DB) GetAucBidListMe(pageInfo *context_auc.MeBidList, walletaddr string,
 			&media); err != nil {
 			log.Error(err)
 		} else {
-			aTermOfService := context_auc.TermsOfService{}
-			json.Unmarshal([]byte(termOfService.String), &aTermOfService)
-			bid.Bid.TermsOfService = aTermOfService
 
 			aTitle := context_auc.Localization{}
 			json.Unmarshal([]byte(title.String), &aTitle)

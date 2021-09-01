@@ -215,45 +215,6 @@ func PostAucBidWinnerGiveUp(bid *context_auc.BidWinnerGiveup, ctx *context.IPBlo
 	return ctx.EchoContext.JSON(http.StatusOK, resp)
 }
 
-// local func
-// 경매 기간중인지 확인
-func IsAuctionPeriod(auction *context_auc.AucAuction, aucId int64) bool {
-	if auction == nil {
-		auc, _, err := model.GetDB().GetAucAuction(aucId)
-		if err != nil || auc == nil {
-			return false
-		}
-
-		auction = auc
-	}
-
-	curT := datetime.GetTS2MilliSec()
-	if auction.AucStartTs > curT || auction.AucEndTs < curT {
-		return false
-	}
-
-	return true
-}
-
-// 경매 종료되었는지 확인
-func IsAuctionEnd(auction *context_auc.AucAuction, aucId int64) bool {
-	if auction == nil {
-		auc, _, err := model.GetDB().GetAucAuction(aucId)
-		if err != nil || auc == nil {
-			return false
-		}
-
-		auction = auc
-	}
-
-	if auction.AucState == context_auc.Auction_auc_state_ready ||
-		auction.AucState == context_auc.Auction_auc_state_start ||
-		auction.AucState == context_auc.Auction_auc_state_paused {
-		return false
-	}
-	return true
-}
-
 // 입찰 삭제
 func DeleteAucBidRemove(bid *context_auc.BidRemove, ctx *context.IPBlockServerContext) error {
 	resp := new(base.BaseResponse)

@@ -220,6 +220,9 @@ func (o *DB) GetAucProductById(productId int64) (*context_auc.ProductInfo, error
 			continue
 		}
 	}
+	if product.CreateTs == 0 {
+		return nil, nil
+	}
 	o.CacheSetProduct(product)
 	return product, err
 }

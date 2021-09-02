@@ -18,15 +18,32 @@ func PostAucAuctionRegister(auction *context_auc.AucAuctionRegister, ctx *contex
 	resp := new(base.BaseResponse)
 	resp.Success()
 
-	//1. auc_product table에 저장
-	auction.CreateTs = datetime.GetTS2MilliSec()
-	if id, err := model.GetDB().InsertAucAuction(auction); err != nil {
-		log.Error("InsertProduct :", err)
+	//1. 해당 product이 존재하는지 체크
+	product, err := model.GetDB().GetAucProductById(auction.ProductId)
+	if err != nil {
+		log.Error("GetAucProductById :", err)
 		resp.SetReturn(resultcode.Result_DBError)
 	} else {
-		auction.Id = id
-		resp.Value = auction
+		if product == nil {
+			log.Error("GetAucProductById invalid product id ")
+			resp.SetReturn(resultcode.Result_Auc_Auction_RequireProductId)
+		} else {
+			//2. 상품 가격 정보 복사
+			auction.TokenType = product.Prices[0].TokenType
+			auction.Price = product.Prices[0].Price
+
+			//3. auc_product table에 저장
+			auction.CreateTs = datetime.GetTS2MilliSec()
+			if id, err := model.GetDB().InsertAucAuction(auction); err != nil {
+				log.Error("InsertProduct :", err)
+				resp.SetReturn(resultcode.Result_DBError)
+			} else {
+				auction.Id = id
+				resp.Value = auction
+			}
+		}
 	}
+
 	return ctx.EchoContext.JSON(http.StatusOK, resp)
 }
 

@@ -13,10 +13,10 @@ func (o *DB) GetAucAuctionList(pageInfo *context_auc.AuctionList) ([]context_auc
 	var sqlQuery string
 	if pageInfo.ActiveState == context_auc.Auction_active_state_all {
 		sqlQuery = fmt.Sprintf("SELECT * FROM auc_auctions LEFT JOIN auc_products on auc_auctions.product_id = auc_products.product_id "+
-			"ORDER BY auc_id DESC LIMIT %v,%v", pageInfo.PageSize*pageInfo.PageOffset, pageInfo.PageSize)
+			"ORDER BY auc_start_ts ASC LIMIT %v,%v", pageInfo.PageSize*pageInfo.PageOffset, pageInfo.PageSize)
 	} else {
 		sqlQuery = fmt.Sprintf("SELECT * FROM auc_auctions LEFT JOIN auc_products on auc_auctions.product_id = auc_products.product_id "+
-			"WHERE active_state = %v ORDER BY auc_id DESC LIMIT %v,%v", pageInfo.ActiveState, pageInfo.PageSize*pageInfo.PageOffset, pageInfo.PageSize)
+			"WHERE active_state = %v ORDER BY auc_start_ts ASC LIMIT %v,%v", pageInfo.ActiveState, pageInfo.PageSize*pageInfo.PageOffset, pageInfo.PageSize)
 	}
 
 	rows, err := o.Mysql.Query(sqlQuery)
@@ -48,10 +48,16 @@ func (o *DB) GetAucAuctionListByAucState(pageInfo *context_auc.AuctionListByAucS
 	if pageInfo.ActiveState == context_auc.Auction_active_state_all {
 		//전체 리스트
 		sqlQuery = fmt.Sprintf("SELECT * FROM auc_auctions LEFT JOIN auc_products on auc_auctions.product_id = auc_products.product_id "+
-			"WHERE auc_state = %v ORDER BY auc_id DESC LIMIT %v,%v", pageInfo.AucState, pageInfo.PageSize*pageInfo.PageOffset, pageInfo.PageSize)
+			"WHERE auc_state = %v ORDER BY auc_start_ts ASC LIMIT %v,%v", pageInfo.AucState, pageInfo.PageSize*pageInfo.PageOffset, pageInfo.PageSize)
 	} else {
-		sqlQuery = fmt.Sprintf("SELECT * FROM auc_auctions LEFT JOIN auc_products on auc_auctions.product_id = auc_products.product_id "+
-			"WHERE auc_state = %v AND active_state = %v ORDER BY auc_id DESC LIMIT %v,%v", pageInfo.AucState, pageInfo.ActiveState, pageInfo.PageSize*pageInfo.PageOffset, pageInfo.PageSize)
+		if pageInfo.AucState == context_auc.Auction_auc_state_finish {
+			sqlQuery = fmt.Sprintf("SELECT * FROM auc_auctions LEFT JOIN auc_products on auc_auctions.product_id = auc_products.product_id "+
+				"WHERE auc_state = %v AND active_state = %v ORDER BY auc_end_ts DESC LIMIT %v,%v", pageInfo.AucState, pageInfo.ActiveState, pageInfo.PageSize*pageInfo.PageOffset, pageInfo.PageSize)
+		} else {
+			sqlQuery = fmt.Sprintf("SELECT * FROM auc_auctions LEFT JOIN auc_products on auc_auctions.product_id = auc_products.product_id "+
+				"WHERE auc_state = %v AND active_state = %v ORDER BY auc_start_ts ASC LIMIT %v,%v", pageInfo.AucState, pageInfo.ActiveState, pageInfo.PageSize*pageInfo.PageOffset, pageInfo.PageSize)
+		}
+
 	}
 
 	rows, err := o.Mysql.Query(sqlQuery)
@@ -83,10 +89,10 @@ func (o *DB) GetAucAuctionListByRecommand(pageInfo *context_auc.AuctionListByRec
 	if pageInfo.ActiveState == context_auc.Auction_active_state_all {
 		//전체 리스트
 		sqlQuery = fmt.Sprintf("SELECT * FROM auc_auctions LEFT JOIN auc_products on auc_auctions.product_id = auc_products.product_id "+
-			"WHERE recommand = 1 ORDER BY auc_id DESC LIMIT %v,%v", pageInfo.PageSize*pageInfo.PageOffset, pageInfo.PageSize)
+			"WHERE recommand = 1 ORDER BY auc_start_ts ASC LIMIT %v,%v", pageInfo.PageSize*pageInfo.PageOffset, pageInfo.PageSize)
 	} else {
 		sqlQuery = fmt.Sprintf("SELECT * FROM auc_auctions LEFT JOIN auc_products on auc_auctions.product_id = auc_products.product_id "+
-			"WHERE recommand = 1 AND active_state = %v ORDER BY token_type DESC, auc_id DESC LIMIT %v,%v", pageInfo.ActiveState, pageInfo.PageSize*pageInfo.PageOffset, pageInfo.PageSize)
+			"WHERE recommand = 1 AND active_state = %v ORDER BY token_type DESC, auc_start_ts ASC LIMIT %v,%v", pageInfo.ActiveState, pageInfo.PageSize*pageInfo.PageOffset, pageInfo.PageSize)
 	}
 
 	rows, err := o.Mysql.Query(sqlQuery)

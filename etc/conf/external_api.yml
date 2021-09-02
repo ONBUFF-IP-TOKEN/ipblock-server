@@ -66,7 +66,7 @@
           uri: "/:apiver/product/order/my/list"
           precheck: true
         - # 플랫폼 api (m1.2)
-          handler: "GetAucAuctionList" # 경매 리스트 요청
+          handler: "GetAucAuctionList" # 경매 리스트 요청 (활성 상태에 따른)
           method: "get"
           uri: "/:apiver/auc/auction/list"
           precheck: false

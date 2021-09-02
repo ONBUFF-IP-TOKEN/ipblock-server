@@ -39,6 +39,7 @@ func PostAucProductRegister(product *context_auc.ProductInfo, ctx *context.IPBlo
 	return ctx.EchoContext.JSON(http.StatusOK, resp)
 }
 
+// product 등록하면서 자동으로 경매까지 등록되도록
 func PostAucProductRegisterAuction(product *context_auc.AllRegister, ctx *context.IPBlockServerContext) error {
 	resp := new(base.BaseResponse)
 	resp.Success()
@@ -63,8 +64,12 @@ func PostAucProductRegisterAuction(product *context_auc.AllRegister, ctx *contex
 		product.AucAuctionRegister.BidStartAmount = product.ProductInfo.Prices[0].Price
 		product.AucAuctionRegister.BidCurAmount = 0
 		product.AucAuctionRegister.BidDeposit = product.AucAuctionRegister.BidStartAmount / float64(10)
-		product.AucAuctionRegister.AucStartTs = datetime.GetTS2MilliSec()
-		product.AucAuctionRegister.AucEndTs = product.AucAuctionRegister.AucStartTs + 2592000000
+		if product.AucAuctionRegister.AucStartTs == 0 {
+			product.AucAuctionRegister.AucStartTs = datetime.GetTS2MilliSec()
+		}
+		if product.AucAuctionRegister.AucEndTs == 0 {
+			product.AucAuctionRegister.AucEndTs = product.AucAuctionRegister.AucStartTs + 2592000000
+		}
 		product.AucAuctionRegister.ProductId = id
 		product.AucAuctionRegister.TokenType = product.ProductInfo.Prices[0].TokenType
 		product.AucAuctionRegister.Price = product.ProductInfo.Prices[0].Price

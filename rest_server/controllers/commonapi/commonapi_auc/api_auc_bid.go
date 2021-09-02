@@ -53,31 +53,40 @@ func PostAucBidSubmit(bidSubmit *context_auc.BidSubmit, ctx *context.IPBlockServ
 		log.Error("PostAucBidSubmit :", err)
 		resp.SetReturn(resultcode.Result_DBError)
 	} else {
-
 		bidSubmit.ProductId = auction.ProductId
 		bidSubmit.BidState = context_auc.Bid_state_submit
 		bidSubmit.BidTs = datetime.GetTS2MilliSec()
 		bidSubmit.TokenType = auction.ProductInfo.Prices[0].TokenType
 
+		// 2. 입찰 최고가 체크 기존 최고가의 5%이하 10배가 넘지 않도록 한다.
 		if bid == nil {
-			// 입찰 한 사람이 아무도 없기때문에 바로 insert
-			if _, err := model.GetDB().InsertAucBidSubmit(bidSubmit); err != nil {
-				log.Error("InsertAucBidSubmit :", err)
-				resp.SetReturn(resultcode.Result_DBError)
+			// 최초 입찰자인경우에는 시작가의 5%이하 10배가 넘지 않도록한다.
+			if bidSubmit.BidAmount < auction.BidStartAmount*1.05 {
+				resp.SetReturn(resultcode.Result_Auc_Bid_OutofRangeMin) //최소가 범위 이탈
+			} else if bidSubmit.BidAmount > auction.BidStartAmount*10 {
+				resp.SetReturn(resultcode.Result_Auc_Bid_OutofRangeMax) // 최대가 범위 이탈
 			} else {
-				// 최고가 정보 업데이트
-				model.GetDB().UpdateAucAuctionBestBid(bidSubmit.AucId, bidSubmit.BidAmount)
+				// 입찰 한 사람이 아무도 없기때문에 바로 입찰 정보 저장
+				if _, err := model.GetDB().InsertAucBidSubmit(bidSubmit); err != nil {
+					log.Error("InsertAucBidSubmit :", err)
+					resp.SetReturn(resultcode.Result_DBError)
+				} else {
+					// 최고가 정보 업데이트
+					model.GetDB().UpdateAucAuctionBestBid(bidSubmit.AucId, bidSubmit.BidAmount)
+				}
 			}
 		} else {
-			// 2. 이미 내가 최고 입찰자 인지 확인
-			if strings.EqualFold(bid.BidAttendeeWalletAddr, ctx.WalletAddr()) {
-				resp.SetReturn(resultcode.Result_Auc_Bid_AlreadyBestAttendee)
+			// 기존 최고가 시작가의 5%이하 10배가 넘지 않도록한다.
+			if bidSubmit.BidAmount < bid.BidAmount*1.05 {
+				resp.SetReturn(resultcode.Result_Auc_Bid_OutofRangeMin) //최소가 범위 이탈
+			} else if bidSubmit.BidAmount > bid.BidAmount*10 {
+				resp.SetReturn(resultcode.Result_Auc_Bid_OutofRangeMax) // 최대가 범위 이탈
 			} else {
-				// 3. 내가 제시한 입찰가가 최고가 인지 확인
-				if bidSubmit.BidAmount <= bid.BidAmount {
-					resp.SetReturn(resultcode.Result_Auc_Bid_NotBestBidAmount)
+				// 이미 내가 최고 입찰자 인지 확인
+				if strings.EqualFold(bid.BidAttendeeWalletAddr, ctx.WalletAddr()) {
+					resp.SetReturn(resultcode.Result_Auc_Bid_AlreadyBestAttendee)
 				} else {
-					// 4. 입찰 성공 (auc_bids table update)
+					// 입찰 정보 저장
 					bidSubmit.BidState = context_auc.Bid_state_submit
 					if _, err := model.GetDB().InsertAucBidSubmit(bidSubmit); err != nil {
 						log.Error("InsertAucBidSubmit :", err)

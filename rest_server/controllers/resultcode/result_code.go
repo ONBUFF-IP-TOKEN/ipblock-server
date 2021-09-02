@@ -40,33 +40,33 @@ const (
 	Result_TokenERC721TransferError = 14003
 	Result_Reused_Txhash            = 14004
 
-	Result_Auc_Product_Requiredtitle        = 15000
-	Result_Auc_Product_RequireDescription   = 15001
-	Result_Auc_Product_RequireMediaOriginal = 15002
-	Result_Auc_Product_RequireMediaThumnail = 15003
-	Result_Auc_Product_RequireOwnerInfo     = 15004
-	Result_Auc_Product_RequireCreatorInfo   = 15005
-	Result_Auc_Product_RequirePriceInfo     = 15006
-	Result_Auc_Product_RequireProductId     = 15007
-	Result_Auc_Product_RequireIPOwnerShip   = 15008
-	Result_Auc_Product_RequireSerialNo      = 15009
+	Result_Auc_Product_Requiredtitle        = 15000 // 제목 필요
+	Result_Auc_Product_RequireDescription   = 15001 // 설명 정보 필요
+	Result_Auc_Product_RequireMediaOriginal = 15002 // 원본 정보 필요
+	Result_Auc_Product_RequireMediaThumnail = 15003 // 썸네일 정보 필요
+	Result_Auc_Product_RequireOwnerInfo     = 15004 // 소유자 정보 필요
+	Result_Auc_Product_RequireCreatorInfo   = 15005 // 생성자 정보 필요
+	Result_Auc_Product_RequirePriceInfo     = 15006 // 가격 정보 필요
+	Result_Auc_Product_RequireProductId     = 15007 // 물품 Id 정보 필요
+	Result_Auc_Product_RequireIPOwnerShip   = 15008 // Ip 보유 회사정보 필요
+	Result_Auc_Product_RequireSerialNo      = 15009 // 물품 시리얼 정보가 필요
 
-	Result_Auc_Auction_RequireBidStartAmount = 15101
-	Result_Auc_Auction_RequireBidUnit        = 15102
-	Result_Auc_Auction_RequireStartTs        = 15103
-	Result_Auc_Auction_RequireEndTs          = 15104
-	Result_Auc_Auction_RequireRound          = 15105
-	Result_Auc_Auction_RequireActiveState    = 15106
-	Result_Auc_Auction_RequireProductId      = 15107
-	Result_Auc_Auction_RequireAucId          = 15108
+	Result_Auc_Auction_RequireBidStartAmount = 15101 // 경매 시작 금액 정보가 필요
+	Result_Auc_Auction_RequireBidUnit        = 15102 // not used
+	Result_Auc_Auction_RequireStartTs        = 15103 // 경매 시작 시간 정보가 필요하다.
+	Result_Auc_Auction_RequireEndTs          = 15104 // 경매 종료 정보가 필요하다.
+	Result_Auc_Auction_RequireRound          = 15105 // not used
+	Result_Auc_Auction_RequireActiveState    = 15106 // active state 정보가 필요하다.
+	Result_Auc_Auction_RequireProductId      = 15107 // product id가 필요하다.
+	Result_Auc_Auction_RequireAucId          = 15108 // 경매 id가 필요하다.
 	Result_Auc_Auction_NotPeriod             = 15109 // 경매기간이 아니다.
 	Result_Auc_Auction_NotOverYet            = 15110 // 아직 경매가 끝나지 않았다.
 
 	Result_Auc_Bid_RequireAucId         = 15201
-	Result_Auc_Bid_RequireWalletAddress = 15202
-	Result_Auc_Bid_RequireAmount        = 15203
-	Result_Auc_Bid_InvalidWalletAddress = 15204
-	Result_Auc_Bid_RequireDepositTxHash = 15205
+	Result_Auc_Bid_RequireWalletAddress = 15202 // 지갑 주소 정보가 필요합니다.
+	Result_Auc_Bid_RequireAmount        = 15203 // 정상적인 입찰 금액이 필요합니다.
+	Result_Auc_Bid_InvalidWalletAddress = 15204 // 비정상 지갑 주소입니다.
+	Result_Auc_Bid_RequireDepositTxHash = 15205 // 입찰 보증금 납부 tx hash 정보가 필요
 	Result_Auc_Bid_AlreadyBestAttendee  = 15206 // 이미 최고 입찰자일때 에러
 	Result_Auc_Bid_NotBestBidAmount     = 15207 // 입찰 가격이 기존 가격보다 낮을때 에러
 	Result_Auc_Bid_RequireDeposit       = 15208 // 입찰전에 보증금 지불을 하지 먼저 하지 않았을때 에러
@@ -74,6 +74,8 @@ const (
 	Result_Auc_Bid_NotWinner            = 15210 // 낙찰자가 아니다.
 	Result_Auc_Bid_RequireDepoistAgree  = 15211 // 보증금 납부 약관 동의가 필요하다.
 	Result_Auc_Bid_RequirePrivacyAgree  = 15212 // 개인정보 이용 동의 약관이 필요하다.
+	Result_Auc_Bid_OutofRangeMax        = 15213 // 입찰 최고가 범위를 벗어났습니다.
+	Result_Auc_Bid_OutofRangeMin        = 15214 // 입찰 최소가 범위를 벗어났습니다.
 
 	Result_Auc_Notice_RequireNotice = 15301 // 공지사항이 한개라도 필요 하다.
 	Result_Auc_Notice_RequireId     = 15302 // 공지사항의 id값이 필요하다.
@@ -159,6 +161,8 @@ var ResultCodeText = map[int]string{
 	Result_Auc_Bid_NotWinner:            "Not winner",
 	Result_Auc_Bid_RequireDepoistAgree:  "Consent for deposit payment is required",
 	Result_Auc_Bid_RequirePrivacyAgree:  "Consent to the privacy policy is required",
+	Result_Auc_Bid_OutofRangeMax:        "Out of maximum price range",
+	Result_Auc_Bid_OutofRangeMin:        "Out of minimum price range",
 
 	Result_Auc_Notice_RequireNotice: "At least one notice is required.",
 	Result_Auc_Notice_RequireId:     "I need the id of the notice",

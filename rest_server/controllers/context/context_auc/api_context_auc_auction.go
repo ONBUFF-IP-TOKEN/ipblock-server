@@ -60,9 +60,6 @@ func (o *AucAuctionRegister) CheckValidate() *base.BaseResponse {
 	if o.AucEndTs == 0 {
 		return base.MakeBaseResponse(resultcode.Result_Auc_Auction_RequireEndTs)
 	}
-	if o.AucRound != 0 {
-		return base.MakeBaseResponse(resultcode.Result_Auc_Auction_RequireRound)
-	}
 	if o.ActiveState < 0 && o.ActiveState > 1 {
 		return base.MakeBaseResponse(resultcode.Result_Auc_Auction_RequireActiveState)
 	}
@@ -95,9 +92,6 @@ func (o *AucAuctionUpdate) CheckValidate() *base.BaseResponse {
 	}
 	if o.AucEndTs == 0 {
 		return base.MakeBaseResponse(resultcode.Result_Auc_Auction_RequireEndTs)
-	}
-	if o.AucRound != 0 {
-		return base.MakeBaseResponse(resultcode.Result_Auc_Auction_RequireRound)
 	}
 	if o.ActiveState < 0 && o.ActiveState > 1 {
 		return base.MakeBaseResponse(resultcode.Result_Auc_Auction_RequireActiveState)

@@ -19,6 +19,9 @@ func PostAucProductRegister(product *context_auc.ProductInfo, ctx *context.IPBlo
 	resp := new(base.BaseResponse)
 	resp.Success()
 
+	//0. 물품 가격 소숫점 3자리이하 버림
+	product.Prices[0].Price = context_auc.CheckPrice(product.Prices[0].Price)
+
 	//1. auc_product table에 저장
 	product.CreateTs = datetime.GetTS2MilliSec()
 	if id, err := model.GetDB().InsertAucProduct(product); err != nil {
@@ -44,6 +47,8 @@ func PostAucProductRegisterAuction(product *context_auc.AllRegister, ctx *contex
 	resp := new(base.BaseResponse)
 	resp.Success()
 
+	//0. 물품 가격 소숫점 3자리이하 버림
+	product.ProductInfo.Prices[0].Price = context_auc.CheckPrice(product.ProductInfo.Prices[0].Price)
 	//1. auc_product table에 저장
 	product.ProductInfo.CreateTs = datetime.GetTS2MilliSec()
 	if id, err := model.GetDB().InsertAucProduct(&product.ProductInfo); err != nil {
@@ -63,7 +68,11 @@ func PostAucProductRegisterAuction(product *context_auc.AllRegister, ctx *contex
 		//3. 경매 등록
 		product.AucAuctionRegister.BidStartAmount = product.ProductInfo.Prices[0].Price
 		product.AucAuctionRegister.BidCurAmount = 0
-		product.AucAuctionRegister.BidDeposit = product.AucAuctionRegister.BidStartAmount / float64(10)
+		product.AucAuctionRegister.BidDeposit = context_auc.CheckDepositPrice(product.AucAuctionRegister.BidStartAmount)
+		// 만약 보증금이 0이 되버리면 0.001로 강제로 고정시킨다.
+		if product.AucAuctionRegister.BidDeposit == 0 {
+			product.AucAuctionRegister.BidDeposit = 0.001
+		}
 		if product.AucAuctionRegister.AucStartTs == 0 {
 			product.AucAuctionRegister.AucStartTs = datetime.GetTS2MilliSec()
 		}
@@ -74,7 +83,7 @@ func PostAucProductRegisterAuction(product *context_auc.AllRegister, ctx *contex
 		product.AucAuctionRegister.TokenType = product.ProductInfo.Prices[0].TokenType
 		product.AucAuctionRegister.Price = product.ProductInfo.Prices[0].Price
 
-		//4. auc_product table에 저장
+		//4. auc_auctions table에 저장
 		product.AucAuctionRegister.CreateTs = datetime.GetTS2MilliSec()
 		if id, err := model.GetDB().InsertAucAuction(&product.AucAuctionRegister); err != nil {
 			log.Error("InsertProduct :", err)
@@ -92,6 +101,8 @@ func PostAucProductUpdate(product *context_auc.ProductInfo, ctx *context.IPBlock
 	resp := new(base.BaseResponse)
 	resp.Success()
 
+	//0. 물품 가격 소숫점 3자리이하 버림
+	product.Prices[0].Price = context_auc.CheckPrice(product.Prices[0].Price)
 	//1. auc_product table에 업데이트
 	if id, err := model.GetDB().UpdateAucProduct(product); err != nil {
 		log.Error("UpdateAucProduct error : ", err)

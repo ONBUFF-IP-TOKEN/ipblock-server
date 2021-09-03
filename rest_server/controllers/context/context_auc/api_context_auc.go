@@ -30,3 +30,11 @@ type PageInfoResponse struct {
 	PageSize   int64 `json:"page_size"`
 	TotalSize  int64 `json:"total_size"`
 }
+
+func CheckPrice(value float64) float64 {
+	return float64(int(value*1000)) / 1000 // 소숫점 3자리 미만은 버린다.
+}
+
+func CheckDepositPrice(value float64) float64 {
+	return CheckPrice(value / 10)
+}

@@ -51,9 +51,6 @@ func NewAucAuctionRegister() *AucAuctionRegister {
 }
 
 func (o *AucAuctionRegister) CheckValidate() *base.BaseResponse {
-	if o.BidStartAmount == 0 {
-		return base.MakeBaseResponse(resultcode.Result_Auc_Auction_RequireBidStartAmount)
-	}
 	if o.AucStartTs == 0 {
 		return base.MakeBaseResponse(resultcode.Result_Auc_Auction_RequireStartTs)
 	}

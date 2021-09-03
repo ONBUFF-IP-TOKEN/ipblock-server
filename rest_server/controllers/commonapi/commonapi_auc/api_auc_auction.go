@@ -29,6 +29,9 @@ func PostAucAuctionRegister(auction *context_auc.AucAuctionRegister, ctx *contex
 			resp.SetReturn(resultcode.Result_Auc_Auction_RequireProductId)
 		} else {
 			//2. 상품 가격 정보 복사
+			auction.BidStartAmount = product.Prices[0].Price
+			auction.BidCurAmount = 0
+			auction.BidDeposit = context_auc.CheckDepositPrice(product.Prices[0].Price)
 			auction.TokenType = product.Prices[0].TokenType
 			auction.Price = product.Prices[0].Price
 
@@ -51,6 +54,10 @@ func PostAucAuctionRegister(auction *context_auc.AucAuctionRegister, ctx *contex
 func PostAucAuctionUpdate(auction *context_auc.AucAuctionUpdate, ctx *context.IPBlockServerContext) error {
 	resp := new(base.BaseResponse)
 	resp.Success()
+
+	auction.BidStartAmount = context_auc.CheckPrice(auction.BidStartAmount)
+	auction.BidDeposit = context_auc.CheckDepositPrice(auction.BidDeposit)
+	auction.Price = context_auc.CheckPrice(auction.Price)
 
 	//1. auc_product table에 업데이트
 	if id, err := model.GetDB().UpdateAucAuction(auction); err != nil {

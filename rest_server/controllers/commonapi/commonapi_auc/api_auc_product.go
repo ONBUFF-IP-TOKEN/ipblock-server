@@ -101,17 +101,25 @@ func PostAucProductUpdate(product *context_auc.ProductInfo, ctx *context.IPBlock
 	resp := new(base.BaseResponse)
 	resp.Success()
 
-	//0. 물품 가격 소숫점 3자리이하 버림
+	//1. 물품 가격 소숫점 3자리이하 버림
 	product.Prices[0].Price = context_auc.CheckPrice(product.Prices[0].Price)
-	//1. auc_product table에 업데이트
-	if id, err := model.GetDB().UpdateAucProduct(product); err != nil {
-		log.Error("UpdateAucProduct error : ", err)
+
+	//2. 해당 product 이 존재하는지 check
+	if getProduct, err := model.GetDB().GetAucProductById(product.Id); err != nil {
+		log.Error("GetAucProductById error : ", err)
 		resp.SetReturn(resultcode.Result_DBError)
 	} else {
-		if id == 0 {
-			resp.SetReturn(resultcode.Result_DBNotExistProduct)
+		if getProduct == nil {
+			log.Error("GetAucProductById invalid product id ")
+			resp.SetReturn(resultcode.Result_Auc_Auction_RequireProductId)
 		} else {
-			resp.Value = product
+			//3. auc_product table에 업데이트
+			if _, err := model.GetDB().UpdateAucProduct(product); err != nil {
+				log.Error("UpdateAucProduct error : ", err)
+				resp.SetReturn(resultcode.Result_DBError)
+			} else {
+				resp.Value = product
+			}
 		}
 	}
 

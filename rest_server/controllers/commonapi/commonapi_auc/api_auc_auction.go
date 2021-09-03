@@ -55,23 +55,34 @@ func PostAucAuctionUpdate(auction *context_auc.AucAuctionUpdate, ctx *context.IP
 	resp := new(base.BaseResponse)
 	resp.Success()
 
+	// 1. 금액 check
 	auction.BidStartAmount = context_auc.CheckPrice(auction.BidStartAmount)
 	auction.BidDeposit = context_auc.CheckDepositPrice(auction.BidDeposit)
 	auction.Price = context_auc.CheckPrice(auction.Price)
 
-	//1. auc_product table에 업데이트
-	if id, err := model.GetDB().UpdateAucAuction(auction); err != nil {
-		log.Error("UpdateAucAuction :", err)
+	// 2. 존재하는 경매인지 check
+	if _, cnt, err := model.GetDB().GetAucAuction(auction.Id); err != nil {
+		log.Error("GetAucAuction :", err)
 		resp.SetReturn(resultcode.Result_DBError)
 	} else {
-		if id == 0 {
+		if cnt == 0 {
 			resp.SetReturn(resultcode.Result_DBNotExistAuction)
 		} else {
-			auction.Id = id
-			resp.Value = auction
-		}
+			// 3. auc_product table에 업데이트
+			if id, err := model.GetDB().UpdateAucAuction(auction); err != nil {
+				log.Error("UpdateAucAuction :", err)
+				resp.SetReturn(resultcode.Result_DBError)
+			} else {
+				if id == 0 {
+					resp.SetReturn(resultcode.Result_DBNotExistAuction)
+				} else {
+					resp.Value = auction
+				}
 
+			}
+		}
 	}
+
 	return ctx.EchoContext.JSON(http.StatusOK, resp)
 }
 

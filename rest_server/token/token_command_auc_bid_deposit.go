@@ -92,6 +92,12 @@ func (o *TokenCmd) BidDepositCheckReceipt(data interface{}) {
 						return
 					}
 				} else {
+					if len(receipt.Logs) == 0 {
+						model.GetDB().UpdateAucBidDepositState(bidDeposit, context_auc.Deposit_state_fail)
+						log.Error("Invalid receipt !!!!!!")
+						return
+					}
+
 					//token contract address check
 					log.Info("token address : ", receipt.Logs[0].Address.Hex())
 					if !strings.EqualFold(strings.ToUpper(o.conf.TokenAddrs[Token_onit]), strings.ToUpper(receipt.Logs[0].Address.Hex())) {

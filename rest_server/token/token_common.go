@@ -5,7 +5,6 @@ import (
 	"github.com/ONBUFF-IP-TOKEN/basenet"
 	"github.com/ONBUFF-IP-TOKEN/baseutil/log"
 	"github.com/ONBUFF-IP-TOKEN/ipblock-server/rest_server/config"
-	"github.com/ONBUFF-IP-TOKEN/ipblock-server/rest_server/controllers/context"
 	"github.com/ONBUFF-IP-TOKEN/ipblock-server/rest_server/model"
 )
 
@@ -98,9 +97,10 @@ func (o *Token) CallBackCmdProc(cmd *basenet.CommandData) {
 				model.GetDB().InsertHistory(transInfo.TxHash, transInfo.FromAddr, transInfo.ToAddr, transInfo.TokenID, token_state_mint)
 			}
 			//product
-			if _, err := model.GetDB().UpdateProductNftTokenID(transInfo.TxHash, transInfo.TokenID, context.Nft_state_mint); err == nil {
-				model.GetDB().InsertHistory(transInfo.TxHash, transInfo.FromAddr, transInfo.ToAddr, transInfo.TokenID, token_state_mint)
-			}
+			//if _, err := model.GetDB().UpdateProductNftTokenID(transInfo.TxHash, transInfo.TokenID, context.Nft_state_mint); err == nil {
+			//	model.GetDB().InsertHistory(transInfo.TxHash, transInfo.FromAddr, transInfo.ToAddr, transInfo.TokenID, token_state_mint)
+			//}
+
 			//aution product
 			if _, err := model.GetDB().UpdateAucProductNftTokenId(transInfo.TxHash, transInfo.TokenID); err != nil {
 				log.Error("UpdateAucProductNftTokenId error : ", err)
@@ -112,11 +112,11 @@ func (o *Token) CallBackCmdProc(cmd *basenet.CommandData) {
 				model.GetDB().InsertHistory(transInfo.TxHash, transInfo.FromAddr, transInfo.ToAddr, transInfo.TokenID, token_state_transfer)
 			}
 			// product
-			if _, err := model.GetDB().UpdateProductNftOwner(transInfo.FromAddr, transInfo.ToAddr, transInfo.TokenID); err == nil {
-				model.GetDB().UpdateOrderState(transInfo.TokenID, context.Order_state_nft_transfer_complete)
-				model.GetDB().InsertHistory(transInfo.TxHash, transInfo.FromAddr, transInfo.ToAddr, transInfo.TokenID, token_state_transfer)
-				model.GetDB().UpdateProductNftOrderState(transInfo.TokenID, context.Nft_order_state_sale_complete)
-			}
+			// if _, err := model.GetDB().UpdateProductNftOwner(transInfo.FromAddr, transInfo.ToAddr, transInfo.TokenID); err == nil {
+			// 	model.GetDB().UpdateOrderState(transInfo.TokenID, context.Order_state_nft_transfer_complete)
+			// 	model.GetDB().InsertHistory(transInfo.TxHash, transInfo.FromAddr, transInfo.ToAddr, transInfo.TokenID, token_state_transfer)
+			// 	model.GetDB().UpdateProductNftOrderState(transInfo.TokenID, context.Nft_order_state_sale_complete)
+			// }
 		} else if transInfo.FromAddr != gNullAddress && transInfo.ToAddr == gNullAddress {
 			// 코인 삭체 처리 : 히스토리에 먼저 남기고 item 테이블 삭제 한다.
 			insertId, err := model.GetDB().InsertHistory(transInfo.TxHash, transInfo.FromAddr, transInfo.ToAddr, transInfo.TokenID, token_state_burn)

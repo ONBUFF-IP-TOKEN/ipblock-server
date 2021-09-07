@@ -152,6 +152,8 @@ func (o *TokenCmd) CreateNftbyAut(data interface{}, cb chan interface{}) {
 			cb <- base.MakeBaseResponse(resultcode.Result_Success)
 		}
 	}
+
+	time.Sleep(time.Second * 5)
 }
 
 func (o *TokenCmd) DeleteToken(data interface{}) {

@@ -93,9 +93,9 @@ func (o *Token) CallBackCmdProc(cmd *basenet.CommandData) {
 		if transInfo.FromAddr == gNullAddress && transInfo.ToAddr != gNullAddress {
 			// 최초 생성 처리
 			// devlab
-			if err := model.GetDB().UpdateTokenID(transInfo.TxHash, transInfo.TokenID); err == nil {
-				model.GetDB().InsertHistory(transInfo.TxHash, transInfo.FromAddr, transInfo.ToAddr, transInfo.TokenID, token_state_mint)
-			}
+			// if err := model.GetDB().UpdateTokenID(transInfo.TxHash, transInfo.TokenID); err == nil {
+			// 	model.GetDB().InsertHistory(transInfo.TxHash, transInfo.FromAddr, transInfo.ToAddr, transInfo.TokenID, token_state_mint)
+			// }
 			//product
 			//if _, err := model.GetDB().UpdateProductNftTokenID(transInfo.TxHash, transInfo.TokenID, context.Nft_state_mint); err == nil {
 			//	model.GetDB().InsertHistory(transInfo.TxHash, transInfo.FromAddr, transInfo.ToAddr, transInfo.TokenID, token_state_mint)
@@ -108,9 +108,9 @@ func (o *Token) CallBackCmdProc(cmd *basenet.CommandData) {
 		} else if transInfo.FromAddr != gNullAddress && transInfo.ToAddr != gNullAddress {
 			// 코인 전송 처리
 			// devlab
-			if err := model.GetDB().UpdateTransfer(transInfo.TxHash, transInfo.FromAddr, transInfo.ToAddr, transInfo.TokenID); err == nil {
-				model.GetDB().InsertHistory(transInfo.TxHash, transInfo.FromAddr, transInfo.ToAddr, transInfo.TokenID, token_state_transfer)
-			}
+			// if err := model.GetDB().UpdateTransfer(transInfo.TxHash, transInfo.FromAddr, transInfo.ToAddr, transInfo.TokenID); err == nil {
+			// 	model.GetDB().InsertHistory(transInfo.TxHash, transInfo.FromAddr, transInfo.ToAddr, transInfo.TokenID, token_state_transfer)
+			// }
 			// product
 			// if _, err := model.GetDB().UpdateProductNftOwner(transInfo.FromAddr, transInfo.ToAddr, transInfo.TokenID); err == nil {
 			// 	model.GetDB().UpdateOrderState(transInfo.TokenID, context.Order_state_nft_transfer_complete)

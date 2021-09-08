@@ -41,8 +41,8 @@ github.com/Azure/go-autorest/tracing v0.5.0/go.mod h1:r/s2XiOKccPW3HrqB+W0TQzfbt
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
 github.com/BurntSushi/xgb v0.0.0-20160522181843-27f122750802/go.mod h1:IVnqGOEym/WlBOVXweHU+Q+/VP0lqqI8lqeDx9IjBqo=
 github.com/DATA-DOG/go-sqlmock v1.3.3/go.mod h1:f/Ixk793poVmq4qj/V1dPUg2JEAKC73Q5eFN3EC/SaM=
-github.com/ONBUFF-IP-TOKEN/baseEthereum v1.0.6 h1:ZCRSr2EBKZX2sxKMkT7lJvNXi1DvdkVp1LVQ0kkn7k8=
-github.com/ONBUFF-IP-TOKEN/baseEthereum v1.0.6/go.mod h1:5ykvitUfOmY379hCSn8ZiHfLYZH/jvn9Hv7Xs/KZ06I=
+github.com/ONBUFF-IP-TOKEN/baseEthereum v1.0.8 h1:TNnbjJpsDwAsFXKSugux6DLj9vpe/80wMUZBrSZ5ArA=
+github.com/ONBUFF-IP-TOKEN/baseEthereum v1.0.8/go.mod h1:5ykvitUfOmY379hCSn8ZiHfLYZH/jvn9Hv7Xs/KZ06I=
 github.com/ONBUFF-IP-TOKEN/baseapp v1.0.4/go.mod h1:ljBhQrS+jf17h0WGGHs0h6cuq6t6KPfl3ouzWXRMBMo=
 github.com/ONBUFF-IP-TOKEN/baseapp v1.0.9 h1:oHhoj2OZ4C+kwM/BHQlNQdpHah7lz8pKwKeuyc3Uh6w=
 github.com/ONBUFF-IP-TOKEN/baseapp v1.0.9/go.mod h1:ljBhQrS+jf17h0WGGHs0h6cuq6t6KPfl3ouzWXRMBMo=

@@ -40,7 +40,13 @@ func PostAucProductRegister(product *context_auc.ProductInfo, ctx *context.IPBlo
 			Callback:    make(chan interface{}),
 		}
 		*resp = commonapi.GetTokenProc(data)
-		resp.Value = product
+		if resp.Return == base.Return_Success {
+			resp.Value = product
+		} else {
+			// nft 생성 실패 하면 입력했던 db 삭제
+			model.GetDB().DeleteAucProduct(id)
+		}
+
 	}
 	return ctx.EchoContext.JSON(http.StatusOK, resp)
 }
@@ -66,7 +72,12 @@ func PostAucProductRegisterAuction(product *context_auc.AllRegister, ctx *contex
 			Data:        &product.ProductInfo,
 			Callback:    make(chan interface{}),
 		}
-		commonapi.GetTokenProc(data)
+		*resp = commonapi.GetTokenProc(data)
+		if resp.Return != base.Return_Success {
+			// nft 생성 실패 하면 입력했던 db 삭제
+			model.GetDB().DeleteAucProduct(id)
+			return ctx.EchoContext.JSON(http.StatusOK, resp)
+		}
 
 		//3. 경매 등록
 		product.AucAuctionRegister.BidStartAmount = product.ProductInfo.Prices[0].Price

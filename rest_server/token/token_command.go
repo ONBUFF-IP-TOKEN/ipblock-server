@@ -128,6 +128,26 @@ func (o *TokenCmd) CreateNftbyAut(data interface{}, cb chan interface{}) {
 		log.Error("Nft_CreateERC721 error :", err)
 		cb <- base.MakeBaseResponse(resultcode.Result_TokenERC721CreateError)
 	} else {
+		errCnt := 0
+	POLLING:
+		_, isPanding, err := o.itoken.Tokens[Token_onit].eth.GetTransactionByTxHash(product.NftCreateTxHash)
+		if err == nil {
+			if isPanding {
+				log.Debug("is panding : ", isPanding, " tx:", product.NftCreateTxHash)
+				time.Sleep(time.Second * 1)
+			}
+		} else {
+			if errCnt > 30 {
+				log.Error("GetTransactionByTxHash max try : ", product.NftCreateTxHash)
+				cb <- base.MakeBaseResponse(resultcode.Result_TokenERC721CreateError)
+				return
+			}
+
+			time.Sleep(time.Second * 1)
+			errCnt++
+			goto POLLING
+		}
+
 		// txhash update
 		if _, err := model.GetDB().UpdateAucProductNft(product); err != nil {
 			log.Error("UpdateAucProductNft fail : ", err, " product_id:", product.Id, " txhash:", product.NftCreateTxHash)

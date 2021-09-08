@@ -44,3 +44,16 @@ func (o *InternalAPI) GetAucBidDepositRefund(c echo.Context) error {
 
 	return commonapi_auc.GetAucBidDepositRefund(params, ctx)
 }
+
+// 입찰 하기
+func (o *InternalAPI) PostAucBidSubmit(c echo.Context) error {
+	ctx := base.GetContext(c).(*context.IPBlockServerContext)
+
+	params := context_auc.NewBidSubmit()
+	if err := ctx.EchoContext.Bind(params); err != nil {
+		log.Error(err)
+		return base.BaseJSONInternalServerError(c, err)
+	}
+
+	return commonapi_auc.PostAucBidSubmitDummy(params, ctx)
+}

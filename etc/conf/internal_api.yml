@@ -110,6 +110,11 @@
           method: "get"
           uri: "/:apiver/auc/bid/deposit/refund"
           precheck: true
+        -
+          handler: "PostAucBidSubmit" # 입찰 하기
+          method: "post"
+          uri: "/:apiver/auc/bid/submit"
+          precheck: true
         - # SYSTEM 관련
           handler: "DeleteSystemRedisRemove" # redis 관련 삭제
           method: "delete"

@@ -1,12 +1,15 @@
 package commonapi_auc
 
 import (
+	"encoding/json"
 	"net/http"
+	"strconv"
 
 	"github.com/ONBUFF-IP-TOKEN/baseapp/base"
 	"github.com/ONBUFF-IP-TOKEN/basenet"
 	"github.com/ONBUFF-IP-TOKEN/baseutil/datetime"
 	"github.com/ONBUFF-IP-TOKEN/baseutil/log"
+	"github.com/ONBUFF-IP-TOKEN/ipblock-server/cdn/azure"
 	"github.com/ONBUFF-IP-TOKEN/ipblock-server/rest_server/controllers/commonapi"
 	"github.com/ONBUFF-IP-TOKEN/ipblock-server/rest_server/controllers/context"
 	"github.com/ONBUFF-IP-TOKEN/ipblock-server/rest_server/controllers/context/context_auc"
@@ -119,6 +122,19 @@ func PostAucProductUpdate(product *context_auc.ProductInfo, ctx *context.IPBlock
 				resp.SetReturn(resultcode.Result_DBError)
 			} else {
 				resp.Value = product
+
+				go func() {
+					// nft 링크용 json 파일 cdn 업로드
+					data := &token.NftUri_AuctionProduct{
+						SNo:      product.SNo,
+						Media:    product.Media,
+						CardInfo: product.CardInfo,
+					}
+
+					nftData, _ := json.Marshal(data)
+					productId := strconv.FormatInt(product.Id, 10)
+					azure.GetAzure().UploadNftInfoBuffer(nftData, productId+"/"+productId+"_0.json")
+				}()
 			}
 		}
 	}

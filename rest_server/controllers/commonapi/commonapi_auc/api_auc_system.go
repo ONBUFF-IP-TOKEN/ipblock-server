@@ -17,6 +17,7 @@ func DeleteSystemRedisRemove(systemRedis *context_auc.SystemRedisRemove, ctx *co
 
 	if strings.EqualFold(systemRedis.AuctionList, context_auc.TRUE) {
 		model.GetDB().DeleteAuctionList()
+		model.GetDB().DeleteAuctionCacheAll()
 	}
 	if strings.EqualFold(systemRedis.ProductList, context_auc.TRUE) {
 		model.GetDB().DeleteProductList()

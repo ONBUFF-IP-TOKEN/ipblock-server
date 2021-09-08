@@ -158,7 +158,7 @@ func PostAucBidSubmitDummy(bidSubmit *context_auc.BidSubmit, ctx *context.IPBloc
 				resp.SetReturn(resultcode.Result_Auc_Bid_OutofRangeMax) // 최대가 범위 이탈
 			} else {
 				// 이미 내가 최고 입찰자 인지 확인
-				if strings.EqualFold(bid.BidAttendeeWalletAddr, ctx.WalletAddr()) {
+				if strings.EqualFold(bid.BidAttendeeWalletAddr, bidSubmit.BidAttendeeWalletAddr) {
 					resp.SetReturn(resultcode.Result_Auc_Bid_AlreadyBestAttendee)
 				} else {
 					// 입찰 정보 저장

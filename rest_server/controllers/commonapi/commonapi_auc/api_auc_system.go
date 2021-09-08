@@ -28,7 +28,7 @@ func DeleteSystemRedisRemove(systemRedis *context_auc.SystemRedisRemove, ctx *co
 	}
 	if len(systemRedis.AuctionId) > 0 {
 		aucId, _ := strconv.ParseInt(systemRedis.AuctionId, 10, 64)
-		model.GetDB().DeleteAucProduct(aucId)
+		model.GetDB().CacheDelProduct(aucId)
 	}
 
 	return ctx.EchoContext.JSON(http.StatusOK, resp)

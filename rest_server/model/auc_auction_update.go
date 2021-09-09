@@ -58,7 +58,7 @@ func (o *DB) UpdateAucAuctionBestBid(auctionId int64, curAmount float64) (int64,
 }
 
 // 경매 종료 정보 업데이트
-func (o *DB) UpdateAucAuctionAucState(auctionId int64, aucState context_auc.Auction_auc_state) (int64, error) {
+func (o *DB) UpdateAucAuctionAucState(auctionId int64, aucState context_auc.Auction_auc_state, refreshCache bool) (int64, error) {
 	sqlQuery := fmt.Sprintf("UPDATE auc_auctions set auc_state=? WHERE auc_id=?")
 
 	result, err := o.Mysql.PrepareAndExec(sqlQuery, aucState, auctionId)
@@ -73,10 +73,13 @@ func (o *DB) UpdateAucAuctionAucState(auctionId int64, aucState context_auc.Auct
 		return -1, err
 	}
 
-	log.Debug("UpdateAucAuctionFinish id:", id)
+	log.Debug("UpdateAucAuctionAucState id:", id)
 
-	// auction list cache 전체 삭제
-	o.DeleteAuctionList()
-	o.DeleteAuctionCache(auctionId)
+	if refreshCache {
+		// auction list cache 전체 삭제
+		o.DeleteAuctionList()
+		o.DeleteAuctionCache(auctionId)
+	}
+
 	return id, nil
 }

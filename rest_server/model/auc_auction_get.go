@@ -144,6 +144,31 @@ func (o *DB) GetAucAuction(aucId int64) (*context_auc.AucAuction, int64, error) 
 	return auction, cnt, err
 }
 
+func (o *DB) GetAucAuctionListForSchedule() ([]*context_auc.AucAuction, error) {
+	var err error
+	sqlQuery := fmt.Sprintf("SELECT * FROM auc_auctions LEFT JOIN auc_products on auc_auctions.product_id = auc_products.product_id WHERE auc_state=0 OR auc_state=1")
+	rows, err := o.Mysql.Query(sqlQuery)
+
+	if err != nil {
+		log.Error(err)
+		return nil, err
+	}
+
+	defer rows.Close()
+
+	auctions := make([]*context_auc.AucAuction, 0)
+	for rows.Next() {
+		auction, err := o.ScanAuction(rows)
+		if err != nil {
+			log.Error(err)
+			continue
+		}
+		auctions = append(auctions, auction)
+	}
+
+	return auctions, err
+}
+
 func (o *DB) GetTotalAucAuctionSize(pageInfo *context_auc.AuctionList) (int64, error) {
 	var count int64
 	var query string

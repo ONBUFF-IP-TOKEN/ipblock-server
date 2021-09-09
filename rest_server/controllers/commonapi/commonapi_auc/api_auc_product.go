@@ -15,6 +15,7 @@ import (
 	"github.com/ONBUFF-IP-TOKEN/ipblock-server/rest_server/controllers/context/context_auc"
 	"github.com/ONBUFF-IP-TOKEN/ipblock-server/rest_server/controllers/resultcode"
 	"github.com/ONBUFF-IP-TOKEN/ipblock-server/rest_server/model"
+	"github.com/ONBUFF-IP-TOKEN/ipblock-server/rest_server/schedule"
 	"github.com/ONBUFF-IP-TOKEN/ipblock-server/rest_server/token"
 )
 
@@ -104,6 +105,8 @@ func PostAucProductRegisterAuction(product *context_auc.AllRegister, ctx *contex
 			resp.SetReturn(resultcode.Result_DBError)
 		} else {
 			product.AucAuctionRegister.Id = id
+			// 스케줄러 리셋
+			schedule.GetScheduler().ResetAuctionScheduler()
 		}
 
 		resp.Value = product

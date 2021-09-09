@@ -16,6 +16,7 @@ import (
 	"github.com/ONBUFF-IP-TOKEN/ipblock-server/rest_server/controllers/internalapi"
 	"github.com/ONBUFF-IP-TOKEN/ipblock-server/rest_server/controllers/resultcode"
 	"github.com/ONBUFF-IP-TOKEN/ipblock-server/rest_server/model"
+	"github.com/ONBUFF-IP-TOKEN/ipblock-server/rest_server/schedule"
 	"github.com/ONBUFF-IP-TOKEN/ipblock-server/rest_server/token"
 )
 
@@ -24,9 +25,10 @@ type ServerApp struct {
 	conf       *config.ServerConfig
 	configFile string
 
-	token *token.IToken
-	auth  *auth.IAuth
-	azure *azure.Azure
+	token    *token.IToken
+	auth     *auth.IAuth
+	azure    *azure.Azure
+	schedule *schedule.AuctionScheduler
 }
 
 func (o *ServerApp) Init(configFile string) (err error) {
@@ -35,6 +37,9 @@ func (o *ServerApp) Init(configFile string) (err error) {
 	context.AppendRequestParameter()
 
 	if err := o.NewDB(o.conf); err != nil {
+		return err
+	}
+	if err := o.InitScheduler(); err != nil {
 		return err
 	}
 	if err := o.InitToken(); err != nil {
@@ -116,5 +121,13 @@ func (o *ServerApp) InitCdn() error {
 		o.azure = azure
 	}
 
+	return nil
+}
+
+func (o *ServerApp) InitScheduler() error {
+	o.schedule = schedule.GetScheduler()
+	if o.schedule != nil {
+		o.schedule.ResetAuctionScheduler()
+	}
 	return nil
 }

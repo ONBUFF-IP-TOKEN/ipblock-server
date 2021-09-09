@@ -10,6 +10,7 @@ import (
 	"github.com/ONBUFF-IP-TOKEN/ipblock-server/rest_server/controllers/context/context_auc"
 	"github.com/ONBUFF-IP-TOKEN/ipblock-server/rest_server/controllers/resultcode"
 	"github.com/ONBUFF-IP-TOKEN/ipblock-server/rest_server/model"
+	"github.com/ONBUFF-IP-TOKEN/ipblock-server/rest_server/schedule"
 	"github.com/labstack/echo"
 )
 
@@ -43,6 +44,9 @@ func PostAucAuctionRegister(auction *context_auc.AucAuctionRegister, ctx *contex
 			} else {
 				auction.Id = id
 				resp.Value = auction
+
+				// 스케줄러 리셋
+				schedule.GetScheduler().ResetAuctionScheduler()
 			}
 		}
 	}
@@ -77,6 +81,8 @@ func PostAucAuctionUpdate(auction *context_auc.AucAuctionUpdate, ctx *context.IP
 					resp.SetReturn(resultcode.Result_DBNotExistAuction)
 				} else {
 					resp.Value = auction
+					// 스케줄러 리셋
+					schedule.GetScheduler().ResetAuctionScheduler()
 				}
 
 			}
@@ -258,11 +264,14 @@ func PostAucAuctionFinish(auctionFinish *context_auc.AuctionFinish, ctx *context
 	resp.Success()
 
 	// 1. 경매 테이블 종료 업데이트
-	if affected, err := model.GetDB().UpdateAucAuctionAucState(auctionFinish.Id, context_auc.Auction_auc_state_finish); err != nil {
+	if affected, err := model.GetDB().UpdateAucAuctionAucState(auctionFinish.Id, context_auc.Auction_auc_state_finish, true); err != nil {
 		resp.SetReturn(resultcode.Result_DBError)
 	} else if err == nil && affected == 0 {
 		resp.SetReturn(resultcode.Result_DBNotExistAuction)
 	} else {
+		// 스케줄러 리셋
+		schedule.GetScheduler().ResetAuctionScheduler()
+
 		// 2. 기존 최고 입찰자 정보 가져오기
 		bid, err := model.GetDB().GetAucBidBestAttendee(auctionFinish.Id)
 		if err != nil {

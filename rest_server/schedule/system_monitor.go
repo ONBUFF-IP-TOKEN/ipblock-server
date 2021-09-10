@@ -3,6 +3,7 @@ package schedule
 import (
 	"math"
 	"strconv"
+	"strings"
 	"sync"
 	"time"
 
@@ -95,9 +96,16 @@ func (o *SystemMonitor) getDisUsage() []context_auc.DiskUsage {
 		return disks
 	} else {
 		for _, partition := range partitions {
-			if state, err := disk.Usage(partition.Mountpoint); err == nil {
-				disks = append(disks, context_auc.DiskUsage{Disk: *state})
+			// 주요 디스크만 수집
+			if strings.Index(partition.Mountpoint, "/urn") == 0 ||
+				strings.Index(partition.Mountpoint, "/boot") == 0 ||
+				strings.EqualFold(partition.Mountpoint, "/") ||
+				strings.Index(partition.Mountpoint, "/mnt/") == 0 {
+				if state, err := disk.Usage(partition.Mountpoint); err == nil {
+					disks = append(disks, context_auc.DiskUsage{Disk: *state})
+				}
 			}
+
 		}
 	}
 

@@ -97,7 +97,7 @@ func (o *SystemMonitor) getDisUsage() []context_auc.DiskUsage {
 	} else {
 		for _, partition := range partitions {
 			// 주요 디스크만 수집
-			if strings.Index(partition.Mountpoint, "/urn") == 0 ||
+			if strings.Index(partition.Mountpoint, "/run") == 0 ||
 				strings.Index(partition.Mountpoint, "/boot") == 0 ||
 				strings.EqualFold(partition.Mountpoint, "/") ||
 				strings.Index(partition.Mountpoint, "/mnt/") == 0 {

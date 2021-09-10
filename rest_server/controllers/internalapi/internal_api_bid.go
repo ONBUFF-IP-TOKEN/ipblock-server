@@ -55,5 +55,5 @@ func (o *InternalAPI) PostAucBidSubmit(c echo.Context) error {
 		return base.BaseJSONInternalServerError(c, err)
 	}
 
-	return commonapi_auc.PostAucBidSubmitDummy(params, ctx)
+	return commonapi_auc.PostAucBidSubmit2(params, ctx)
 }

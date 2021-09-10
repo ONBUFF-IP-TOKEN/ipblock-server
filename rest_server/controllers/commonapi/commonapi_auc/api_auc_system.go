@@ -9,6 +9,7 @@ import (
 	"github.com/ONBUFF-IP-TOKEN/ipblock-server/rest_server/controllers/context"
 	"github.com/ONBUFF-IP-TOKEN/ipblock-server/rest_server/controllers/context/context_auc"
 	"github.com/ONBUFF-IP-TOKEN/ipblock-server/rest_server/model"
+	"github.com/ONBUFF-IP-TOKEN/ipblock-server/rest_server/schedule"
 )
 
 func DeleteSystemRedisRemove(systemRedis *context_auc.SystemRedisRemove, ctx *context.IPBlockServerContext) error {
@@ -30,6 +31,16 @@ func DeleteSystemRedisRemove(systemRedis *context_auc.SystemRedisRemove, ctx *co
 		aucId, _ := strconv.ParseInt(systemRedis.AuctionId, 10, 64)
 		model.GetDB().CacheDelProduct(aucId)
 	}
+
+	return ctx.EchoContext.JSON(http.StatusOK, resp)
+}
+
+func GetNodeMetric(ctx *context.IPBlockServerContext) error {
+	resp := new(base.BaseResponse)
+	resp.Success()
+
+	node := schedule.GetSystemMonitor().GetMetricInfo()
+	resp.Value = node
 
 	return ctx.EchoContext.JSON(http.StatusOK, resp)
 }

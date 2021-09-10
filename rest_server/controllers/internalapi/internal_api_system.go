@@ -26,3 +26,9 @@ func (o *InternalAPI) DeleteSystemRedisRemove(c echo.Context) error {
 
 	return commonapi_auc.DeleteSystemRedisRemove(params, ctx)
 }
+
+func (o *InternalAPI) GetNodeMetric(c echo.Context) error {
+	ctx := base.GetContext(c).(*context.IPBlockServerContext)
+
+	return commonapi_auc.GetNodeMetric(ctx)
+}

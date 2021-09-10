@@ -120,6 +120,11 @@
           method: "delete"
           uri: "/:apiver/system/redis/remove"
           precheck: true
+        - 
+          handler: "GetNodeMetric" # Node 정보
+          method: "get"
+          uri: "/:apiver/system/nodemetric"
+          precheck: true
         - # 공지사항 관련
           handler: "PostNoticeRegister" # 공지 등록
           method: "post"

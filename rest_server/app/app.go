@@ -25,10 +25,11 @@ type ServerApp struct {
 	conf       *config.ServerConfig
 	configFile string
 
-	token    *token.IToken
-	auth     *auth.IAuth
-	azure    *azure.Azure
-	schedule *schedule.AuctionScheduler
+	token      *token.IToken
+	auth       *auth.IAuth
+	azure      *azure.Azure
+	schedule   *schedule.AuctionScheduler
+	sysMonitor *schedule.SystemMonitor
 }
 
 func (o *ServerApp) Init(configFile string) (err error) {
@@ -129,5 +130,8 @@ func (o *ServerApp) InitScheduler() error {
 	if o.schedule != nil {
 		o.schedule.ResetAuctionScheduler()
 	}
+
+	o.sysMonitor = schedule.GetSystemMonitor()
+
 	return nil
 }

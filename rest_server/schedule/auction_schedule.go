@@ -81,6 +81,21 @@ func (o *AuctionScheduler) CheckAuctionState() {
 				bChange = true
 				auction.AucState = context_auc.Auction_auc_state_finish
 				model.GetDB().UpdateAucAuctionAucState(auction.Id, context_auc.Auction_auc_state_finish, false)
+
+				// 낙찰자 업데이트
+				bid, err := model.GetDB().GetAucBidBestAttendee(auction.Id)
+				if err != nil {
+					log.Error("GetAucBidBestAttendee :", err)
+				} else if bid != nil {
+					// 3. 입찰자 리스트 낙찰 업데이트
+					if _, err := model.GetDB().UpdateAucBidFinish(bid, context_auc.Bid_state_success); err != nil {
+						log.Error("UpdateAucBidFinish :", err)
+					} else {
+						// 입찰금 반환 금지 지정
+						model.GetDB().UpdateAucBidDepositStateByAucId(bid.AucId, context_auc.Deposit_state_not_refund)
+					}
+				}
+
 				model.GetDB().DeleteAuctionCache(auction.Id)
 			}
 		}

@@ -148,35 +148,6 @@ func (o *DB) GetAucBidByTxhash(txHash string) (bool, error) {
 	return false, nil
 }
 
-// 입찰 보증금 반환 리스트
-func (o *DB) GetAucBidDepositRefund(req *context_auc.BidDepositRefundList) ([]context_auc.Bid, int64, error) {
-	sqlQuery := fmt.Sprintf("SELECT * FROM auc_bids WHERE bid_amount != 0 and auc_id=%v and bid_state = 1 and "+
-		"bid_winner_state = 0 and deposit_state = 2 "+
-		"ORDER BY bid_amount DESC LIMIT %v,%v", req.AucId, req.PageSize*req.PageOffset, req.PageSize)
-	rows, err := o.Mysql.Query(sqlQuery)
-
-	if err != nil {
-		log.Error(err)
-		return nil, 0, err
-	}
-
-	defer rows.Close()
-
-	bids := make([]context_auc.Bid, 0)
-	for rows.Next() {
-		bid, err := o.ScanBid(rows)
-		if err != nil {
-			log.Error("GetAucBidDepositRefund::ScanBid error : ", err)
-			continue
-		}
-		bids = append(bids, *bid)
-	}
-
-	totalCount, err := o.GetTotalAucBidDepositRefund(req)
-
-	return bids, totalCount, err
-}
-
 func (o *DB) GetTotalAucBidSize(aucId int64) (int64, error) {
 	var count int64
 	query := fmt.Sprintf("SELECT COUNT(*) as count FROM auc_bids WHERE bid_amount != 0 AND auc_id=%v", aucId)
@@ -193,9 +164,7 @@ func (o *DB) GetTotalAucBidSize(aucId int64) (int64, error) {
 
 func (o *DB) GetTotalAucBidDepositRefund(req *context_auc.BidDepositRefundList) (int64, error) {
 	var count int64
-	query := fmt.Sprintf("SELECT COUNT(*) as count FROM auc_bids WHERE bid_amount != 0 and auc_id=%v and bid_state = 1 and "+
-		"bid_winner_state = 0 and deposit_state = 2 "+
-		"ORDER BY bid_amount DESC", req.AucId)
+	query := fmt.Sprintf("SELECT COUNT(*) as count FROM auc_bids_deposit WHERE auc_id=%v and deposit_state = 2", req.AucId)
 	err := o.Mysql.QueryRow(query, &count)
 
 	if err != nil {

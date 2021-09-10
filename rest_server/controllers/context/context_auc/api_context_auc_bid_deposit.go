@@ -11,9 +11,10 @@ import (
 type Deposit_state int64
 
 const (
-	Deposit_state_fail     = 0 // 보증금 확인 안됨
-	Deposit_state_checking = 1 // 보증금 확인중
-	Deposit_state_complete = 2 // 보증금 확인 완료
+	Deposit_state_fail       = 0 // 보증금 확인 안됨
+	Deposit_state_checking   = 1 // 보증금 확인중
+	Deposit_state_complete   = 2 // 보증금 확인 완료
+	Deposit_state_not_refund = 3 // 보증금 반환 금지
 )
 
 type BidDeposit struct {

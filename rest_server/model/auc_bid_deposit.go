@@ -62,6 +62,34 @@ func (o *DB) GetAucBidDeposit(aucId int64, walletAddr string) (*context_auc.BidD
 	return bidDeposit, err
 }
 
+// 입찰 보증금 반환 리스트
+func (o *DB) GetAucBidDepositRefund(req *context_auc.BidDepositRefundList) ([]context_auc.BidDeposit, int64, error) {
+	sqlQuery := fmt.Sprintf("SELECT *FROM auc_bids_deposit WHERE auc_id=%v and deposit_state = 2 "+
+		"ORDER BY id DESC LIMIT %v,%v", req.AucId, req.PageSize*req.PageOffset, req.PageSize)
+	rows, err := o.Mysql.Query(sqlQuery)
+
+	if err != nil {
+		log.Error(err)
+		return nil, 0, err
+	}
+
+	defer rows.Close()
+
+	bids := make([]context_auc.BidDeposit, 0)
+	for rows.Next() {
+		bid, err := o.ScanBidDeposit(rows)
+		if err != nil {
+			log.Error("GetAucBidDepositRefund::ScanBid error : ", err)
+			continue
+		}
+		bids = append(bids, *bid)
+	}
+
+	totalCount, err := o.GetTotalAucBidDepositRefund(req)
+
+	return bids, totalCount, err
+}
+
 // 입찰 보증금 전송 상태 업데이트
 func (o *DB) UpdateAucBidDepositState(bidDeposit *context_auc.BidDepositSubmit, state int64) (int64, error) {
 	sqlQuery := fmt.Sprintf("UPDATE auc_bids_deposit set deposit_state=? WHERE id=?")
@@ -79,6 +107,26 @@ func (o *DB) UpdateAucBidDepositState(bidDeposit *context_auc.BidDepositSubmit, 
 	}
 	log.Debug("UpdateAucBidDepositState id:", id, " deposit_state:", state)
 	o.DeleteBidList(bidDeposit.AucId)
+	return id, nil
+}
+
+// 입찰 보증금 전송 상태 업데이트
+func (o *DB) UpdateAucBidDepositStateByAucId(aucId int64, state int64) (int64, error) {
+	sqlQuery := fmt.Sprintf("UPDATE auc_bids_deposit set deposit_state=? WHERE id=?")
+
+	result, err := o.Mysql.PrepareAndExec(sqlQuery, state, aucId)
+
+	if err != nil {
+		log.Error(err)
+		return -1, err
+	}
+	id, err := result.RowsAffected()
+	if err != nil {
+		log.Error(err)
+		return -1, err
+	}
+	log.Debug("UpdateAucBidDepositStateByAucId id:", id, " deposit_state:", state)
+	o.DeleteBidList(aucId)
 	return id, nil
 }
 

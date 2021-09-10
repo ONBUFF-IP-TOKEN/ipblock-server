@@ -231,7 +231,7 @@ func (o *BidDepositRefundList) CheckValidate() *base.BaseResponse {
 
 type BidDepositRefundListResponse struct {
 	PageInfo PageInfoResponse `json:"page_info"`
-	Bids     []Bid            `json:"bids"`
+	Bids     []BidDeposit     `json:"bids_deposits"`
 }
 
 ////////////////////////////////////////////////

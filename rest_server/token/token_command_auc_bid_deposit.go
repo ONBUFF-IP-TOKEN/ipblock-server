@@ -139,7 +139,7 @@ func (o *TokenCmd) BidDepositCheckReceipt(data interface{}) {
 			} else if err.Error() == "not found" {
 				log.Error("not found retry GetTransactionReceipt : ", bidDeposit.DepositTxHash, " bid id:", bidDeposit.Id)
 				time.Sleep(time.Second * 1)
-				if errCnt > 3 {
+				if errCnt > 30 {
 					model.GetDB().UpdateAucBidDepositState(bidDeposit, context_auc.Deposit_state_fail)
 					log.Error("GetTransactionReceipt max try from hash : ", bidDeposit.DepositTxHash, " bid id:", bidDeposit.Id)
 					return

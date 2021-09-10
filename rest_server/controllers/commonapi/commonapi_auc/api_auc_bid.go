@@ -103,7 +103,7 @@ func PostAucBidSubmit(bidSubmit *context_auc.BidSubmit, ctx *context.IPBlockServ
 	return ctx.EchoContext.JSON(http.StatusOK, resp)
 }
 
-func PostAucBidSubmitDummy(bidSubmit *context_auc.BidSubmit, ctx *context.IPBlockServerContext) error {
+func PostAucBidSubmit2(bidSubmit *context_auc.BidSubmit, ctx *context.IPBlockServerContext) error {
 	resp := new(base.BaseResponse)
 	resp.Success()
 

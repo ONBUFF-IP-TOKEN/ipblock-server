@@ -34,6 +34,7 @@ type NodeMetric struct {
 	CpuTime       string      `json:"cpu_time"`
 	MemTotalBytes uint64      `json:"mem_total_bytes"`
 	MemAllocBytes uint64      `json:"mem_alloc_bytes"`
+	MemPercent    float32     `json:"mem_usage_percent"`
 	CpuUsage      int32       `json:"cpu_usage"`
 	DiskUsage     []DiskUsage `json:"disk_usage"`
 }

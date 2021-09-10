@@ -63,7 +63,7 @@ func (o *SystemMonitor) CheckMetricInfo() *context_auc.NodeMetric {
 	// cpu 타임
 	o.NodeMetric.CpuTime = strconv.FormatInt(datetime.GetTS2Sec(), 10)
 	// 메모리 사용정보
-	o.NodeMetric.MemTotalBytes, o.NodeMetric.MemAllocBytes = o.getMemoryUsage()
+	o.NodeMetric.MemTotalBytes, o.NodeMetric.MemAllocBytes, o.NodeMetric.MemPercent = o.getMemoryUsage()
 	// CPU 점유율
 	o.NodeMetric.CpuUsage = int32(o.getCpuUsage())
 	// disk 사용 정보
@@ -81,13 +81,13 @@ func (o *SystemMonitor) getCpuUsage() uint64 {
 	return uint64(math.Ceil(percent[0]))
 }
 
-func (o *SystemMonitor) getMemoryUsage() (uint64, uint64) {
+func (o *SystemMonitor) getMemoryUsage() (uint64, uint64, float32) {
 	vmStat, err := mem.VirtualMemory()
 	if err != nil {
-		return 0, 0
+		return 0, 0, 0
 	}
 
-	return vmStat.Total, vmStat.Used
+	return vmStat.Total, vmStat.Used, float32(vmStat.Used) * 100 / float32(vmStat.Total)
 }
 
 func (o *SystemMonitor) getDisUsage() []context_auc.DiskUsage {

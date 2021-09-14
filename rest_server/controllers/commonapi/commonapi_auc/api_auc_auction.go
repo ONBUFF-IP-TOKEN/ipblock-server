@@ -61,7 +61,7 @@ func PostAucAuctionUpdate(auction *context_auc.AucAuctionUpdate, ctx *context.IP
 
 	// 1. 금액 check
 	auction.BidStartAmount = context_auc.CheckPrice(auction.BidStartAmount)
-	auction.BidDeposit = context_auc.CheckDepositPrice(auction.BidDeposit)
+	auction.BidDeposit = context_auc.CheckDepositPrice(auction.BidStartAmount)
 	auction.Price = context_auc.CheckPrice(auction.Price)
 
 	// 2. 존재하는 경매인지 check

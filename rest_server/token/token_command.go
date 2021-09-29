@@ -130,6 +130,7 @@ func (o *TokenCmd) CreateNftbyAut(data interface{}, cb chan interface{}) {
 	} else {
 		errCnt := 0
 	POLLING:
+		time.Sleep(time.Second * 5)
 		_, isPanding, err := o.itoken.Tokens[Token_onit].eth.GetTransactionByTxHash(product.NftCreateTxHash)
 		if err == nil {
 			if isPanding {
@@ -143,7 +144,6 @@ func (o *TokenCmd) CreateNftbyAut(data interface{}, cb chan interface{}) {
 				return
 			}
 
-			time.Sleep(time.Second * 1)
 			errCnt++
 			goto POLLING
 		}

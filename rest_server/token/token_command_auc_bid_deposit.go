@@ -149,11 +149,12 @@ func (o *TokenCmd) BidDepositCheckReceipt(data interface{}) {
 			}
 		} else {
 			log.Error("GetTransactionByTxHash error : ", err)
-			if errCnt > 3 {
+			if errCnt > 30 {
 				model.GetDB().UpdateAucBidDepositState(bidDeposit, context_auc.Deposit_state_fail)
 				log.Error("GetTransactionByTxHash max try : ", bidDeposit.DepositTxHash, " bidDeposit id:", bidDeposit.Id)
 				return
 			}
+			time.Sleep(time.Second * 5)
 			errCnt++
 			goto POLLING
 		}

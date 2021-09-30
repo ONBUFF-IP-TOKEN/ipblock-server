@@ -61,10 +61,10 @@ func PostAucBidSubmit(bidSubmit *context_auc.BidSubmit, ctx *context.IPBlockServ
 		// 2. 입찰 최고가 체크 기존 최고가의 5%이하 10배가 넘지 않도록 한다.
 		if bid == nil {
 			// 최초 입찰자인경우에는 시작가의 5%이하 10배가 넘지 않도록한다.
-			if bidSubmit.BidAmount < auction.BidStartAmount*1.05 {
+			if bidSubmit.BidAmount < auction.BidCurAmount*1.05 {
 				log.Error(base.ReturnCodeText(resultcode.Result_Auc_Bid_OutofRangeMin)+" : ", bidSubmit.BidAmount)
 				resp.SetReturn(resultcode.Result_Auc_Bid_OutofRangeMin) //최소가 범위 이탈
-			} else if bidSubmit.BidAmount > auction.BidStartAmount*10 {
+			} else if bidSubmit.BidAmount > auction.BidCurAmount*10 {
 				log.Error(base.ReturnCodeText(resultcode.Result_Auc_Bid_OutofRangeMax)+" : ", bidSubmit.BidAmount)
 				resp.SetReturn(resultcode.Result_Auc_Bid_OutofRangeMax) // 최대가 범위 이탈
 			} else {
@@ -138,9 +138,9 @@ func PostAucBidSubmit2(bidSubmit *context_auc.BidSubmit, ctx *context.IPBlockSer
 		// 2. 입찰 최고가 체크 기존 최고가의 5%이하 10배가 넘지 않도록 한다.
 		if bid == nil {
 			// 최초 입찰자인경우에는 시작가의 5%이하 10배가 넘지 않도록한다.
-			if bidSubmit.BidAmount < auction.BidStartAmount*1.05 {
+			if bidSubmit.BidAmount < auction.BidCurAmount*1.05 {
 				resp.SetReturn(resultcode.Result_Auc_Bid_OutofRangeMin) //최소가 범위 이탈
-			} else if bidSubmit.BidAmount > auction.BidStartAmount*10 {
+			} else if bidSubmit.BidAmount > auction.BidCurAmount*10 {
 				resp.SetReturn(resultcode.Result_Auc_Bid_OutofRangeMax) // 최대가 범위 이탈
 			} else {
 				// 입찰 한 사람이 아무도 없기때문에 바로 입찰 정보 저장

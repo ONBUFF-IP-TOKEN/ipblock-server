@@ -92,6 +92,41 @@ func (o *DB) UpdateAucProduct(product *context_auc.ProductInfo) (int64, error) {
 	return Id, nil
 }
 
+// 물품 정보 업데이트 price only
+func (o *DB) UpdateAucProductForPrice(productId int64, tokenType string, price float64) (int64, error) {
+	sqlQuery := fmt.Sprintf("UPDATE auc_products set prices=? WHERE product_id=?")
+
+	Tmpprices := []context_auc.ProductPrice{}
+	Tmpprices = append(Tmpprices, context_auc.ProductPrice{TokenType: tokenType, Price: price})
+	prices, _ := json.Marshal(Tmpprices)
+
+	result, err := o.Mysql.PrepareAndExec(sqlQuery, string(prices), productId)
+
+	if err != nil {
+		log.Error(err)
+		return -1, err
+	}
+	Id, err := result.RowsAffected()
+	if err != nil {
+		log.Error(err)
+		return -1, err
+	}
+	log.Debug("UpdateAucProductForPrice id:", Id)
+
+	if Id != 0 {
+		// cache 삭제
+		o.CacheDelProduct(productId)
+		// product list cache 전체 삭제
+		o.DeleteProductList()
+		// auction list cache 전체 삭제
+		o.DeleteAuctionList()
+		// auction 단일 cache 전체 삭제
+		o.DeleteAuctionCacheAll()
+	}
+
+	return Id, nil
+}
+
 // nft 정보 업데이트
 func (o *DB) UpdateAucProductNft(product *context_auc.ProductInfo) (int64, error) {
 	sqlQuery := "UPDATE auc_products set nft_contract=?, nft_create_txhash=?, nft_uri=? WHERE product_id=?"

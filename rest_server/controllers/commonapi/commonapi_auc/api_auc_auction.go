@@ -80,6 +80,8 @@ func PostAucAuctionUpdate(auction *context_auc.AucAuctionUpdate, ctx *context.IP
 				if id == 0 {
 					resp.SetReturn(resultcode.Result_DBNotExistAuction)
 				} else {
+					// 가격도 product 테이블에 업데이트 처리
+					model.GetDB().UpdateAucProductForPrice(auction.ProductId, auction.TokenType, auction.Price)
 					resp.Value = auction
 					// 스케줄러 리셋
 					schedule.GetScheduler().ResetAuctionScheduler()

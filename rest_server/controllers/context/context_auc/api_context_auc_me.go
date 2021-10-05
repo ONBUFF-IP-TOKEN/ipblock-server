@@ -63,7 +63,7 @@ func (o *MeTokenAmount) CheckValidate(ctx *context.IPBlockServerContext, checkWa
 	if len(o.TokenType) == 0 {
 		return base.MakeBaseResponse(resultcode.Result_RequireTokenType)
 	}
-	if checkWallet == true && !strings.EqualFold(ctx.WalletAddr(), o.WalletAddr) {
+	if checkWallet && !strings.EqualFold(ctx.WalletAddr(), o.WalletAddr) {
 		log.Error("api:", o.WalletAddr, " auth:", ctx.WalletAddr())
 		return base.MakeBaseResponse(resultcode.Result_Auc_Bid_InvalidWalletAddress)
 	}

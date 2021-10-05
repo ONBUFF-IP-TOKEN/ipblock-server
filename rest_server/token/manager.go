@@ -1,6 +1,10 @@
 package token
 
 import (
+	"errors"
+	"strings"
+
+	ethCtrl "github.com/ONBUFF-IP-TOKEN/baseEthereum/ethcontroller"
 	"github.com/ONBUFF-IP-TOKEN/baseutil/log"
 	"github.com/ONBUFF-IP-TOKEN/ipblock-server/rest_server/config"
 )
@@ -70,4 +74,25 @@ func (o *IToken) Init() error {
 	o.tokenCmd.StartTokenCommand()
 
 	return nil
+}
+
+func (o *IToken) GetBalance(walletAddr string, tokenType string) (float64, error) {
+	if strings.EqualFold(tokenType, "ONIT") {
+		balance, err := o.Tokens[Token_onit].Onit_GetBalanceOf(walletAddr)
+		if err != nil {
+			return 0, err
+		}
+		transferEther := ethCtrl.Convert(balance.String(), ethCtrl.Wei, ethCtrl.Ether)
+		value, _ := transferEther.Float64()
+		return value, err
+	} else if strings.EqualFold(tokenType, "ETH") {
+		_, balance, err := o.Tokens[Token_onit].GetEthClient().GetPendingBalance(walletAddr)
+		if err != nil {
+			return 0, err
+		}
+		value, _ := balance.Float64()
+		return value, nil
+	}
+
+	return 0, errors.New("unknwon token type")
 }

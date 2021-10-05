@@ -1,7 +1,10 @@
 package context_auc
 
 import (
+	"strings"
+
 	"github.com/ONBUFF-IP-TOKEN/baseapp/base"
+	"github.com/ONBUFF-IP-TOKEN/baseutil/log"
 	"github.com/ONBUFF-IP-TOKEN/ipblock-server/rest_server/controllers/context"
 	"github.com/ONBUFF-IP-TOKEN/ipblock-server/rest_server/controllers/resultcode"
 )
@@ -44,3 +47,25 @@ type MeBidListResponse struct {
 }
 
 ////////////////////////////////////////////////
+
+// 내 보유 토큰 정보
+type MeTokenAmount struct {
+	WalletAddr string  `query:"wallet_address" json:"wallet_address"`
+	TokenType  string  `query:"token_type" json:"token_type"`
+	Balance    float64 `json:"balance"`
+}
+
+func NewMeTokenAmount() *MeTokenAmount {
+	return new(MeTokenAmount)
+}
+
+func (o *MeTokenAmount) CheckValidate(ctx *context.IPBlockServerContext, checkWallet bool) *base.BaseResponse {
+	if len(o.TokenType) == 0 {
+		return base.MakeBaseResponse(resultcode.Result_RequireTokenType)
+	}
+	if checkWallet == true && !strings.EqualFold(ctx.WalletAddr(), o.WalletAddr) {
+		log.Error("api:", o.WalletAddr, " auth:", ctx.WalletAddr())
+		return base.MakeBaseResponse(resultcode.Result_Auc_Bid_InvalidWalletAddress)
+	}
+	return nil
+}

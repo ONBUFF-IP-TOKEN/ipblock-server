@@ -8,6 +8,7 @@ import (
 	"github.com/ONBUFF-IP-TOKEN/ipblock-server/rest_server/controllers/context/context_auc"
 	"github.com/ONBUFF-IP-TOKEN/ipblock-server/rest_server/controllers/resultcode"
 	"github.com/ONBUFF-IP-TOKEN/ipblock-server/rest_server/model"
+	"github.com/ONBUFF-IP-TOKEN/ipblock-server/rest_server/token"
 )
 
 func GetAucBidListMe(pageInfo *context_auc.MeBidList, ctx *context.IPBlockServerContext) error {
@@ -28,6 +29,20 @@ func GetAucBidListMe(pageInfo *context_auc.MeBidList, ctx *context.IPBlockServer
 			PageInfo: pageInfo,
 			MeBids:   meBids,
 		}
+	}
+
+	return ctx.EchoContext.JSON(http.StatusOK, resp)
+}
+
+func GetAucBidTokenAmountMe(req *context_auc.MeTokenAmount, ctx *context.IPBlockServerContext) error {
+	resp := new(base.BaseResponse)
+	resp.Success()
+
+	if balance, err := token.GetToken().GetBalance(req.WalletAddr, req.TokenType); err != nil {
+		resp.SetReturn(resultcode.Result_GetBalanceError)
+	} else {
+		req.Balance = balance
+		resp.Value = req
 	}
 
 	return ctx.EchoContext.JSON(http.StatusOK, resp)

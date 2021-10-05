@@ -39,6 +39,7 @@ const (
 	Result_TokenERC721BurnError     = 14002
 	Result_TokenERC721TransferError = 14003
 	Result_Reused_Txhash            = 14004 // tx hash를 재사용 하였다.
+	Result_GetBalanceError          = 14005
 
 	Result_Auc_Product_Requiredtitle        = 15000 // 제목 필요
 	Result_Auc_Product_RequireDescription   = 15001 // 설명 정보 필요
@@ -127,6 +128,7 @@ var ResultCodeText = map[int]string{
 	Result_TokenERC721BurnError:     "ERC721 burn error",
 	Result_TokenERC721TransferError: "ERC721 transfer error",
 	Result_Reused_Txhash:            "Reused hash",
+	Result_GetBalanceError:          "Get balance error",
 
 	Result_Auc_Product_Requiredtitle:        "Require product title",
 	Result_Auc_Product_RequireDescription:   "Require description",

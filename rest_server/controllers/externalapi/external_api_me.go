@@ -11,6 +11,22 @@ import (
 	"github.com/labstack/echo"
 )
 
+func (o *ExternalAPI) GetAucBidTokenAmountMe(c echo.Context) error {
+	ctx := base.GetContext(c).(*context.IPBlockServerContext)
+
+	params := context_auc.NewMeTokenAmount()
+	if err := ctx.EchoContext.Bind(params); err != nil {
+		log.Error(err)
+		return base.BaseJSONInternalServerError(c, err)
+	}
+
+	if err := params.CheckValidate(ctx, true); err != nil {
+		return c.JSON(http.StatusOK, err)
+	}
+
+	return commonapi_auc.GetAucBidTokenAmountMe(params, ctx)
+}
+
 func (o *ExternalAPI) GetAucBidListMe(c echo.Context) error {
 	ctx := base.GetContext(c).(*context.IPBlockServerContext)
 

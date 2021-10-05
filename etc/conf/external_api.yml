@@ -121,6 +121,11 @@
           uri: "/:apiver/auc/bid/winner/giveup"
           precheck: true
         - # my page
+          handler: "GetAucBidTokenAmountMe" # 내 토큰 보유 정보 요청
+          method: "get"
+          uri: "/:apiver/auc/bid/tokenamount/me"
+          precheck: true
+        -
           handler: "GetAucBidListMe" # 내 입찰자 리스트 요청
           method: "get"
           uri: "/:apiver/auc/bid/list/me"

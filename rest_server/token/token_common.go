@@ -32,6 +32,10 @@ func (o *Token) ConnectMainNet(host string) error {
 	return nil
 }
 
+func (o *Token) GetEthClient() *ethcontroller.EthClient {
+	return o.eth
+}
+
 func (o *Token) SubcribeContract(tokenAddr string) error {
 	if o.TokenType == Token_nft {
 		if err := o.eth.SubcribeContract(tokenAddr); err != nil {

@@ -30,14 +30,9 @@ func (o *Token) Onit_LoadContractInfo() error {
 	return err
 }
 
-func (o *Token) Onit_GetBalanceOf(walletAddr string) (int64, error) {
+func (o *Token) Onit_GetBalanceOf(walletAddr string) (*big.Int, error) {
 	bal, err := o.eth.Onit_GetBalanceOf(walletAddr)
-	ne := big.NewInt(1000000000000000000)
-
-	baseBal := big.NewInt(0)
-	baseBal = baseBal.Div(bal, ne)
-
-	return baseBal.Int64(), err
+	return bal, err
 }
 
 func (o *Token) CheckTransferReceipt(purchaseInfo *context.PostPurchaseItem, itemInfo *context.ItemInfo) {

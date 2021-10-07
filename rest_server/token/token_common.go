@@ -92,6 +92,7 @@ func (o *Token) CreateChannel() {
 func (o *Token) CallBackCmdProc(cmd *basenet.CommandData) {
 	cmdType := cmd.CommandType
 	switch cmdType {
+	//case ethcontroller.Ch_type_disconnect:
 	case ethcontroller.Ch_type_transfer:
 		transInfo := cmd.Data.(ethcontroller.CallBack_Transfer)
 		if transInfo.FromAddr == gNullAddress && transInfo.ToAddr != gNullAddress {
@@ -130,18 +131,3 @@ func (o *Token) CallBackCmdProc(cmd *basenet.CommandData) {
 		}
 	}
 }
-
-// func (o *Token) CallBackCmdProc(cmd *basenet.CommandData) {
-// 	cmdType := cmd.CommandType
-// 	switch cmdType {
-// 	case ethcontroller.Ch_type_transfer:
-// 		transInfo := cmd.Data.(ethcontroller.CallBack_Transfer)
-// 		if transInfo.FromAddr == gNullAddress && transInfo.ToAddr != gNullAddress {
-// 			// 최초 생성 처리
-// 		} else if transInfo.FromAddr != gNullAddress && transInfo.ToAddr != gNullAddress {
-// 			// 코인 전송 처리
-// 		} else if transInfo.FromAddr != gNullAddress && transInfo.ToAddr == gNullAddress {
-// 			// 코인 삭체 처리 : 히스토리에 먼저 남기고 item 테이블 삭제 한다.
-// 		}
-// 	}
-// }

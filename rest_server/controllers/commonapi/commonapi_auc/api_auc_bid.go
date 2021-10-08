@@ -291,7 +291,7 @@ func PostAucBidWinnerGiveUp(bid *context_auc.BidWinnerGiveup, ctx *context.IPBlo
 		} else {
 			if successBid != nil &&
 				successBid.BidState == context_auc.Bid_state_success &&
-				successBid.BidWinnerState != context_auc.Bid_winner_state_giveup {
+				successBid.BidWinnerState == context_auc.Bid_winner_state_none {
 				// 낙찰자 확인 완료
 				bid.BidWinnerState = context_auc.Bid_winner_state_giveup
 
@@ -391,7 +391,7 @@ func GetAucBidWinnerVerify(req *context_auc.BidWinnerVerify, ctx *context.IPBloc
 		} else {
 			if successBid != nil &&
 				successBid.BidState == context_auc.Bid_state_success &&
-				successBid.BidWinnerState != context_auc.Bid_winner_state_giveup {
+				successBid.BidWinnerState == context_auc.Bid_winner_state_none {
 				bidResp := &context_auc.BidWinnerVerifyResponse{
 					Bid:       *successBid,
 					TokenType: successBid.TokenType,

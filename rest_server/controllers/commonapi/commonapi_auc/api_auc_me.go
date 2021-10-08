@@ -76,7 +76,7 @@ func GetAucNftListMe(pageInfo *context_auc.MeBidList, ctx *context.IPBlockServer
 	resp := new(base.BaseResponse)
 	resp.Success()
 
-	meBids, totalCount, err := model.GetDB().GetAucBidListMe(pageInfo, pageInfo.WalletAddr, true)
+	meBids, totalCount, err := model.GetDB().GetAucBidNftListMe(pageInfo, pageInfo.WalletAddr)
 	if err != nil {
 		resp.SetReturn(resultcode.Result_DBError)
 	} else {

@@ -294,8 +294,8 @@ func (o *TokenCmd) BidWinnerCheckReceipt(data interface{}) {
 				}
 			} else if err.Error() == "not found" {
 				log.Debug("not found retry GetTransactionReceipt : ", bid.BidWinnerTxHash, " bid id:", bid.Id)
-				time.Sleep(time.Second * 1)
-				if errCnt > 3 {
+				time.Sleep(time.Second * 5)
+				if errCnt > 30 {
 					model.GetDB().UpdateAucBidWinnerState(&bid.Bid, context_auc.Bid_winner_state_none)
 					log.Error("GetTransactionReceipt max try from hash : ", bid.BidWinnerTxHash, " bid id:", bid.Id)
 					return
@@ -305,11 +305,12 @@ func (o *TokenCmd) BidWinnerCheckReceipt(data interface{}) {
 			}
 		} else {
 			log.Debug("GetTransactionByTxHash error : ", err)
-			if errCnt > 3 {
+			if errCnt > 30 {
 				model.GetDB().UpdateAucBidWinnerState(&bid.Bid, context_auc.Bid_winner_state_none)
 				log.Error("GetTransactionByTxHash max try : ", bid.BidWinnerTxHash, " bid id:", bid.Id)
 				return
 			}
+			time.Sleep(time.Second * 5)
 			errCnt++
 			goto POLLING
 		}

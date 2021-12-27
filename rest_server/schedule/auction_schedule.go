@@ -92,7 +92,7 @@ func (o *AuctionScheduler) CheckAuctionState() {
 						log.Error("UpdateAucBidFinish :", err)
 					} else {
 						// 입찰금 반환 금지 지정
-						model.GetDB().UpdateAucBidDepositStateByAucId(bid.AucId, context_auc.Deposit_state_not_refund)
+						model.GetDB().UpdateAucBidDepositStateByAucId(bid.Id, context_auc.Deposit_state_not_refund)
 					}
 				}
 
